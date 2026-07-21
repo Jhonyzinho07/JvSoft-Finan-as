@@ -43,10 +43,14 @@ export function useAlertasVencimento(usuario, toast) {
       const vencidas = contas.filter(c => new Date(c.data_vencimento + 'T00:00:00') < dataAtual)
       const totalAberto = contas.reduce((acc, c) => acc + Number(c.valor), 0)
 
+      // Novo formato: Foco Executivo e Profissional
       const titulo = vencidas.length > 0
-        ? `⚠️ ${vencidas.length} conta${vencidas.length > 1 ? 's' : ''} vencida${vencidas.length > 1 ? 's' : ''}`
-        : `📅 ${contas.length} conta${contas.length > 1 ? 's' : ''} vencendo em breve`
-      const corpo = `Total em aberto: ${formatarMoeda(totalAberto)}`
+        ? '🔴 Resumo de Pendências'
+        : '🔔 Atualização de Vencimentos'
+        
+      const corpo = vencidas.length > 0
+        ? `Você possui ${vencidas.length} conta${vencidas.length > 1 ? 's' : ''} com prazo expirado. Total em aberto: ${formatarMoeda(totalAberto)}.`
+        : `Você possui ${contas.length} conta${contas.length > 1 ? 's' : ''} com vencimento próximo. Total a pagar: ${formatarMoeda(totalAberto)}.`
 
       // Alerta dentro do app (sempre funciona, independe de permissão do navegador)
       toast?.warning(`${titulo} — ${corpo}`, 8000)
