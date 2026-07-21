@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/logo.png" />
+<meta name="theme-color" content="#1e3a8a" />
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JvSoft Finanças</title>
+    <script>
+      // Aplica o modo escuro ANTES do React montar, evitando o "flash" de tela
+      // clara ao recarregar a página com a preferência de modo escuro ativa.
+      (function () {
+        try {
+          if (localStorage.getItem('pref_dark') === 'true') {
+            document.documentElement.classList.add('dark')
+          }
+        } catch (e) {}
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
