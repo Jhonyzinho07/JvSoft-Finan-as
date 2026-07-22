@@ -23,6 +23,24 @@ html.dark ::-webkit-scrollbar-track {
   background: #1e293b; /* slate-800 */
 }
 
+/* Rede de segurança: qualquer <input>/<select>/<textarea> que não tenha
+   uma classe de fundo/texto própria (ex: bg-white, dark:bg-slate-800)
+   ainda assim fica legível no modo escuro. :where() zera a especificidade
+   do seletor, então QUALQUER classe do Tailwind (mesmo uma única) sempre
+   ganha desta regra — ela só entra em ação quando não há nada mais. */
+:where(html.dark) input,
+:where(html.dark) select,
+:where(html.dark) textarea {
+  background-color: #0f172a; /* slate-900 */
+  color: #f1f5f9; /* slate-100 */
+  border-color: #334155; /* slate-700 */
+}
+
+:where(html.dark) input::placeholder,
+:where(html.dark) textarea::placeholder {
+  color: #64748b; /* slate-500 */
+}
+
 /* Espaço extra em dispositivos com "notch"/home indicator (iPhone) para a barra de navegação mobile */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);

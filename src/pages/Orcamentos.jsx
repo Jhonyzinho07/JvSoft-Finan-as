@@ -126,11 +126,11 @@ export default function Orcamentos() {
     <div className="p-4 md:p-8 max-w-6xl mx-auto animate-fade-in pb-24">
       <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3 dark:text-slate-100">
             <PieChart className="text-blue-600" size={32} />
             Orçamentos do Mês
           </h1>
-          <p className="text-slate-500 mt-2">Defina limites e acompanhe seus gastos por categoria</p>
+          <p className="text-slate-500 mt-2 dark:text-slate-400">Defina limites e acompanhe seus gastos por categoria</p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
@@ -142,15 +142,15 @@ export default function Orcamentos() {
       </header>
 
       {loading ? (
-        <div className="p-12 flex flex-col items-center justify-center text-slate-500">
+        <div className="p-12 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-4" />
           Calculando seus limites e gastos...
         </div>
       ) : orcamentos.length === 0 ? (
-        <div className="bg-white rounded-3xl p-12 shadow-soft border border-slate-100 text-center">
+        <div className="bg-white rounded-3xl p-12 shadow-soft border border-slate-100 text-center dark:bg-slate-800 dark:border-slate-700">
           <Target className="w-16 h-16 text-blue-200 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-slate-700 mb-2">Nenhum orçamento definido</h3>
-          <p className="text-slate-500 mb-6">Comece criando um limite de gastos para categorias como Alimentação ou Lazer.</p>
+          <h3 className="text-xl font-bold text-slate-700 mb-2 dark:text-slate-200">Nenhum orçamento definido</h3>
+          <p className="text-slate-500 mb-6 dark:text-slate-400">Comece criando um limite de gastos para categorias como Alimentação ou Lazer.</p>
           <button onClick={() => setShowModal(true)} className="text-blue-600 font-semibold hover:underline">
             Criar meu primeiro orçamento
           </button>
@@ -165,7 +165,7 @@ export default function Orcamentos() {
             const emAlerta = porcentagem >= 80 && !passouDoLimite
 
             return (
-              <div key={orc.id} className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100 relative group overflow-hidden">
+              <div key={orc.id} className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100 relative group overflow-hidden dark:bg-slate-800 dark:border-slate-700">
                 <button 
                   onClick={() => handleExcluir(orc.id)}
                   className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all md:opacity-0 group-hover:opacity-100"
@@ -182,15 +182,15 @@ export default function Orcamentos() {
                     {orc.categorias?.icone || '📁'}
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800 text-lg">{orc.categorias?.nome || 'Geral'}</h3>
-                    <p className="text-sm text-slate-500">Limite: {formatarMoeda(limite)}</p>
+                    <h3 className="font-bold text-slate-800 text-lg dark:text-slate-100">{orc.categorias?.nome || 'Geral'}</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Limite: {formatarMoeda(limite)}</p>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-end">
                     <div>
-                      <p className="text-sm text-slate-500 mb-1">Total Gasto</p>
+                      <p className="text-sm text-slate-500 mb-1 dark:text-slate-400">Total Gasto</p>
                       <p className={`text-2xl font-bold ${passouDoLimite ? 'text-red-600' : 'text-slate-800'}`}>
                         {formatarMoeda(gasto)}
                       </p>
@@ -228,19 +228,19 @@ export default function Orcamentos() {
 
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-strong w-full max-w-sm overflow-hidden animate-slide-in">
+          <div className="bg-white rounded-3xl shadow-strong w-full max-w-sm overflow-hidden animate-slide-in dark:bg-slate-800">
             <div className="bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex justify-between items-center text-white">
               <h2 className="font-bold text-lg">Novo Orçamento</h2>
             </div>
 
             <form onSubmit={handleSalvar} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Categoria</label>
                 <select
                   required
                   value={novaCategoriaId}
                   onChange={(e) => setNovaCategoriaId(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none text-slate-700 bg-white"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none text-slate-700 bg-white dark:border-slate-700 dark:text-slate-200 dark:bg-slate-800"
                 >
                   <option value="">Selecione a categoria...</option>
                   {categorias.map(c => (
@@ -250,14 +250,14 @@ export default function Orcamentos() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Qual o limite mensal? (R$)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Qual o limite mensal? (R$)</label>
                 <input
                   type="number"
                   step="0.01"
                   required
                   value={novoLimite}
                   onChange={(e) => setNovoLimite(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-semibold text-slate-700"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-200"
                   placeholder="Ex: 800.00"
                 />
               </div>
@@ -266,7 +266,7 @@ export default function Orcamentos() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 border border-slate-200 rounded-xl font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                  className="flex-1 py-3 border border-slate-200 rounded-xl font-semibold text-slate-600 hover:bg-slate-50 transition-colors dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
                 >
                   Cancelar
                 </button>

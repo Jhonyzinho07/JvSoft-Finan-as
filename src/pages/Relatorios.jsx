@@ -303,8 +303,8 @@ export default function Relatorios() {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 rounded-2xl shadow-xl border border-slate-100">
-          <p className="font-bold text-slate-800 mb-2">{label || payload[0].name}</p>
+        <div className="bg-white p-4 rounded-2xl shadow-xl border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
+          <p className="font-bold text-slate-800 mb-2 dark:text-slate-100">{label || payload[0].name}</p>
           {payload.map((entry, index) => (
             <p key={index} style={{ color: entry.color }} className="text-sm font-semibold">
               {entry.name}: {formatarMoeda(entry.value)}
@@ -320,21 +320,21 @@ export default function Relatorios() {
     <div className="p-4 md:p-8 max-w-6xl mx-auto animate-fade-in pb-24">
       <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3 dark:text-slate-100">
             <BarChart2 className="text-blue-600" size={32} />
             Relatórios
           </h1>
-          <p className="text-slate-500 mt-2">Análise detalhada da sua saúde financeira</p>
+          <p className="text-slate-500 mt-2 dark:text-slate-400">Análise detalhada da sua saúde financeira</p>
         </div>
         
         <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl shadow-soft border border-slate-100 w-full sm:w-auto">
+          <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl shadow-soft border border-slate-100 w-full sm:w-auto dark:bg-slate-800 dark:border-slate-700">
             <Filter size={18} className="text-blue-600" />
             <input 
               type="month" 
               value={filtroMes} 
               onChange={(e) => setFiltroMes(e.target.value)}
-              className="bg-transparent outline-none text-slate-700 font-medium cursor-pointer w-full"
+              className="bg-transparent outline-none text-slate-700 font-medium cursor-pointer w-full dark:text-slate-200"
             />
             {filtroMes && (
               <button onClick={() => setFiltroMes('')} className="text-slate-400 hover:text-red-500 transition-colors" title="Ver todo o histórico">
@@ -358,30 +358,30 @@ export default function Relatorios() {
       </header>
 
       {loading ? (
-        <div className="p-12 flex flex-col items-center justify-center text-slate-500">
+        <div className="p-12 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-4" />
           Gerando gráficos e análises...
         </div>
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100 flex items-center gap-4">
+            <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100 flex items-center gap-4 dark:bg-slate-800 dark:border-slate-700">
               <div className="w-14 h-14 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center">
                 <TrendingUp size={28} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Total de Entradas</p>
-                <p className="text-2xl font-bold text-slate-800">{formatarMoeda(resumo.receitas)}</p>
+                <p className="text-sm text-slate-500 font-medium dark:text-slate-400">Total de Entradas</p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatarMoeda(resumo.receitas)}</p>
               </div>
             </div>
             
-            <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100 flex items-center gap-4">
+            <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100 flex items-center gap-4 dark:bg-slate-800 dark:border-slate-700">
               <div className="w-14 h-14 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center">
                 <TrendingDown size={28} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Total de Saídas</p>
-                <p className="text-2xl font-bold text-slate-800">{formatarMoeda(resumo.despesas)}</p>
+                <p className="text-sm text-slate-500 font-medium dark:text-slate-400">Total de Saídas</p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatarMoeda(resumo.despesas)}</p>
               </div>
             </div>
 
@@ -398,14 +398,14 @@ export default function Relatorios() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100">
+            <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
               <div className="flex items-center gap-2 mb-6">
                 <Calendar className="text-blue-600" size={20} />
-                <h3 className="text-lg font-bold text-slate-800">Evolução Mensal</h3>
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Evolução Mensal</h3>
               </div>
               
               {/* CORREÇÃO 1: Adicionado pb-8 para o html2canvas ter margem extra de segurança na captura */}
-              <div ref={graficoBarrasRef} className="bg-white px-2 pt-2 pb-8">
+              <div ref={graficoBarrasRef} className="bg-white px-2 pt-2 pb-8 dark:bg-slate-800">
                 {dadosGraficoBarras.length > 0 ? (
                   <div className="h-72 sm:h-80">
                     <ResponsiveContainer width="100%" height="100%">
@@ -426,14 +426,14 @@ export default function Relatorios() {
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100">
+            <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
               <div className="flex items-center gap-2 mb-6">
                 <PieChart className="text-blue-600" size={20} />
-                <h3 className="text-lg font-bold text-slate-800">Despesas por Categoria</h3>
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Despesas por Categoria</h3>
               </div>
               
               {/* CORREÇÃO 1: Adicionado pb-8 para dar folga na base da imagem */}
-              <div ref={graficoPizzaRef} className="bg-white px-2 pt-2 pb-8">
+              <div ref={graficoPizzaRef} className="bg-white px-2 pt-2 pb-8 dark:bg-slate-800">
                 {dadosGraficoPizza.length > 0 ? (
                   <div className="flex flex-col">
                     
@@ -466,7 +466,7 @@ export default function Relatorios() {
                           <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }}></div>
                           {/* CORREÇÃO 3: Quando gerar o PDF, o 'truncate' sai de cena para não cortar as letras */}
                           <span className={`text-xs text-slate-600 flex-1 ${gerandoPDF ? 'whitespace-normal' : 'truncate'}`} title={item.name}>{item.name}</span>
-                          <span className="text-xs font-semibold text-slate-800">{formatarMoeda(item.value)}</span>
+                          <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">{formatarMoeda(item.value)}</span>
                         </div>
                       ))}
                     </div>

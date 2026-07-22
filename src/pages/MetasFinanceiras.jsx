@@ -218,11 +218,11 @@ export default function MetasFinanceiras() {
     <div className="p-4 md:p-8 max-w-6xl mx-auto animate-fade-in pb-24">
       <header className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3 dark:text-slate-100">
             <Target className="text-blue-600" size={32} />
             Metas Financeiras
           </h1>
-          <p className="text-slate-500 mt-2">Guarde dinheiro em seus cofres e realize sonhos</p>
+          <p className="text-slate-500 mt-2 dark:text-slate-400">Guarde dinheiro em seus cofres e realize sonhos</p>
         </div>
         <button 
           onClick={() => setShowNovaMetaModal(true)}
@@ -233,11 +233,11 @@ export default function MetasFinanceiras() {
       </header>
 
       {loading ? (
-        <div className="p-12 text-center text-slate-500 flex flex-col items-center gap-3">
+        <div className="p-12 text-center text-slate-500 flex flex-col items-center gap-3 dark:text-slate-400">
           <Loader2 className="animate-spin w-8 h-8 text-blue-500" /> Carregando metas...
         </div>
       ) : metas.length === 0 ? (
-        <div className="bg-white p-12 rounded-3xl text-center text-slate-500 shadow-soft border border-dashed border-slate-300">
+        <div className="bg-white p-12 rounded-3xl text-center text-slate-500 shadow-soft border border-dashed border-slate-300 dark:bg-slate-800 dark:text-slate-400">
           Você ainda não tem nenhum cofre. Clique no botão acima para criar o seu primeiro objetivo!
         </div>
       ) : (
@@ -247,7 +247,7 @@ export default function MetasFinanceiras() {
             const metaAtingida = progresso >= 100
 
             return (
-              <div key={meta.id} className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100 relative group overflow-hidden flex flex-col h-full">
+              <div key={meta.id} className="bg-white rounded-3xl p-6 shadow-soft border border-slate-100 relative group overflow-hidden flex flex-col h-full dark:bg-slate-800 dark:border-slate-700">
                 <div className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-10 pointer-events-none" style={{ backgroundColor: meta.cor }}></div>
                 
                 <div className="absolute top-4 right-4 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
@@ -260,7 +260,7 @@ export default function MetasFinanceiras() {
                       }); 
                       setShowEditarModal(true);
                     }}
-                    className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                    className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors dark:hover:bg-slate-700"
                     title="Editar Meta"
                   >
                     <Edit size={20} />
@@ -279,8 +279,8 @@ export default function MetasFinanceiras() {
                     {metaAtingida ? <Award size={28} strokeWidth={2.5} /> : renderizarIcone(meta.icone)}
                   </div>
                   <div className="truncate">
-                    <h3 className="text-xl font-bold text-slate-800 truncate" title={meta.titulo}>{meta.titulo}</h3>
-                    <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
+                    <h3 className="text-xl font-bold text-slate-800 truncate dark:text-slate-100" title={meta.titulo}>{meta.titulo}</h3>
+                    <div className="flex items-center gap-2 text-sm text-slate-500 mt-1 dark:text-slate-400">
                       <Calendar size={14} /> {formatarData(meta.data_limite)}
                     </div>
                   </div>
@@ -291,7 +291,7 @@ export default function MetasFinanceiras() {
                     <p className="text-3xl font-bold truncate" style={{ color: meta.cor }}>
                       {formatarMoeda(meta.valor_atual)}
                     </p>
-                    <p className="text-sm font-semibold text-slate-500 mb-1 ml-2">
+                    <p className="text-sm font-semibold text-slate-500 mb-1 ml-2 dark:text-slate-400">
                       de {formatarMoeda(meta.valor_objetivo)}
                     </p>
                   </div>
@@ -305,7 +305,7 @@ export default function MetasFinanceiras() {
                     </div>
                   </div>
                   
-                  <div className="flex justify-between text-xs font-semibold text-slate-500">
+                  <div className="flex justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
                     <span>{progresso.toFixed(1)}% concluído</span>
                     {metaAtingida && <span className="text-green-600 font-bold">Meta Atingida! 🎉</span>}
                   </div>
@@ -315,7 +315,7 @@ export default function MetasFinanceiras() {
                   {!metaAtingida && (
                     <button 
                       onClick={() => { setMetaSelecionada(meta); setTipoMovimento('depositar'); setShowMovimentoModal(true) }}
-                      className="flex-1 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 border border-slate-200 shadow-sm"
+                      className="flex-1 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 border border-slate-200 shadow-sm dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
                     >
                       <TrendingUp size={18} /> Guardar
                     </button>
@@ -323,7 +323,7 @@ export default function MetasFinanceiras() {
                   {meta.valor_atual > 0 && (
                     <button 
                       onClick={() => { setMetaSelecionada(meta); setTipoMovimento('resgatar'); setShowMovimentoModal(true) }}
-                      className="flex-1 py-2.5 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 border border-slate-200 hover:border-red-200 shadow-sm"
+                      className="flex-1 py-2.5 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 border border-slate-200 hover:border-red-200 shadow-sm dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
                     >
                       <TrendingDown size={18} /> Resgatar
                     </button>
@@ -338,7 +338,7 @@ export default function MetasFinanceiras() {
       {/* MODAL 1: Nova Meta */}
       {showNovaMetaModal && createPortal(
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] dark:bg-slate-800">
             <div className="shrink-0 bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2"><Target size={20} /> Novo Cofre</h2>
               <button onClick={() => setShowNovaMetaModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
@@ -346,12 +346,12 @@ export default function MetasFinanceiras() {
             
             <form onSubmit={handleSalvarMeta} className="p-6 space-y-5 overflow-y-auto custom-scrollbar">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Título da Meta</label>
-                <input required autoFocus type="text" value={novaMeta.titulo} onChange={e => setNovaMeta({...novaMeta, titulo: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Ex: Viagem, Carro..." />
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Título da Meta</label>
+                <input required autoFocus type="text" value={novaMeta.titulo} onChange={e => setNovaMeta({...novaMeta, titulo: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:border-slate-700" placeholder="Ex: Viagem, Carro..." />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Valor Objetivo</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor Objetivo</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">R$</span>
                   <input 
@@ -359,19 +359,19 @@ export default function MetasFinanceiras() {
                     type="text" 
                     value={novaMeta.valor_objetivo} 
                     onChange={e => setNovaMeta({...novaMeta, valor_objetivo: aplicarMascaraMoeda(e.target.value)})} 
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold text-slate-800" 
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-100" 
                     placeholder="0,00" 
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Data Limite (Opcional)</label>
-                <input type="date" value={novaMeta.data_limite} onChange={e => setNovaMeta({...novaMeta, data_limite: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm text-slate-700" />
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Data Limite (Opcional)</label>
+                <input type="date" value={novaMeta.data_limite} onChange={e => setNovaMeta({...novaMeta, data_limite: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200" />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Escolha um Ícone</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">Escolha um Ícone</label>
                 <div className="flex flex-wrap gap-2">
                   {iconesDisponiveis.map(({ id, Icon }) => (
                     <button 
@@ -387,7 +387,7 @@ export default function MetasFinanceiras() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Cor de Destaque</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">Cor de Destaque</label>
                 <div className="flex flex-wrap gap-3">
                   {coresDisponiveis.map(cor => (
                     <button key={cor} type="button" onClick={() => setNovaMeta({...novaMeta, cor})} className={`w-8 h-8 rounded-full shadow-sm ${novaMeta.cor === cor ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : 'hover:scale-110 transition-transform'}`} style={{ backgroundColor: cor }} />
@@ -407,7 +407,7 @@ export default function MetasFinanceiras() {
       {/* MODAL 2: Editar Meta (Padronizado e Bonito) */}
       {showEditarModal && metaEditando && createPortal(
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] dark:bg-slate-800">
             <div className="shrink-0 bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2"><Edit size={20} /> Editar Meta</h2>
               <button onClick={() => { setShowEditarModal(false); setMetaEditando(null) }} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
@@ -415,12 +415,12 @@ export default function MetasFinanceiras() {
             
             <form onSubmit={handleEditarMeta} className="p-6 space-y-5 overflow-y-auto custom-scrollbar">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Título da Meta</label>
-                <input required autoFocus type="text" value={metaEditando.titulo} onChange={e => setMetaEditando({...metaEditando, titulo: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Título da Meta</label>
+                <input required autoFocus type="text" value={metaEditando.titulo} onChange={e => setMetaEditando({...metaEditando, titulo: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:border-slate-700" />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Valor Objetivo</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor Objetivo</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">R$</span>
                   <input 
@@ -428,19 +428,19 @@ export default function MetasFinanceiras() {
                     type="text" 
                     value={metaEditando.valor_objetivo} 
                     onChange={e => setMetaEditando({...metaEditando, valor_objetivo: aplicarMascaraMoeda(e.target.value)})} 
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold text-slate-800" 
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-100" 
                     placeholder="0,00"
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Data Limite (Opcional)</label>
-                <input type="date" value={metaEditando.data_limite || ''} onChange={e => setMetaEditando({...metaEditando, data_limite: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm text-slate-700" />
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Data Limite (Opcional)</label>
+                <input type="date" value={metaEditando.data_limite || ''} onChange={e => setMetaEditando({...metaEditando, data_limite: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200" />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Escolha um Ícone</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">Escolha um Ícone</label>
                 <div className="flex flex-wrap gap-2">
                   {iconesDisponiveis.map(({ id, Icon }) => (
                     <button 
@@ -456,7 +456,7 @@ export default function MetasFinanceiras() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Cor de Destaque</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">Cor de Destaque</label>
                 <div className="flex flex-wrap gap-3">
                   {coresDisponiveis.map(cor => (
                     <button key={cor} type="button" onClick={() => setMetaEditando({...metaEditando, cor})} className={`w-8 h-8 rounded-full shadow-sm ${metaEditando.cor === cor ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : 'hover:scale-110 transition-transform'}`} style={{ backgroundColor: cor }} />
@@ -476,7 +476,7 @@ export default function MetasFinanceiras() {
       {/* MODAL 3: Movimentação (Guardar/Resgatar com Mascara Moeda) */}
       {showMovimentoModal && metaSelecionada && createPortal(
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col dark:bg-slate-800">
             <div 
               className="shrink-0 px-6 py-4 flex items-center justify-between text-white rounded-t-3xl" 
               style={{ backgroundColor: tipoMovimento === 'depositar' ? metaSelecionada.cor : '#dc2626' }}
@@ -488,9 +488,9 @@ export default function MetasFinanceiras() {
             </div>
             
             <form onSubmit={handleMovimentar} className="p-6">
-              <p className="text-center text-slate-500 mb-4 text-sm">
+              <p className="text-center text-slate-500 mb-4 text-sm dark:text-slate-400">
                 Quanto você quer {tipoMovimento === 'depositar' ? 'adicionar no cofre' : 'resgatar do cofre'}<br/>
-                <strong className="text-slate-800 text-base">{metaSelecionada.titulo}</strong>?
+                <strong className="text-slate-800 text-base dark:text-slate-100">{metaSelecionada.titulo}</strong>?
               </p>
               
               {tipoMovimento === 'resgatar' && (
@@ -506,7 +506,7 @@ export default function MetasFinanceiras() {
                   type="text" 
                   value={valorMovimento} 
                   onChange={e => setValorMovimento(aplicarMascaraMoeda(e.target.value))} 
-                  className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200 font-bold text-3xl text-slate-800 text-center" 
+                  className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200 font-bold text-3xl text-slate-800 text-center dark:border-slate-700 dark:text-slate-100" 
                   autoFocus 
                   placeholder="0,00" 
                 />

@@ -376,10 +376,10 @@ function ContasPagar() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center dark:bg-slate-900">
         <div className="text-center">
           <RefreshCw className="animate-spin text-blue-600 mx-auto mb-4" size={48} />
-          <p className="text-gray-600 font-medium">Carregando suas contas...</p>
+          <p className="text-gray-600 font-medium dark:text-slate-300">Carregando suas contas...</p>
         </div>
       </div>
     )
@@ -387,11 +387,11 @@ function ContasPagar() {
 
   if (erro) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 dark:bg-slate-900">
         <div className="bg-red-50 border border-red-200 p-8 rounded-2xl max-w-lg text-center shadow-lg">
           <AlertTriangle className="text-red-500 mx-auto mb-4" size={48} />
           <h2 className="text-xl font-bold text-red-700 mb-2">Erro ao carregar dados</h2>
-          <p className="text-red-600 mb-6 text-sm bg-white p-3 rounded border border-red-100">{erro}</p>
+          <p className="text-red-600 mb-6 text-sm bg-white p-3 rounded border border-red-100 dark:bg-slate-800">{erro}</p>
           <button onClick={carregarContas} className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 font-medium flex items-center gap-2 mx-auto">
             <RefreshCw size={16} /> Tentar Novamente
           </button>
@@ -401,16 +401,16 @@ function ContasPagar() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8 dark:bg-slate-900">
       <div className="max-w-4xl mx-auto pb-24">
         
         <header className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+            <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2 dark:text-slate-100">
               <Calendar className="text-blue-600" size={32} />
               Contas a Pagar
             </h1>
-            <p className="text-gray-500 mt-2">Controle de pagamentos de contas avulsas e parcelamentos</p>
+            <p className="text-gray-500 mt-2 dark:text-slate-400">Controle de pagamentos de contas avulsas e parcelamentos</p>
           </div>
           <button 
             onClick={() => setShowModal(true)}
@@ -422,31 +422,31 @@ function ContasPagar() {
         </header>
 
         {/* BARRA DE NAVEGAÇÃO DE MESES */}
-        <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-100 mb-8">
-          <button onClick={() => alterarMes(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-600">
+        <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-100 mb-8 dark:bg-slate-800 dark:border-slate-700">
+          <button onClick={() => alterarMes(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-600 dark:text-slate-300">
             <ChevronLeft size={24} />
           </button>
-          <h2 className="text-xl font-bold text-slate-800">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
             {MESES[mesAtual]} {anoAtual}
           </h2>
-          <button onClick={() => alterarMes(1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-600">
+          <button onClick={() => alterarMes(1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-600 dark:text-slate-300">
             <ChevronRight size={24} />
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-blue-500">
-            <div className="flex items-center gap-2 text-gray-500 mb-2">
+          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-blue-500 dark:bg-slate-800">
+            <div className="flex items-center gap-2 text-gray-500 mb-2 dark:text-slate-400">
               <DollarSign size={20} />
               <span className="text-sm font-medium">Total Geral</span>
             </div>
-            <p className="text-2xl font-bold text-gray-800">
+            <p className="text-2xl font-bold text-gray-800 dark:text-slate-100">
               {formatarMoeda(totais.geral)}
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-green-500">
-            <div className="flex items-center gap-2 text-gray-500 mb-2">
+          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-green-500 dark:bg-slate-800">
+            <div className="flex items-center gap-2 text-gray-500 mb-2 dark:text-slate-400">
               <CheckCircle size={20} />
               <span className="text-sm font-medium">Total Pago</span>
             </div>
@@ -455,8 +455,8 @@ function ContasPagar() {
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-red-500">
-            <div className="flex items-center gap-2 text-gray-500 mb-2">
+          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-red-500 dark:bg-slate-800">
+            <div className="flex items-center gap-2 text-gray-500 mb-2 dark:text-slate-400">
               <TrendingDown size={20} />
               <span className="text-sm font-medium">Total Pendente</span>
             </div>
@@ -468,21 +468,21 @@ function ContasPagar() {
 
         <div className="space-y-6">
           {datasOrdenadas.length === 0 && (
-            <div className="bg-white p-12 rounded-2xl text-center text-gray-500 shadow-md border border-dashed border-gray-300">
+            <div className="bg-white p-12 rounded-2xl text-center text-gray-500 shadow-md border border-dashed border-gray-300 dark:bg-slate-800 dark:text-slate-400">
               Nenhuma conta encontrada para <strong>{MESES[mesAtual]} de {anoAtual}</strong>.
             </div>
           )}
           
           {datasOrdenadas.map(data => (
-            <div key={data} className="bg-white rounded-2xl shadow-md overflow-hidden animate-fade-in">
-              <div className="bg-gray-100 px-6 py-3 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+            <div key={data} className="bg-white rounded-2xl shadow-md overflow-hidden animate-fade-in dark:bg-slate-800">
+              <div className="bg-gray-100 px-6 py-3 border-b border-gray-200 dark:border-slate-700">
+                <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2 dark:text-slate-200">
                   <Calendar size={20} className="text-blue-600" />
                   {data}
                 </h2>
               </div>
               
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 dark:divide-slate-700">
                 {contasAgrupadas[data].map(conta => (
                   <div key={conta.id} className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50 transition-colors group ${conta.status_pago ? 'bg-green-50/50' : ''}`}>
                     <div className="flex items-center gap-3 flex-1">
@@ -492,7 +492,7 @@ function ContasPagar() {
                       <div className="flex-1">
                         <p className={`font-semibold ${conta.status_pago ? 'text-gray-500 line-through' : 'text-gray-800'}`}>{conta.descricao}</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-sm text-gray-500">{conta.credor}</span>
+                          <span className="text-sm text-gray-500 dark:text-slate-400">{conta.credor}</span>
                           {conta.tipo === 'parcela' && (
                             <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
                               Restam {conta.parcelas_restantes} parcelas
@@ -529,7 +529,7 @@ function ContasPagar() {
 
                       <button
                         onClick={() => abrirEditar(conta)}
-                        className="p-2 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all md:opacity-0 group-hover:opacity-100"
+                        className="p-2 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all md:opacity-0 group-hover:opacity-100 dark:hover:bg-slate-700"
                         title="Editar Conta"
                       >
                         <Pencil size={18} />
@@ -554,7 +554,7 @@ function ContasPagar() {
       {/* Modal de Nova Conta */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden dark:bg-slate-800">
             <div className="bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2">
                 <Calendar size={20} /> Nova Conta a Pagar
@@ -566,20 +566,20 @@ function ContasPagar() {
 
             <form onSubmit={handleSalvarConta} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição / Nome da Conta</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Descrição / Nome da Conta</label>
                 <input 
                   type="text" 
                   required 
                   value={novaConta.descricao} 
                   onChange={(e) => setNovaConta({...novaConta, descricao: e.target.value})} 
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" 
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all dark:border-slate-700" 
                   placeholder="Ex: Conta de Luz, Internet, etc." 
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">
                     {parseInt(novaConta.parcelas) > 1 ? 'Valor Total (R$)' : 'Valor (R$)'}
                   </label>
                   <div className="relative">
@@ -589,14 +589,14 @@ function ContasPagar() {
                       required 
                       value={novaConta.valor} 
                       onChange={(e) => setNovaConta({...novaConta, valor: aplicarMascaraMoeda(e.target.value)})} 
-                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-semibold text-slate-800" 
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-100" 
                       placeholder="0,00" 
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">
                     {parseInt(novaConta.parcelas) > 1 ? 'Data da 1ª Parcela' : 'Data do Vencimento'}
                   </label>
                   <div className="relative">
@@ -606,14 +606,14 @@ function ContasPagar() {
                       required 
                       value={novaConta.data_vencimento} 
                       onChange={(e) => setNovaConta({...novaConta, data_vencimento: e.target.value})} 
-                      className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-slate-700 text-sm" 
+                      className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-slate-700 text-sm dark:border-slate-700 dark:text-slate-200" 
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Número de Parcelas</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Número de Parcelas</label>
                 <div className="relative">
                   <Repeat className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input 
@@ -621,12 +621,12 @@ function ContasPagar() {
                     min="1" 
                     value={novaConta.parcelas} 
                     onChange={(e) => setNovaConta({...novaConta, parcelas: e.target.value})} 
-                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-slate-800 font-semibold" 
+                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-slate-800 font-semibold dark:border-slate-700 dark:text-slate-100" 
                     placeholder="1" 
                   />
                 </div>
                 {parseInt(novaConta.parcelas) > 1 && novaConta.valor && (
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-slate-500 mt-1 dark:text-slate-400">
                     {novaConta.parcelas}x de aproximadamente{' '}
                     {formatarMoeda(converterParaFloat(novaConta.valor) / parseInt(novaConta.parcelas))}
                   </p>
@@ -634,13 +634,13 @@ function ContasPagar() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria (Opcional)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Categoria (Opcional)</label>
                 <div className="relative">
                   <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <select 
                     value={novaConta.categoria_id} 
                     onChange={(e) => setNovaConta({...novaConta, categoria_id: e.target.value})} 
-                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white appearance-none"
+                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white appearance-none dark:border-slate-700 dark:bg-slate-800"
                   >
                     <option value="">Selecione uma categoria...</option>
                     {categorias.map(cat => (
@@ -665,7 +665,7 @@ function ContasPagar() {
       {/* Modal de Confirmação de Pagamento */}
       {modalPagar.show && modalPagar.conta && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden dark:bg-slate-800">
             <div className={`bg-gradient-to-r ${modalPagar.conta.status_pago ? 'from-amber-500 to-orange-500' : 'from-green-500 to-emerald-500'} px-6 py-4 flex items-center justify-between text-white`}>
               <h2 className="font-bold text-lg flex items-center gap-2">
                 {modalPagar.conta.status_pago ? <XCircle size={20} /> : <CheckCircle size={20} />}
@@ -676,14 +676,14 @@ function ContasPagar() {
               </button>
             </div>
             <div className="p-6 text-center">
-              <p className="text-slate-600 mb-6">
-                Deseja {modalPagar.conta.status_pago ? 'desfazer o pagamento de' : 'marcar como paga a conta de'} <strong className="text-slate-800">{modalPagar.conta.descricao}</strong> no valor de <strong className="text-slate-800">{formatarMoeda(modalPagar.conta.valor)}</strong>?
+              <p className="text-slate-600 mb-6 dark:text-slate-300">
+                Deseja {modalPagar.conta.status_pago ? 'desfazer o pagamento de' : 'marcar como paga a conta de'} <strong className="text-slate-800 dark:text-slate-100">{modalPagar.conta.descricao}</strong> no valor de <strong className="text-slate-800 dark:text-slate-100">{formatarMoeda(modalPagar.conta.valor)}</strong>?
               </p>
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setModalPagar({ show: false, conta: null })}
-                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors"
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200"
                 >
                   Cancelar
                 </button>
@@ -703,7 +703,7 @@ function ContasPagar() {
       {/* Modal de Confirmação de Exclusão */}
       {modalExcluir.show && modalExcluir.conta && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden dark:bg-slate-800">
             <div className="bg-gradient-to-r from-red-600 to-rose-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2">
                 <Trash2 size={20} /> Excluir Conta
@@ -716,29 +716,29 @@ function ContasPagar() {
               
               {modalExcluir.conta.tipo === 'consumo' && modalExcluir.conta.id_parcelamento ? (
                 <>
-                  <p className="text-slate-600 mb-4 text-center">
-                    A conta <strong className="text-slate-800">{modalExcluir.conta.descricao}</strong> faz parte de um parcelamento. O que deseja excluir?
+                  <p className="text-slate-600 mb-4 text-center dark:text-slate-300">
+                    A conta <strong className="text-slate-800 dark:text-slate-100">{modalExcluir.conta.descricao}</strong> faz parte de um parcelamento. O que deseja excluir?
                   </p>
                   <div className="space-y-3 mb-6">
                     <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${modalExcluir.escopo === 'unica' ? 'border-red-500 bg-red-50' : 'border-slate-200 hover:bg-slate-50'}`}>
                       <input type="radio" name="escopoExclusao" value="unica" checked={modalExcluir.escopo === 'unica'} onChange={() => setModalExcluir({...modalExcluir, escopo: 'unica'})} className="w-4 h-4 text-red-600" />
                       <div>
-                        <p className="font-semibold text-slate-800 text-sm">Apenas esta parcela</p>
-                        <p className="text-xs text-slate-500 mt-0.5">Exclui apenas a parcela {modalExcluir.conta.numero_parcela}/{modalExcluir.conta.total_parcelas}.</p>
+                        <p className="font-semibold text-slate-800 text-sm dark:text-slate-100">Apenas esta parcela</p>
+                        <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">Exclui apenas a parcela {modalExcluir.conta.numero_parcela}/{modalExcluir.conta.total_parcelas}.</p>
                       </div>
                     </label>
                     <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${modalExcluir.escopo === 'todas' ? 'border-red-500 bg-red-50' : 'border-slate-200 hover:bg-slate-50'}`}>
                       <input type="radio" name="escopoExclusao" value="todas" checked={modalExcluir.escopo === 'todas'} onChange={() => setModalExcluir({...modalExcluir, escopo: 'todas'})} className="w-4 h-4 text-red-600" />
                       <div>
-                        <p className="font-semibold text-slate-800 text-sm">Todas as pendentes</p>
-                        <p className="text-xs text-slate-500 mt-0.5">Cancela e exclui as parcelas futuras desta compra.</p>
+                        <p className="font-semibold text-slate-800 text-sm dark:text-slate-100">Todas as pendentes</p>
+                        <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">Cancela e exclui as parcelas futuras desta compra.</p>
                       </div>
                     </label>
                   </div>
                 </>
               ) : (
-                <p className="text-slate-600 mb-6 text-center">
-                  Tem certeza que deseja excluir permanentemente a conta <strong className="text-slate-800">{modalExcluir.conta.descricao}</strong>?
+                <p className="text-slate-600 mb-6 text-center dark:text-slate-300">
+                  Tem certeza que deseja excluir permanentemente a conta <strong className="text-slate-800 dark:text-slate-100">{modalExcluir.conta.descricao}</strong>?
                 </p>
               )}
 
@@ -746,7 +746,7 @@ function ContasPagar() {
                 <button
                   type="button"
                   onClick={() => setModalExcluir({ show: false, conta: null, escopo: 'unica' })}
-                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors"
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200"
                 >
                   Cancelar
                 </button>
@@ -766,7 +766,7 @@ function ContasPagar() {
       {/* Modal de Edição de Conta */}
       {modalEditar.show && modalEditar.conta && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden dark:bg-slate-800">
             <div className="bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2">
                 <Pencil size={20} /> Editar Conta
@@ -777,46 +777,46 @@ function ContasPagar() {
             </div>
             <form onSubmit={handleSalvarEdicao} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Descrição</label>
                 <input
                   type="text" required
                   value={contaEditando.descricao}
                   onChange={(e) => setContaEditando({...contaEditando, descricao: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Valor (R$)</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor (R$)</label>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">R$</span>
                     <input
                       type="text" required
                       value={contaEditando.valor}
                       onChange={(e) => setContaEditando({...contaEditando, valor: aplicarMascaraMoeda(e.target.value)})}
-                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-semibold text-slate-800"
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-100"
                       placeholder="0,00"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Data de Vencimento</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Data de Vencimento</label>
                   <input
                     type="date" required
                     value={contaEditando.data_vencimento}
                     onChange={(e) => setContaEditando({...contaEditando, data_vencimento: e.target.value})}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-slate-700 text-sm"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-slate-700 text-sm dark:border-slate-700 dark:text-slate-200"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Categoria</label>
                 <div className="relative">
                   <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <select
                     value={contaEditando.categoria_id}
                     onChange={(e) => setContaEditando({...contaEditando, categoria_id: e.target.value})}
-                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white appearance-none"
+                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white appearance-none dark:border-slate-700 dark:bg-slate-800"
                   >
                     <option value="">Sem categoria</option>
                     {categorias.map(cat => (
@@ -832,7 +832,7 @@ function ContasPagar() {
               )}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setModalEditar({ show: false, conta: null })}
-                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors">
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200">
                   Cancelar
                 </button>
                 <button type="submit" disabled={salvando}

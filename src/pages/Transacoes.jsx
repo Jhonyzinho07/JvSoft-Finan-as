@@ -154,18 +154,18 @@ export default function Transacoes() {
           <ArrowRightLeft size={17} className="text-white" />
         </div>
         <div>
-          <h1 className="font-extrabold text-slate-800 text-lg leading-tight">Transações</h1>
+          <h1 className="font-extrabold text-slate-800 text-lg leading-tight dark:text-slate-100">Transações</h1>
           <p className="text-slate-400 text-xs">Histórico de receitas e despesas</p>
         </div>
       </div>
 
       {/* Navegação de mês */}
-      <div className="flex items-center justify-between bg-white px-5 py-3.5 rounded-2xl border border-slate-100 shadow-sm">
-        <button onClick={() => alterarMes(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
+      <div className="flex items-center justify-between bg-white px-5 py-3.5 rounded-2xl border border-slate-100 shadow-sm dark:bg-slate-800 dark:border-slate-700">
+        <button onClick={() => alterarMes(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500 dark:text-slate-400">
           <ChevronLeft size={20} />
         </button>
-        <span className="font-bold text-slate-800">{MESES[mesAtual]} {anoAtual}</span>
-        <button onClick={() => alterarMes(1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
+        <span className="font-bold text-slate-800 dark:text-slate-100">{MESES[mesAtual]} {anoAtual}</span>
+        <button onClick={() => alterarMes(1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500 dark:text-slate-400">
           <ChevronRight size={20} />
         </button>
       </div>
@@ -178,7 +178,7 @@ export default function Transacoes() {
           { label: 'Saldo',     valor: saldo,         cor: saldo >= 0 ? 'text-blue-700' : 'text-red-600', bg: 'bg-blue-50 border-blue-100', icon: <ArrowRightLeft size={16} className="text-blue-500" /> },
         ].map(c => (
           <div key={c.label} className={`${c.bg} border rounded-2xl p-4`}>
-            <div className="flex items-center gap-1.5 mb-1">{c.icon}<span className="text-[11px] font-semibold text-slate-500">{c.label}</span></div>
+            <div className="flex items-center gap-1.5 mb-1">{c.icon}<span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{c.label}</span></div>
             <p className={`font-extrabold text-sm ${c.cor}`}>{formatarMoeda(c.valor)}</p>
           </div>
         ))}
@@ -190,7 +190,7 @@ export default function Transacoes() {
         <input
           type="text" placeholder="Buscar transações..."
           value={busca} onChange={e => setBusca(e.target.value)}
-          className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-sm"
+          className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-sm dark:border-slate-700"
         />
         {busca && (
           <button onClick={() => setBusca('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -205,15 +205,15 @@ export default function Transacoes() {
       ) : filtradas.length === 0 ? (
         <div className="py-16 text-center text-slate-400">
           <ArrowRightLeft size={36} className="mx-auto mb-3 text-slate-200" />
-          <p className="font-semibold text-slate-500">Nenhuma transação encontrada</p>
+          <p className="font-semibold text-slate-500 dark:text-slate-400">Nenhuma transação encontrada</p>
           <p className="text-sm mt-1">{busca ? 'Tente outro termo de busca.' : `Nenhuma movimentação em ${MESES[mesAtual]}.`}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {datasOrdenadas.map(data => (
-            <div key={data} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="px-5 py-3 bg-slate-50 border-b border-slate-100">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide capitalize">
+            <div key={data} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
+              <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 dark:bg-slate-800 dark:border-slate-700">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide capitalize dark:text-slate-400">
                   {formatarDataLabel(data)}
                 </p>
               </div>
@@ -225,7 +225,7 @@ export default function Transacoes() {
                       {t.tipo === 'receita' ? <TrendingUp size={17} /> : <TrendingDown size={17} />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-800 text-sm truncate">{t.descricao}</p>
+                      <p className="font-semibold text-slate-800 text-sm truncate dark:text-slate-100">{t.descricao}</p>
                       {t.categorias?.nome && (
                         <span className="text-[11px] text-slate-400 inline-flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ backgroundColor: t.categorias.cor || '#94a3b8' }} />
@@ -238,7 +238,7 @@ export default function Transacoes() {
                     </p>
                     <div className="flex items-center gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                       <button onClick={() => abrirEditar(t)}
-                        className="p-1.5 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                        className="p-1.5 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors dark:hover:bg-slate-700">
                         <Pencil size={15} />
                       </button>
                       <button onClick={() => excluir(t)}
@@ -257,7 +257,7 @@ export default function Transacoes() {
       {/* Modal de Edição */}
       {modalEditar.show && modalEditar.transacao && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden dark:bg-slate-800">
             <div className="bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2"><Pencil size={18} /> Editar Transação</h2>
               <button onClick={() => setModalEditar({ show: false, transacao: null })} className="p-2 hover:bg-white/20 rounded-full">
@@ -273,43 +273,43 @@ export default function Transacoes() {
                     className={`py-2.5 rounded-xl font-semibold text-sm transition-all border
                       ${editando.tipo === tipo
                         ? tipo === 'receita' ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-red-500 text-white border-red-500'
-                        : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                        : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
                       }`}>
                     {tipo === 'receita' ? '↑ Receita' : '↓ Despesa'}
                   </button>
                 ))}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Descrição</label>
                 <input type="text" required value={editando.descricao}
                   onChange={e => setEditando({...editando, descricao: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Valor (R$)</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor (R$)</label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">R$</span>
                     <input type="text" required value={editando.valor}
                       onChange={e => setEditando({...editando, valor: aplicarMascara(e.target.value)})}
-                      className="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-semibold"
+                      className="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-semibold dark:border-slate-700"
                       placeholder="0,00" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Data</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Data</label>
                   <input type="date" required value={editando.data_transacao}
                     onChange={e => setEditando({...editando, data_transacao: e.target.value})}
-                    className="w-full px-3 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm" />
+                    className="w-full px-3 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm dark:border-slate-700" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Categoria</label>
                 <div className="relative">
                   <Tag size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <select value={editando.categoria_id}
                     onChange={e => setEditando({...editando, categoria_id: e.target.value})}
-                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 bg-white appearance-none text-sm">
+                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 bg-white appearance-none text-sm dark:border-slate-700 dark:bg-slate-800">
                     <option value="">Sem categoria</option>
                     {categorias.filter(c => c.tipo === editando.tipo).map(c => (
                       <option key={c.id} value={c.id}>{c.nome}</option>
@@ -319,7 +319,7 @@ export default function Transacoes() {
               </div>
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setModalEditar({ show: false, transacao: null })}
-                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors">
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200">
                   Cancelar
                 </button>
                 <button type="submit" disabled={salvando}

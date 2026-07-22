@@ -227,7 +227,7 @@ export default function Dashboard() {
           <LayoutDashboard size={18} className="text-white" />
         </div>
         <div>
-          <h1 className="font-extrabold text-slate-800 text-lg leading-tight">Dashboard</h1>
+          <h1 className="font-extrabold text-slate-800 text-lg leading-tight dark:text-slate-100">Dashboard</h1>
           <p className="text-slate-400 text-xs">
             {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
           </p>
@@ -364,12 +364,12 @@ export default function Dashboard() {
       </div>
 
       {/* ── CARD PRINCIPAL: Compromissos Financeiros ───────────────────────── */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
 
-        <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+        <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 dark:border-slate-700">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="font-extrabold text-slate-800 text-base">Compromissos Financeiros</h2>
+              <h2 className="font-extrabold text-slate-800 text-base dark:text-slate-100">Compromissos Financeiros</h2>
               <p className="text-slate-400 text-xs mt-0.5">
                 {compromissos.length > 0
                   ? `${compromissos.filter(c => c.tipo === 'parcelamento').length} parcelamento${compromissos.filter(c => c.tipo === 'parcelamento').length !== 1 ? 's' : ''} · ${compromissos.filter(c => c.tipo === 'avulsa').length} conta${compromissos.filter(c => c.tipo === 'avulsa').length !== 1 ? 's' : ''} avulsa${compromissos.filter(c => c.tipo === 'avulsa').length !== 1 ? 's' : ''}`
@@ -386,7 +386,7 @@ export default function Dashboard() {
         {compromissos.length === 0 ? (
           <div className="py-16 flex flex-col items-center gap-3 text-slate-400">
             <CheckCircle2 size={40} className="text-emerald-400" />
-            <p className="font-bold text-slate-600 text-base">Tudo em dia!</p>
+            <p className="font-bold text-slate-600 text-base dark:text-slate-300">Tudo em dia!</p>
             <p className="text-sm">Nenhum compromisso pendente no momento.</p>
           </div>
         ) : (
@@ -426,7 +426,7 @@ export default function Dashboard() {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-bold text-slate-800 text-sm truncate">{c.descricao}</p>
+                          <p className="font-bold text-slate-800 text-sm truncate dark:text-slate-100">{c.descricao}</p>
                           
                           {isVencida && (
                             <span className="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full shrink-0">
@@ -441,7 +441,7 @@ export default function Dashboard() {
                         </div>
                         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                           {c.tipo === 'parcelamento' && (
-                            <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                            <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full dark:bg-slate-800">
                               Parcela {c.parcelasPagas + 1}/{c.total_parcelas}
                             </span>
                           )}
@@ -458,13 +458,13 @@ export default function Dashboard() {
                     </div>
 
                     <div className="text-right shrink-0">
-                      <p className="text-base font-extrabold text-slate-800">{formatarMoeda(c.valorRestante)}</p>
+                      <p className="text-base font-extrabold text-slate-800 dark:text-slate-100">{formatarMoeda(c.valorRestante)}</p>
                       <p className="text-[11px] text-slate-400">restante</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-[11px] text-slate-500 flex-wrap mb-3">
-                    <span className="font-semibold text-slate-600">{formatarMoeda(c.valorTotal)} total</span>
+                  <div className="flex items-center gap-2 text-[11px] text-slate-500 flex-wrap mb-3 dark:text-slate-400">
+                    <span className="font-semibold text-slate-600 dark:text-slate-300">{formatarMoeda(c.valorTotal)} total</span>
                     <span className="text-slate-300">·</span>
                     <span className="flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full inline-block bg-emerald-400" />
@@ -507,7 +507,7 @@ export default function Dashboard() {
         )}
 
         {compromissos.length > 0 && (
-          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/40">
+          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/40 dark:border-slate-700">
             <Link to="/contas"
               className="flex items-center justify-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors">
               Gerenciar todas as contas <ChevronRight size={16} />
@@ -519,8 +519,8 @@ export default function Dashboard() {
       {/* ── Gráfico + Movimentações ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
-          <h2 className="font-bold text-slate-800 text-sm mb-0.5">Fluxo dos Últimos 6 Meses</h2>
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 dark:bg-slate-800 dark:border-slate-700">
+          <h2 className="font-bold text-slate-800 text-sm mb-0.5 dark:text-slate-100">Fluxo dos Últimos 6 Meses</h2>
           <p className="text-slate-400 text-xs mb-5">Receitas vs. despesas mês a mês</p>
           {temGrafico ? (
             <>
@@ -538,10 +538,10 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
               <div className="flex items-center justify-center gap-5 mt-2">
-                <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                   <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block" /> Receitas
                 </span>
-                <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                   <span className="w-2.5 h-2.5 rounded-sm bg-red-400 inline-block" /> Despesas
                 </span>
               </div>
@@ -554,10 +554,10 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 dark:bg-slate-800 dark:border-slate-700">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="font-bold text-slate-800 text-sm mb-0.5">Movimentações Recentes</h2>
+              <h2 className="font-bold text-slate-800 text-sm mb-0.5 dark:text-slate-100">Movimentações Recentes</h2>
               <p className="text-slate-400 text-xs">Últimas transações do mês</p>
             </div>
             <Link to="/transacoes"
@@ -574,13 +574,13 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-1">
               {movimentacoes.map(t => (
-                <div key={t.id} className="flex items-center gap-3 py-2.5 px-2 rounded-xl hover:bg-slate-50 transition-colors">
+                <div key={t.id} className="flex items-center gap-3 py-2.5 px-2 rounded-xl hover:bg-slate-50 transition-colors dark:hover:bg-slate-700">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0
                     ${t.tipo === 'receita' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
                     {t.tipo === 'receita' ? <TrendingUp size={15} /> : <TrendingDown size={15} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 truncate">{t.descricao}</p>
+                    <p className="text-sm font-semibold text-slate-800 truncate dark:text-slate-100">{t.descricao}</p>
                     <p className="text-[11px] text-slate-400">
                       {new Date(t.data_transacao + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                       {t.categorias?.nome ? ` · ${t.categorias.nome}` : ''}
@@ -598,10 +598,10 @@ export default function Dashboard() {
 
       {/* ── Faturas abertas ───────────────────────────────────────────────── */}
       {totalFaturas > 0 && (
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 dark:bg-slate-800 dark:border-slate-700">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="font-bold text-slate-800 text-sm mb-0.5">Faturas Abertas</h2>
+              <h2 className="font-bold text-slate-800 text-sm mb-0.5 dark:text-slate-100">Faturas Abertas</h2>
               <p className="text-slate-400 text-xs">Gastos acumulados nos cartões</p>
             </div>
             <Link to="/cartoes"
@@ -609,7 +609,7 @@ export default function Dashboard() {
               Gerenciar <ChevronRight size={14} />
             </Link>
           </div>
-          <div className="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100 rounded-2xl px-5 py-4">
+          <div className="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100 rounded-2xl px-5 py-4 dark:border-slate-700">
             <div className="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
               <CreditCard size={20} className="text-white" />
             </div>

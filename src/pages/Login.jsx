@@ -88,20 +88,20 @@ export default function Login() {
                 className="w-full h-full object-contain drop-shadow-md" 
               />
             </div>
-            <h1 className="text-3xl font-bold text-slate-800 mb-2">
+            <h1 className="text-3xl font-bold text-slate-800 mb-2 dark:text-slate-100">
               JvSoft Finanças
             </h1>
-            <p className="text-slate-600">
+            <p className="text-slate-600 dark:text-slate-300">
               {isSignUp ? 'Crie sua conta gratuita' : 'Bem-vindo de volta!'}
             </p>
           </div>
 
           {/* Card do Formulário */}
-          <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-8 border border-slate-100">
+          <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-8 border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">
                   Email
                 </label>
                 <div className="relative">
@@ -111,7 +111,7 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400"
+                    className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400 dark:border-slate-700 dark:text-slate-100"
                     placeholder="seu@email.com"
                   />
                 </div>
@@ -119,7 +119,7 @@ export default function Login() {
 
               {/* Senha */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">
                   Senha
                 </label>
                 <div className="relative">
@@ -130,7 +130,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
-                    className="w-full pl-12 pr-12 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400"
+                    className="w-full pl-12 pr-12 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400 dark:border-slate-700 dark:text-slate-100"
                     placeholder="••••••••"
                   />
                   <button
@@ -173,17 +173,17 @@ export default function Login() {
             {/* Divisor */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
+                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-slate-500">ou continue com</span>
+                <span className="px-4 bg-white text-slate-500 dark:bg-slate-800 dark:text-slate-400">ou continue com</span>
               </div>
             </div>
 
             {/* Google Login */}
             <button
               onClick={handleGoogleLogin}
-              className="w-full py-3.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 flex items-center justify-center gap-3"
+              className="w-full py-3.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 flex items-center justify-center gap-3 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -208,7 +208,7 @@ export default function Login() {
 
             {/* Toggle Sign Up / Login */}
             <div className="mt-6 text-center">
-              <p className="text-slate-600">
+              <p className="text-slate-600 dark:text-slate-300">
                 {isSignUp ? 'Já tem uma conta?' : 'Não tem uma conta?'}{' '}
                 <button
                   onClick={() => setIsSignUp(!isSignUp)}
@@ -221,7 +221,7 @@ export default function Login() {
           </div>
 
           {/* Footer */}
-          <p className="text-center text-slate-500 text-sm mt-8">
+          <p className="text-center text-slate-500 text-sm mt-8 dark:text-slate-400">
             © 2026 JvSoft. Todos os direitos reservados.
           </p>
         </div>

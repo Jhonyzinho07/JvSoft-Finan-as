@@ -70,31 +70,31 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden dark:bg-slate-800">
         <div className={`bg-gradient-to-r ${tipo === 'receita' ? 'from-green-600 to-emerald-400' : 'from-red-600 to-rose-400'} px-6 py-4 flex items-center justify-between text-white`}>
           <h2 className="font-bold text-lg flex items-center gap-2">Nova Transação</h2>
           <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full"><X size={20} /></button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="flex bg-slate-100 p-1 rounded-xl">
-            <button type="button" onClick={() => setTipo('despesa')} className={`flex-1 py-2 text-sm font-semibold rounded-lg ${tipo === 'despesa' ? 'bg-white text-red-600 shadow-sm' : 'text-slate-500'}`}>Despesa</button>
-            <button type="button" onClick={() => setTipo('receita')} className={`flex-1 py-2 text-sm font-semibold rounded-lg ${tipo === 'receita' ? 'bg-white text-green-600 shadow-sm' : 'text-slate-500'}`}>Receita</button>
+          <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+            <button type="button" onClick={() => setTipo('despesa')} className={`flex-1 py-2 text-sm font-semibold rounded-lg ${tipo === 'despesa' ? 'bg-white dark:bg-slate-700 text-red-600 dark:text-red-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}>Despesa</button>
+            <button type="button" onClick={() => setTipo('receita')} className={`flex-1 py-2 text-sm font-semibold rounded-lg ${tipo === 'receita' ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}>Receita</button>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
-            <input type="text" required value={descricao} onChange={(e) => setDescricao(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none" placeholder="Ex: Compras" />
+            <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Descrição</label>
+            <input type="text" required value={descricao} onChange={(e) => setDescricao(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" placeholder="Ex: Compras" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Valor</label>
-                <input type="number" step="0.01" required value={valor} onChange={(e) => setValor(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none" placeholder="0.00" />
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor</label>
+                <input type="number" step="0.01" required value={valor} onChange={(e) => setValor(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" placeholder="0.00" />
             </div>
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
-                <select value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white">
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Categoria</label>
+                <select value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white dark:border-slate-700 dark:bg-slate-800">
                     <option value="">Selecione...</option>
                     {categoriasFiltradas.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
                 </select>
@@ -104,8 +104,8 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
           {/* NOVO CAMPO: Escolher Cartão */}
           {tipo === 'despesa' && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Pagar com Cartão (Opcional)</label>
-              <select value={cartaoId} onChange={(e) => setCartaoId(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white">
+              <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Pagar com Cartão (Opcional)</label>
+              <select value={cartaoId} onChange={(e) => setCartaoId(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white dark:border-slate-700 dark:bg-slate-800">
                 <option value="">Dinheiro / Débito (Sai do Saldo)</option>
                 {cartoes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
               </select>
