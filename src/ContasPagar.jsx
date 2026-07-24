@@ -75,55 +75,24 @@ function ContasPagar() {
 
       if (errorContas) throw new Error(`Erro ao buscar contas: ${errorContas.message}`)
 
-      const { data: dividasParceladas, error: errorDividas } = await supabase
-        .from('dividas')
-        .select(`*, credores:credor_id (nome, emoji, cor)`)
-        .gt('parcelas_restantes', 0) 
-
-      if (errorDividas) throw new Error(`Erro ao buscar dívidas: ${errorDividas.message}`)
-
-      const todasContas = []
-
-      if (contasConsumo) {
-        todasContas.push(...contasConsumo.map(c => {
-             const vencimentoFormatado = c.dia_vencimento ? `Dia ${String(c.dia_vencimento).padStart(2, '0')}` : 'Sem data'
-          return {
-            id: c.id,
-            credor: c.categorias?.nome || c.credores?.nome || 'Outros',
-            emoji: c.credores?.emoji || '💰',
-            cor: c.credores?.cor || '#6b7280',
-            descricao: c.descricao,
-            valor: c.valor,
-            vencimento: vencimentoFormatado,
-            status_pago: c.status_pago,
-            tipo: 'consumo',
-            categoria_id: c.categoria_id, 
-            dia_ordenacao: c.dia_vencimento || 99,
-            db_table: 'contas',
-            id_parcelamento: c.id_parcelamento || null,
-            numero_parcela: c.numero_parcela || null,
-            total_parcelas: c.total_parcelas || null
-          }
-        }))
-      }
-
-      if (dividasParceladas) {
-        todasContas.push(...dividasParceladas.map(d => ({
-          id: d.id,
-          credor: d.credores?.nome || 'Outros',
-          emoji: d.credores?.emoji || '💰',
-          cor: d.credores?.cor || '#6b7280',
-          descricao: d.descricao,
-          valor: d.valor_parcela,
-          vencimento: d.dia_vencimento ? `Dia ${String(d.dia_vencimento).padStart(2, '0')}` : 'À vista',
-          status_pago: false, 
-          tipo: 'parcela',
-          categoria_id: null, 
-          dia_ordenacao: d.dia_vencimento || 99,
-          parcelas_restantes: d.parcelas_restantes,
-          db_table: 'dividas'
-        })))
-      }
+      const todasContas = (contasConsumo || []).map(c => {
+        const vencimentoFormatado = c.dia_vencimento ? `Dia ${String(c.dia_vencimento).padStart(2, '0')}` : 'Sem data'
+        return {
+          id: c.id,
+          credor: c.categorias?.nome || c.credores?.nome || 'Outros',
+          emoji: c.credores?.emoji || '💰',
+          cor: c.credores?.cor || '#6b7280',
+          descricao: c.descricao,
+          valor: c.valor,
+          vencimento: vencimentoFormatado,
+          status_pago: c.status_pago,
+          categoria_id: c.categoria_id,
+          dia_ordenacao: c.dia_vencimento || 99,
+          id_parcelamento: c.id_parcelamento || null,
+          numero_parcela: c.numero_parcela || null,
+          total_parcelas: c.total_parcelas || null
+        }
+      })
 
       todasContas.sort((a, b) => a.dia_ordenacao - b.dia_ordenacao)
 
@@ -260,24 +229,11 @@ function ContasPagar() {
     if (!conta) return
     setSalvando(true)
 
-    if (conta.status_pago && conta.tipo === 'parcela') {
-      toast.warning('Esta parcela já foi processada e não pode ser desfeita.')
-      setSalvando(false)
-      setModalPagar({ show: false, conta: null })
-      return
-    }
-
     const novoStatus = !conta.status_pago
 
     try {
-      if (conta.tipo === 'consumo') {
-        const { error } = await supabase.from('contas').update({ status_pago: novoStatus }).eq('id', conta.id)
-        if (error) throw error
-      } else if (conta.tipo === 'parcela' && novoStatus === true) {
-        const novasParcelas = conta.parcelas_restantes - 1
-        const { error } = await supabase.from('dividas').update({ parcelas_restantes: novasParcelas }).eq('id', conta.id)
-        if (error) throw error
-      }
+      const { error } = await supabase.from('contas').update({ status_pago: novoStatus }).eq('id', conta.id)
+      if (error) throw error
 
       if (novoStatus === true) {
         const { error: errorTransacao } = await supabase.from('transacoes').insert([{
@@ -315,31 +271,20 @@ function ContasPagar() {
     setSalvando(true)
 
     try {
-      if (conta.tipo === 'consumo' && conta.id_parcelamento) {
-        if (escopo === 'todas') {
-          // Solução direta pelo Front-End sem depender de função complexa no banco!
-          // Ele encontra todas as contas pendentes da mesma compra e deleta de uma vez.
-          const { error } = await supabase
-            .from('contas')
-            .delete()
-            .eq('id_parcelamento', conta.id_parcelamento)
-            .eq('status_pago', false) // Apaga apenas o que ainda não foi pago!
-            
-          if (error) throw error
-        } else {
-          // Exclui apenas uma parcela específica
-          const { error } = await supabase.from('contas').delete().eq('id', conta.id)
-          if (error) throw error
-        }
+      if (conta.id_parcelamento && escopo === 'todas') {
+        // Solução direta pelo Front-End sem depender de função complexa no banco!
+        // Ele encontra todas as contas pendentes da mesma compra e deleta de uma vez.
+        const { error } = await supabase
+          .from('contas')
+          .delete()
+          .eq('id_parcelamento', conta.id_parcelamento)
+          .eq('status_pago', false) // Apaga apenas o que ainda não foi pago!
+
+        if (error) throw error
       } else {
-        // Exclusão de contas avulsas ou dívidas antigas
-        if (conta.tipo === 'consumo') {
-          const { error } = await supabase.from('contas').delete().eq('id', conta.id)
-          if (error) throw error
-        } else if (conta.tipo === 'parcela') {
-          const { error } = await supabase.from('dividas').delete().eq('id', conta.id)
-          if (error) throw error
-        }
+        // Exclui apenas uma parcela específica (ou uma conta avulsa, sem parcelamento)
+        const { error } = await supabase.from('contas').delete().eq('id', conta.id)
+        if (error) throw error
       }
 
       // Se a conta estava paga e você a excluiu, removemos a transação também (Estorno)
@@ -493,12 +438,7 @@ function ContasPagar() {
                         <p className={`font-semibold ${conta.status_pago ? 'text-gray-500 line-through' : 'text-gray-800'}`}>{conta.descricao}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-sm text-gray-500 dark:text-slate-400">{conta.credor}</span>
-                          {conta.tipo === 'parcela' && (
-                            <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
-                              Restam {conta.parcelas_restantes} parcelas
-                            </span>
-                          )}
-                          {conta.tipo === 'consumo' && conta.total_parcelas > 1 && (
+                          {conta.total_parcelas > 1 && (
                             <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
                               <Repeat size={12} /> Parcela {conta.numero_parcela}/{conta.total_parcelas}
                             </span>
@@ -714,7 +654,7 @@ function ContasPagar() {
             </div>
             <div className="p-6">
               
-              {modalExcluir.conta.tipo === 'consumo' && modalExcluir.conta.id_parcelamento ? (
+              {modalExcluir.conta.id_parcelamento ? (
                 <>
                   <p className="text-slate-600 mb-4 text-center dark:text-slate-300">
                     A conta <strong className="text-slate-800 dark:text-slate-100">{modalExcluir.conta.descricao}</strong> faz parte de um parcelamento. O que deseja excluir?

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from './supabaseClient'
 import { formatarMoeda } from './utils/helpers'
+import { corTema } from './utils/tema'
 import { useToast } from './components/Toast'
 import {
   TrendingUp, TrendingDown, CreditCard, Clock, ChevronRight,
@@ -178,7 +179,7 @@ function BadgeVariacao({ atual, anterior, inverso = false }) {
 
 function BarraDupla({ pctPago, cor }) {
   return (
-    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden flex">
+    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden flex dark:bg-slate-700">
       <div
         className="h-full rounded-l-full transition-all duration-700"
         style={{ width: `${Math.min(pctPago, 100)}%`, backgroundColor: cor }}
@@ -390,7 +391,7 @@ export default function Dashboard() {
             <p className="text-sm">Nenhum compromisso pendente no momento.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-50">
+          <div className="divide-y divide-slate-50 dark:divide-slate-700">
             {compromissos.map((c, idx) => {
               const pctPago = c.valorTotal > 0 ? (c.valorPago / c.valorTotal) * 100 : 0
               const pctDoTotal = totalDividas > 0 ? (c.valorRestante / totalDividas) * 100 : 0
@@ -490,7 +491,7 @@ export default function Dashboard() {
                   )}
 
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden dark:bg-slate-700">
                       <div
                         className="h-full rounded-full transition-all duration-700"
                         style={{ width: `${pctDoTotal}%`, backgroundColor: cor + 'aa' }}
@@ -526,12 +527,18 @@ export default function Dashboard() {
             <>
               <ResponsiveContainer width="100%" height={190}>
                 <BarChart data={grafico} barSize={9} barGap={2}>
-                  <XAxis dataKey="mes" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="mes" tick={{ fontSize: 10, fill: corTema('#94a3b8', '#64748b') }} axisLine={false} tickLine={false} />
                   <YAxis hide />
                   <Tooltip
                     formatter={(v, name) => [formatarMoeda(v), name === 'receitas' ? 'Receitas' : 'Despesas']}
-                    contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 11 }}
-                    cursor={{ fill: '#f8fafc' }}
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: `1px solid ${corTema('#e2e8f0', '#334155')}`,
+                      backgroundColor: corTema('#ffffff', '#1e293b'),
+                      color: corTema('#1e293b', '#f1f5f9'),
+                      fontSize: 11
+                    }}
+                    cursor={{ fill: corTema('#f8fafc', '#334155') }}
                   />
                   <Bar dataKey="receitas" fill="#10b981" radius={[4,4,0,0]} />
                   <Bar dataKey="despesas" fill="#f87171" radius={[4,4,0,0]} />
@@ -586,7 +593,7 @@ export default function Dashboard() {
                       {t.categorias?.nome ? ` · ${t.categorias.nome}` : ''}
                     </p>
                   </div>
-                  <p className={`text-sm font-bold shrink-0 ${t.tipo === 'receita' ? 'text-emerald-600' : 'text-slate-700'}`}>
+                  <p className={`text-sm font-bold shrink-0 ${t.tipo === 'receita' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200'}`}>
                     {t.tipo === 'receita' ? '+' : '-'}{formatarMoeda(t.valor)}
                   </p>
                 </div>

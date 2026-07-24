@@ -57,10 +57,10 @@ function ToastContainer({ toasts, onRemove }) {
 
 // ─── Item individual ─────────────────────────────────────────────────
 const STYLES = {
-  success: { bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-800', icon: <CheckCircle size={18} className="text-emerald-500 shrink-0 mt-0.5" /> },
-  error:   { bg: 'bg-red-50 border-red-200',         text: 'text-red-800',     icon: <XCircle     size={18} className="text-red-500 shrink-0 mt-0.5" /> },
-  warning: { bg: 'bg-amber-50 border-amber-200',     text: 'text-amber-800',   icon: <AlertTriangle size={18} className="text-amber-500 shrink-0 mt-0.5" /> },
-  info:    { bg: 'bg-blue-50 border-blue-200',       text: 'text-blue-800',    icon: <Info        size={18} className="text-blue-500 shrink-0 mt-0.5" /> },
+  success: { bg: 'bg-emerald-50 dark:bg-emerald-950/90 border-emerald-200 dark:border-emerald-800', text: 'text-emerald-800 dark:text-emerald-200', icon: <CheckCircle size={18} className="text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" /> },
+  error:   { bg: 'bg-red-50 dark:bg-red-950/90 border-red-200 dark:border-red-800',                 text: 'text-red-800 dark:text-red-200',         icon: <XCircle     size={18} className="text-red-500 dark:text-red-400 shrink-0 mt-0.5" /> },
+  warning: { bg: 'bg-amber-50 dark:bg-amber-950/90 border-amber-200 dark:border-amber-800',         text: 'text-amber-800 dark:text-amber-200',     icon: <AlertTriangle size={18} className="text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" /> },
+  info:    { bg: 'bg-blue-50 dark:bg-slate-800 border-blue-200 dark:border-slate-600',              text: 'text-blue-800 dark:text-slate-200',      icon: <Info        size={18} className="text-blue-500 dark:text-cyan-400 shrink-0 mt-0.5" /> },
 }
 
 function ToastItem({ toast, onRemove }) {

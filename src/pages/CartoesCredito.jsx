@@ -267,7 +267,7 @@ export default function CartoesCredito() {
                     <span>Uso do Limite</span>
                     <span>{Math.min(porcentagemUso, 100).toFixed(0)}%</span>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden mb-4">
+                  <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden mb-4 dark:bg-slate-700">
                     <div className={`h-full rounded-full transition-all ${estourado ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: `${Math.min(porcentagemUso, 100)}%` }}></div>
                   </div>
                   
@@ -422,7 +422,7 @@ export default function CartoesCredito() {
               </p>
               
               <div className="flex gap-3">
-                <button type="button" onClick={() => setModalFechar({ show: false, cartao: null })} className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200">
+                <button type="button" onClick={() => setModalFechar({ show: false, cartao: null })} className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200 dark:bg-slate-700">
                   Cancelar
                 </button>
                 <button type="button" onClick={confirmarFechamento} disabled={salvando} className="flex-1 py-3 bg-gradient-to-r from-blue-900 to-cyan-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex justify-center items-center gap-2">

@@ -191,7 +191,7 @@ export default function Orcamentos() {
                   <div className="flex justify-between items-end">
                     <div>
                       <p className="text-sm text-slate-500 mb-1 dark:text-slate-400">Total Gasto</p>
-                      <p className={`text-2xl font-bold ${passouDoLimite ? 'text-red-600' : 'text-slate-800'}`}>
+                      <p className={`text-2xl font-bold ${passouDoLimite ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-slate-100'}`}>
                         {formatarMoeda(gasto)}
                       </p>
                     </div>
@@ -208,7 +208,7 @@ export default function Orcamentos() {
                     </div>
                   </div>
 
-                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden dark:bg-slate-700">
                     <div 
                       className={`h-full rounded-full transition-all duration-1000 ${
                         passouDoLimite ? 'bg-red-500' : emAlerta ? 'bg-amber-500' : 'bg-gradient-to-r from-blue-600 to-cyan-400'

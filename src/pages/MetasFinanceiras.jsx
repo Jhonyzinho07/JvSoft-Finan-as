@@ -296,7 +296,7 @@ export default function MetasFinanceiras() {
                     </p>
                   </div>
                   
-                  <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden relative">
+                  <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden relative dark:bg-slate-700">
                     <div 
                       className="h-full rounded-full transition-all duration-1000 ease-out relative"
                       style={{ width: `${progresso}%`, backgroundColor: meta.cor }}
@@ -378,7 +378,7 @@ export default function MetasFinanceiras() {
                       key={id} 
                       type="button" 
                       onClick={() => setNovaMeta({...novaMeta, icone: id})} 
-                      className={`w-10 h-10 rounded-xl border-2 transition-all flex items-center justify-center ${novaMeta.icone === id ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-300'}`}
+                      className={`w-10 h-10 rounded-xl border-2 transition-all flex items-center justify-center ${novaMeta.icone === id ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400' : 'border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'}`}
                     >
                       <Icon size={20} strokeWidth={2.5} />
                     </button>
@@ -447,7 +447,7 @@ export default function MetasFinanceiras() {
                       key={id} 
                       type="button" 
                       onClick={() => setMetaEditando({...metaEditando, icone: id})} 
-                      className={`w-10 h-10 rounded-xl border-2 transition-all flex items-center justify-center ${metaEditando.icone === id ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-300'}`}
+                      className={`w-10 h-10 rounded-xl border-2 transition-all flex items-center justify-center ${metaEditando.icone === id ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400' : 'border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'}`}
                     >
                       <Icon size={20} strokeWidth={2.5} />
                     </button>

@@ -32,7 +32,6 @@ export default function Relatorios() {
     try {
       const { data: manuais } = await supabase.from('transacoes').select('*, categorias(nome)')
       const { data: receitas } = await supabase.from('receitas').select('*')
-      const { data: dividas } = await supabase.from('dividas').select('*, credores(nome)').gt('parcelas_restantes', 0)
       const { data: contas } = await supabase.from('contas').select('*, credores(nome), categorias(nome)').is('status_pago', false)
 
       const historicoUnificado = []
@@ -51,14 +50,6 @@ export default function Relatorios() {
         valor: Number(r.valor),
         data: r.criado_em,
         categoria: 'Receita Fixa'
-      }))
-
-      dividas?.forEach(d => historicoUnificado.push({
-        tipo: 'despesa',
-        descricao: d.descricao,
-        valor: Number(d.valor_parcela),
-        data: d.criado_em,
-        categoria: d.credores?.nome || 'Dívida'
       }))
 
       contas?.forEach(c => historicoUnificado.push({

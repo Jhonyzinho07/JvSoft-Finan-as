@@ -217,7 +217,7 @@ export default function Transacoes() {
                   {formatarDataLabel(data)}
                 </p>
               </div>
-              <div className="divide-y divide-slate-50">
+              <div className="divide-y divide-slate-50 dark:divide-slate-700">
                 {agrupadas[data].map(t => (
                   <div key={t.id} className="flex items-center gap-3 px-5 py-4 hover:bg-slate-50/50 transition-colors group">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0
@@ -233,7 +233,7 @@ export default function Transacoes() {
                         </span>
                       )}
                     </div>
-                    <p className={`font-bold text-sm shrink-0 ${t.tipo === 'receita' ? 'text-emerald-600' : 'text-slate-700'}`}>
+                    <p className={`font-bold text-sm shrink-0 ${t.tipo === 'receita' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200'}`}>
                       {t.tipo === 'receita' ? '+' : '-'}{formatarMoeda(t.valor)}
                     </p>
                     <div className="flex items-center gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -319,7 +319,7 @@ export default function Transacoes() {
               </div>
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setModalEditar({ show: false, transacao: null })}
-                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200">
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200 dark:bg-slate-700">
                   Cancelar
                 </button>
                 <button type="submit" disabled={salvando}

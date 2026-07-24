@@ -78,11 +78,11 @@ export default function ModalInstalacao() {
               <p className="font-semibold mb-3 flex items-center gap-2">Siga estes passos no seu iPhone:</p>
               <ol className="space-y-3">
                 <li className="flex items-center gap-3">
-                  <span className="bg-white p-1.5 rounded-lg shadow-sm"><Share size={18} className="text-blue-600" /></span>
+                  <span className="bg-white p-1.5 rounded-lg shadow-sm dark:bg-slate-800"><Share size={18} className="text-blue-600" /></span>
                   <span>1. Toque no ícone de <strong>Compartilhar</strong> na barra inferior do Safari.</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <span className="bg-white p-1.5 rounded-lg shadow-sm"><PlusSquare size={18} className="text-blue-600" /></span>
+                  <span className="bg-white p-1.5 rounded-lg shadow-sm dark:bg-slate-800"><PlusSquare size={18} className="text-blue-600" /></span>
                   <span>2. Role para baixo e escolha <strong>Adicionar à Tela de Início</strong>.</span>
                 </li>
               </ol>
