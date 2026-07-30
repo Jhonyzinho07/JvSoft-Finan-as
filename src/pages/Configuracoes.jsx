@@ -58,11 +58,6 @@ export default function Configuracoes() {
     })
   }, [])
 
-  // Aplica modo escuro no <html> (funciona em qualquer tela, pois altera o elemento global)
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', modoEscuro)
-    localStorage.setItem('pref_dark', modoEscuro)
-  }, [modoEscuro])
 
   useEffect(() => { localStorage.setItem('pref_alerta', alertaVencimento) }, [alertaVencimento])
 
