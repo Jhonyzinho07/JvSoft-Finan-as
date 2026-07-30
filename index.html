@@ -9,12 +9,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>JvSoft Finanças</title>
     <script>
-      // Aplica o modo escuro ANTES do React montar, evitando o "flash" de tela
-      // clara ao recarregar a página com a preferência de modo escuro ativa.
+      // Aplica o tema (incluindo preferência do sistema) ANTES do React montar,
+      // evitando o "flash" de tela ao recarregar a página.
       (function () {
         try {
-          if (localStorage.getItem('pref_dark') === 'true') {
-            document.documentElement.classList.add('dark')
+          const theme = localStorage.getItem('theme');
+          const prefDark = localStorage.getItem('pref_dark');
+
+          if (theme === 'dark' || (theme !== 'light' && theme !== 'system' && prefDark === 'true')) {
+             document.documentElement.classList.add('dark');
+          } else if (theme === 'system' || (!theme && !prefDark)) {
+             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+               document.documentElement.classList.add('dark');
+             }
           }
         } catch (e) {}
       })()

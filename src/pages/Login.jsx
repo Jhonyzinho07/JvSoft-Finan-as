@@ -23,7 +23,7 @@ export default function Login() {
     try {
       if (isSignUp) {
         // Registro de novo usuário
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
         });
@@ -34,7 +34,7 @@ export default function Login() {
         setIsSignUp(false);
       } else {
         // Login de usuário existente
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -43,9 +43,9 @@ export default function Login() {
 
         navigate('/dashboard');
       }
-    } catch (err) {
+    } catch (_err) {
       // TRADUÇÃO DE ERROS DO SUPABASE PARA PORTUGUÊS
-      if (err.message === 'Invalid login credentials') {
+      if (_err.message === 'Invalid login credentials') {
         setError('E-mail ou senha incorretos. Tente novamente.');
       } else {
         setError('Ocorreu um erro ao tentar fazer login. Verifique sua conexão.');
@@ -68,7 +68,7 @@ export default function Login() {
       });
 
       if (error) throw error;
-    } catch (err) {
+    } catch (_err) {
       setError('Erro ao fazer login com o Google.');
       setLoading(false);
     }

@@ -4,6 +4,7 @@ import { supabase } from './supabaseClient'
 import { ToastProvider, useToast } from './components/Toast'
 import { useAlertasVencimento } from './hooks/useAlertasVencimento'
 import { Plus } from 'lucide-react'
+import { ThemeProvider } from './contexts/ThemeContext'
 
 // Componentes que carregam SEMPRE (parte do shell do app)
 import Sidebar from './components/Sidebar'
@@ -142,8 +143,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ToastProvider>
-      <AppContent />
-    </ToastProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
+    </ThemeProvider>
   )
 }

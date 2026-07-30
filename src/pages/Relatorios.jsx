@@ -4,11 +4,13 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { supabase } from '../supabaseClient'
 import { formatarMoeda } from '../utils/helpers'
 import { useToast } from '../components/Toast'
+import { useTheme } from '../contexts/ThemeContext'
 // jsPDF, autoTable e html2canvas são carregados só quando o usuário clica em "Exportar PDF"
 // (import dinâmico — mantém o chunk de Relatorios leve no carregamento inicial)
 
 export default function Relatorios() {
   const toast = useToast()
+  const { isDark } = useTheme()
   const [loading, setLoading] = useState(true)
   const [gerandoPDF, setGerandoPDF] = useState(false)
   
@@ -61,8 +63,8 @@ export default function Relatorios() {
       }))
 
       setDadosBrutos(historicoUnificado)
-    } catch (error) {
-      console.error("Erro ao carregar relatórios:", error)
+    } catch (_error) {
+      console.error("Erro ao carregar relatórios:", _error)
     } finally {
       setLoading(false)
     }
@@ -169,7 +171,7 @@ export default function Relatorios() {
       const desenharCabecalho = (doc, numeroPagina) => {
         try {
           doc.addImage('/logo.png', 'PNG', 14, 10, 16, 16)
-        } catch (e) {
+        } catch (_error) {
           console.warn("Logo não encontrada.")
         }
         
@@ -283,8 +285,8 @@ export default function Relatorios() {
 
       doc.save(`JvSoft_Relatorio_${dataAtual.replace(/\//g, '-')}.pdf`)
       
-    } catch (error) {
-      console.error("Erro completo ao gerar PDF:", error)
+    } catch (_error) {
+      console.error("Erro completo ao gerar PDF:", _error)
       toast.error('Erro ao gerar o PDF. Tente novamente.')
     } finally {
       setGerandoPDF(false)
@@ -401,10 +403,10 @@ export default function Relatorios() {
                   <div className="h-72 sm:h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={dadosGraficoBarras} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(value) => `R$ ${value}`} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#334155' : '#f1f5f9'} />
+                        <XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 12 }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 12 }} tickFormatter={(value) => `R$ ${value}`} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: isDark ? '#334155' : '#f8fafc' }} />
                         <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
                         <Bar isAnimationActive={false} dataKey="Receitas" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={40} />
                         <Bar isAnimationActive={false} dataKey="Despesas" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={40} />

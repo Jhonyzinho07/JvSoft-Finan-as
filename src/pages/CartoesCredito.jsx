@@ -73,7 +73,7 @@ export default function CartoesCredito() {
       
       setModalGasto({ show: false, cartao: null, valor: '' })
       carregarCartoes()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao lançar gasto. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -95,7 +95,7 @@ export default function CartoesCredito() {
       
       setModalEditar({ show: false, cartao: null, limite: '' })
       carregarCartoes()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao editar cartão. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -168,7 +168,7 @@ export default function CartoesCredito() {
 
       setModalFechar({ show: false, cartao: null })
       carregarCartoes()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao fechar fatura. Tente novamente.')
     } finally {
       setSalvando(false)

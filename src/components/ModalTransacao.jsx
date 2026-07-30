@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, TrendingUp, TrendingDown, DollarSign, Type, Loader2, Calendar, Tag, CreditCard } from 'lucide-react'
+import { X, Loader2 } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import { useToast } from '../components/Toast'
 
@@ -8,7 +8,7 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
   const [tipo, setTipo] = useState(tipoInicial)
   const [descricao, setDescricao] = useState('')
   const [valor, setValor] = useState('')
-  const [data, setData] = useState(new Date().toISOString().split('T')[0])
+  const [data, _setData] = useState(new Date().toISOString().split('T')[0])
   const [categoriaId, setCategoriaId] = useState('')
   const [cartaoId, setCartaoId] = useState('')
   const [categorias, setCategorias] = useState([])
@@ -35,20 +35,19 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
       const valorNumerico = parseFloat(valor.replace(',', '.'))
       
       // 1. Inserir a Transação (Se tiver cartão_id, ela é registrada mas não é "dinheiro vivo")
-      const { data: transacao, error: errTrans } = await supabase.from('transacoes').insert([{
+      const { error: errTrans } = await supabase.from('transacoes').insert([{
         tipo,
         descricao,
         valor: valorNumerico,
         data_transacao: data,
         categoria_id: categoriaId || null,
         cartao_id: cartaoId || null // Se for null, sai do saldo. Se tiver ID, vai pro cartão.
-      }]).select()
+      }])
 
       if (errTrans) throw errTrans
 
       // 2. Se for despesa no cartão, atualiza a fatura do cartão automaticamente
       if (tipo === 'despesa' && cartaoId) {
-        const cartao = cartoes.find(c => c.id === cartaoId)
         // Precisamos buscar o valor atual da fatura antes de somar
         const { data: cartaoAtual } = await supabase.from('cartoes').select('fatura_atual').eq('id', cartaoId).single()
         
