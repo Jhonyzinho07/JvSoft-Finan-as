@@ -2,8 +2,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from './supabaseClient'
 import { formatarMoeda } from './utils/helpers'
-import { corTema } from './utils/tema'
-import { useToast } from './components/Toast'
+import { useTheme } from './contexts/ThemeContext'
 import {
   TrendingUp, TrendingDown, CreditCard, Clock, ChevronRight,
   ArrowUpRight, ArrowDownRight, Wallet, Repeat, Receipt,
@@ -191,7 +190,7 @@ function BarraDupla({ pctPago, cor }) {
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function Dashboard() {
-  const toast = useToast()
+  const { isDark } = useTheme()
 
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard'],
@@ -527,18 +526,18 @@ export default function Dashboard() {
             <>
               <ResponsiveContainer width="100%" height={190}>
                 <BarChart data={grafico} barSize={9} barGap={2}>
-                  <XAxis dataKey="mes" tick={{ fontSize: 10, fill: corTema('#94a3b8', '#64748b') }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="mes" tick={{ fontSize: 10, fill: isDark ? '#64748b' : '#94a3b8' }} axisLine={false} tickLine={false} />
                   <YAxis hide />
                   <Tooltip
                     formatter={(v, name) => [formatarMoeda(v), name === 'receitas' ? 'Receitas' : 'Despesas']}
                     contentStyle={{
                       borderRadius: 12,
-                      border: `1px solid ${corTema('#e2e8f0', '#334155')}`,
-                      backgroundColor: corTema('#ffffff', '#1e293b'),
-                      color: corTema('#1e293b', '#f1f5f9'),
+                      border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+                      backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                      color: isDark ? '#f1f5f9' : '#1e293b',
                       fontSize: 11
                     }}
-                    cursor={{ fill: corTema('#f8fafc', '#334155') }}
+                    cursor={{ fill: isDark ? '#334155' : '#f8fafc' }}
                   />
                   <Bar dataKey="receitas" fill="#10b981" radius={[4,4,0,0]} />
                   <Bar dataKey="despesas" fill="#f87171" radius={[4,4,0,0]} />

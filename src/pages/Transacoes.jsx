@@ -47,8 +47,8 @@ export default function Transacoes() {
 
       const { data: cats } = await supabase.from('categorias').select('id, nome, tipo')
       setCategorias(cats || [])
-    } catch (err) {
-      console.error(err)
+    } catch (_err) {
+      console.error(_err)
       toast.error('Erro ao carregar transações.')
     } finally {
       setLoading(false)
@@ -96,7 +96,7 @@ export default function Transacoes() {
       toast.success('Transação atualizada!')
       setModalEditar({ show: false, transacao: null })
       carregarDados()
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao salvar. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -110,7 +110,7 @@ export default function Transacoes() {
       if (error) throw error
       toast.success('Transação excluída.')
       carregarDados()
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao excluir.')
     }
   }

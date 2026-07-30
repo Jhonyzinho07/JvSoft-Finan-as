@@ -67,8 +67,8 @@ export default function Orcamentos() {
 
       setCategorias(categoriasDB || [])
       setOrcamentos(orcamentosCalculados)
-    } catch (error) {
-      console.error("Erro ao carregar orçamentos:", error)
+    } catch (_error) {
+      console.error("Erro ao carregar orçamentos:", _error)
     } finally {
       setLoading(false)
     }
@@ -103,8 +103,8 @@ export default function Orcamentos() {
         setNovoLimite('')
         carregarDados()
       }
-    } catch (error) {
-      console.error('Erro ao salvar orçamento:', error)
+    } catch (_error) {
+      console.error('Erro ao salvar orçamento:', _error)
       toast.error('Erro ao salvar o orçamento. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -116,7 +116,7 @@ export default function Orcamentos() {
     try {
       await supabase.from('orcamentos').delete().eq('id', id)
       carregarDados()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao excluir orçamento. Tente novamente.')
     }
   }

@@ -52,8 +52,8 @@ export default function MetasFinanceiras() {
       const { data, error } = await supabase.from('metas').select('*').order('created_at', { ascending: false })
       if (error) throw error
       setMetas(data || [])
-    } catch (error) {
-      console.error("Erro ao carregar metas:", error)
+    } catch (_error) {
+      console.error("Erro ao carregar metas:", _error)
     } finally {
       setLoading(false)
     }
@@ -99,7 +99,7 @@ export default function MetasFinanceiras() {
       setNovaMeta({ titulo: '', valor_objetivo: '', data_limite: '', cor: '#3b82f6', icone: 'Target' })
       toast.success('Meta criada com sucesso!')
       carregarMetas()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao criar meta. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -128,7 +128,7 @@ export default function MetasFinanceiras() {
       setMetaEditando(null)
       toast.success('Meta atualizada com sucesso!')
       carregarMetas()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao editar meta. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -184,7 +184,7 @@ export default function MetasFinanceiras() {
       setMetaSelecionada(null)
       toast.success(tipoMovimento === 'depositar' ? 'Depósito realizado!' : 'Resgate realizado!')
       carregarMetas()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao processar a movimentação. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -197,7 +197,7 @@ export default function MetasFinanceiras() {
     try {
       await supabase.from('metas').delete().eq('id', id)
       carregarMetas()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao excluir meta. Tente novamente.')
     }
   }
