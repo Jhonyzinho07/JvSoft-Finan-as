@@ -15,7 +15,7 @@ export default function CartoesCredito() {
   const [showModalNovo, setShowModalNovo] = useState(false)
   const [novoCartao, setNovoCartao] = useState({ nome: '', limite: '', fatura_atual: '', dia_fechamento: '', dia_vencimento: '', cor: '#1e40af' })
 
-  const [modalGasto, setModalGasto] = useState({ show: false, cartao: null, valor: '' })
+  const [modalGasto, setModalGasto] = useState({ show: false, cartao: null, valor: '', descricao: 'Compra Rápida', parcelas: '1' })
   const [modalEditar, setModalEditar] = useState({ show: false, cartao: null, limite: '' })
   const [modalFechar, setModalFechar] = useState({ show: false, cartao: null })
 
@@ -56,7 +56,7 @@ export default function CartoesCredito() {
     carregarCartoes()
   }
 
-  const confirmarGasto = async (e) => {
+    const confirmarGasto = async (e) => {
     e.preventDefault()
     setSalvando(true)
     try {
@@ -67,11 +67,68 @@ export default function CartoesCredito() {
         return
       }
 
-      await supabase.from('cartoes')
-        .update({ fatura_atual: Number(modalGasto.cartao.fatura_atual) + valorGasto })
-        .eq('id', modalGasto.cartao.id)
+      const numParcelas = parseInt(modalGasto.parcelas) || 1
+      const descricaoOriginal = modalGasto.descricao || 'Compra Rápida'
+      const cartao = modalGasto.cartao
+
+      // Primeiro precisamos achar/criar uma categoria padrão para Cartão se não for fornecida
+      const { data: categoriaData } = await supabase.from('categorias').select('id').eq('nome', 'Cartão').single()
+      let categoriaId = categoriaData ? categoriaData.id : null
+
+      if (!categoriaId) {
+        const { data: novaCat } = await supabase.from('categorias').insert([{ nome: 'Cartão', tipo: 'despesa', cor: '#ef4444' }]).select().single()
+        if (novaCat) categoriaId = novaCat.id
+      }
+
+      if (numParcelas > 1) {
+        const valorParcela = valorGasto / numParcelas
+        let transacoesParceladas = []
+        let dataBase = new Date()
+
+        for (let i = 0; i < numParcelas; i++) {
+          let dataVencimento = new Date(dataBase)
+          dataVencimento.setMonth(dataBase.getMonth() + i)
+
+          if (cartao && cartao.dia_vencimento) {
+            let mesAjuste = dataBase.getMonth() + i
+            if (i === 0 && dataBase.getDate() > cartao.dia_vencimento) {
+              mesAjuste += 1
+            }
+            dataVencimento = new Date(dataBase.getFullYear(), mesAjuste, cartao.dia_vencimento)
+          }
+
+          transacoesParceladas.push({
+            tipo: 'despesa',
+            descricao: `${descricaoOriginal} - Parcela ${i + 1}/${numParcelas}`,
+            valor: parseFloat(valorParcela.toFixed(2)),
+            data_transacao: dataVencimento.toISOString().split('T')[0],
+            categoria_id: categoriaId,
+            cartao_id: cartao.id
+          })
+        }
+
+        await supabase.from('transacoes').insert(transacoesParceladas)
+
+        await supabase.from('cartoes')
+          .update({ fatura_atual: Number(cartao.fatura_atual) + parseFloat(valorParcela.toFixed(2)) })
+          .eq('id', cartao.id)
+
+      } else {
+        await supabase.from('transacoes').insert([{
+          tipo: 'despesa',
+          descricao: descricaoOriginal,
+          valor: valorGasto,
+          data_transacao: new Date().toISOString().split('T')[0],
+          categoria_id: categoriaId,
+          cartao_id: cartao.id
+        }])
+
+        await supabase.from('cartoes')
+          .update({ fatura_atual: Number(cartao.fatura_atual) + valorGasto })
+          .eq('id', cartao.id)
+      }
       
-      setModalGasto({ show: false, cartao: null, valor: '' })
+      setModalGasto({ show: false, cartao: null, valor: '', descricao: 'Compra Rápida', parcelas: '1' })
       carregarCartoes()
     } catch (_error) {
       toast.error('Erro ao lançar gasto. Tente novamente.')
@@ -353,16 +410,31 @@ export default function CartoesCredito() {
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col dark:bg-slate-800">
             <div className="shrink-0 bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white rounded-t-3xl">
               <h2 className="font-bold text-lg flex items-center gap-2"><Plus size={20} /> Lançar Compra</h2>
-              <button onClick={() => setModalGasto({ show: false, cartao: null, valor: '' })} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
+              <button onClick={() => setModalGasto({ show: false, cartao: null, valor: '', descricao: 'Compra Rápida', parcelas: '1' })} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
             </div>
             <div className="p-6">
               <p className="text-sm text-slate-500 mb-4 dark:text-slate-400">Adicionando gasto no cartão <strong className="text-slate-800 dark:text-slate-100">{modalGasto.cartao?.nome}</strong></p>
-              <form onSubmit={confirmarGasto} className="space-y-4">
+                            <form onSubmit={confirmarGasto} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor da Compra (R$)</label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input autoFocus type="number" step="0.01" required value={modalGasto.valor} onChange={(e) => setModalGasto({...modalGasto, valor: e.target.value})} className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-semibold dark:border-slate-700" placeholder="0.00" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Descrição (Opcional)</label>
+                  <input type="text" value={modalGasto.descricao} onChange={(e) => setModalGasto({...modalGasto, descricao: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:border-slate-700" placeholder="Ex: Mercado" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor da Compra (R$)</label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input autoFocus type="number" step="0.01" required value={modalGasto.valor} onChange={(e) => setModalGasto({...modalGasto, valor: e.target.value})} className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold dark:border-slate-700" placeholder="0.00" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Parcelas</label>
+                    <select value={modalGasto.parcelas} onChange={(e) => setModalGasto({...modalGasto, parcelas: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:border-slate-700">
+                      <option value="1">1x (À vista)</option>
+                      {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24].map(n => (
+                        <option key={n} value={n}>{n}x</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <button type="submit" disabled={salvando} className="w-full py-3.5 bg-gradient-to-r from-blue-900 to-cyan-500 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex justify-center items-center gap-2">
