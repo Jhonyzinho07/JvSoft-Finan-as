@@ -420,7 +420,7 @@ function ContasPagar() {
           
           {datasOrdenadas.map(data => (
             <div key={data} className="bg-white rounded-2xl shadow-md overflow-hidden animate-fade-in dark:bg-slate-800">
-              <div className="bg-gray-100 px-6 py-3 border-b border-gray-200 dark:border-slate-700">
+              <div className="bg-gray-100 dark:bg-slate-700/50 px-6 py-3 border-b border-gray-200 dark:border-slate-700">
                 <h2 className="text-lg font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2 dark:text-slate-200">
                   <Calendar size={20} className="text-blue-600" />
                   {data}
@@ -429,7 +429,7 @@ function ContasPagar() {
               
               <div className="divide-y divide-gray-100 dark:divide-slate-700">
                 {contasAgrupadas[data].map(conta => (
-                  <div key={conta.id} className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50 transition-colors group ${conta.status_pago ? 'bg-green-50/50' : ''}`}>
+                  <div key={conta.id} className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group ${conta.status_pago ? 'bg-green-50/50 dark:bg-green-900/10' : ''}`}>
                     <div className="flex items-center gap-3 flex-1">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-lg shadow-sm" style={{ backgroundColor: conta.cor }}>
                         {conta.emoji}
@@ -457,7 +457,7 @@ function ContasPagar() {
                         className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
                           conta.status_pago 
                           ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/40'
-                          : 'bg-gray-800 text-white dark:bg-slate-700 hover:bg-blue-600 shadow-md'
+                          : 'bg-gray-800 text-white dark:bg-slate-600 dark:hover:bg-slate-500 hover:bg-blue-600 shadow-md'
                         }`}
                       >
                         {conta.status_pago ? (
