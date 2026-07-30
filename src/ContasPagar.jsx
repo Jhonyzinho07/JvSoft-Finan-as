@@ -660,14 +660,14 @@ function ContasPagar() {
                     A conta <strong className="text-slate-800 dark:text-slate-100">{modalExcluir.conta.descricao}</strong> faz parte de um parcelamento. O que deseja excluir?
                   </p>
                   <div className="space-y-3 mb-6">
-                    <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${modalExcluir.escopo === 'unica' ? 'border-red-500 bg-red-50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                    <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${modalExcluir.escopo === 'unica' ? 'border-red-500 bg-red-50 dark:border-red-800 dark:bg-red-950/40' : 'border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700'}`}>
                       <input type="radio" name="escopoExclusao" value="unica" checked={modalExcluir.escopo === 'unica'} onChange={() => setModalExcluir({...modalExcluir, escopo: 'unica'})} className="w-4 h-4 text-red-600" />
                       <div>
                         <p className="font-semibold text-slate-800 text-sm dark:text-slate-100">Apenas esta parcela</p>
                         <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">Exclui apenas a parcela {modalExcluir.conta.numero_parcela}/{modalExcluir.conta.total_parcelas}.</p>
                       </div>
                     </label>
-                    <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${modalExcluir.escopo === 'todas' ? 'border-red-500 bg-red-50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                    <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${modalExcluir.escopo === 'todas' ? 'border-red-500 bg-red-50 dark:border-red-800 dark:bg-red-950/40' : 'border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700'}`}>
                       <input type="radio" name="escopoExclusao" value="todas" checked={modalExcluir.escopo === 'todas'} onChange={() => setModalExcluir({...modalExcluir, escopo: 'todas'})} className="w-4 h-4 text-red-600" />
                       <div>
                         <p className="font-semibold text-slate-800 text-sm dark:text-slate-100">Todas as pendentes</p>

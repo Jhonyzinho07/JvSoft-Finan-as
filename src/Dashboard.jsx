@@ -239,7 +239,7 @@ export default function Dashboard() {
         
         {/* Banner Vencidas (Vermelho) — só aparece se "Alertas de Vencimento" estiver ativo em Configurações */}
         {alertasAtivos && contasVencidas.length > 0 && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-red-50 border border-red-200 dark:bg-red-950/40 dark:border-red-900/50 rounded-2xl overflow-hidden shadow-sm">
             <div className="px-5 py-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
@@ -261,7 +261,7 @@ export default function Dashboard() {
             </div>
             
             {/* Listagem Vencidas */}
-            <div className="px-5 pb-4 pt-3 border-t border-red-200/60 bg-red-50/50">
+            <div className="px-5 pb-4 pt-3 border-t border-red-200/60 bg-red-50/50 dark:border-red-900/50 dark:bg-red-950/20">
               <div className="space-y-2.5">
                 {contasVencidas.slice(0, 3).map(conta => (
                   <div key={conta.id} className="flex items-center justify-between text-sm">
@@ -289,7 +289,7 @@ export default function Dashboard() {
 
         {/* Banner Vencem em breve (Amarelo) — mesma regra de "Alertas de Vencimento" */}
         {alertasAtivos && contasEmBreve.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-900/50 rounded-2xl overflow-hidden shadow-sm">
             <div className="px-5 py-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
@@ -311,7 +311,7 @@ export default function Dashboard() {
             </div>
 
             {/* Listagem Em breve */}
-            <div className="px-5 pb-4 pt-3 border-t border-amber-200/60 bg-amber-50/50">
+            <div className="px-5 pb-4 pt-3 border-t border-amber-200/60 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/20">
               <div className="space-y-2.5">
                 {contasEmBreve.slice(0, 3).map(conta => (
                   <div key={conta.id} className="flex items-center justify-between text-sm">
@@ -366,7 +366,7 @@ export default function Dashboard() {
       {/* ── CARD PRINCIPAL: Compromissos Financeiros ───────────────────────── */}
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
 
-        <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 dark:border-slate-700">
+        <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="font-extrabold text-slate-800 text-base dark:text-slate-100">Compromissos Financeiros</h2>
@@ -429,12 +429,12 @@ export default function Dashboard() {
                           <p className="font-bold text-slate-800 text-sm truncate dark:text-slate-100">{c.descricao}</p>
                           
                           {isVencida && (
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full shrink-0">
+                            <span className="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:border-red-900/50 px-2 py-0.5 rounded-full shrink-0">
                               <AlertCircle size={10} /> Vencida
                             </span>
                           )}
                           {isVencendoEmBreve && (
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full shrink-0">
+                            <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-900/50 px-2 py-0.5 rounded-full shrink-0">
                               <Clock size={10} /> Vence em breve
                             </span>
                           )}
@@ -507,7 +507,7 @@ export default function Dashboard() {
         )}
 
         {compromissos.length > 0 && (
-          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/40 dark:border-slate-700">
+          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/40 dark:border-slate-700 dark:bg-slate-800">
             <Link to="/contas"
               className="flex items-center justify-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors">
               Gerenciar todas as contas <ChevronRight size={16} />
@@ -582,7 +582,7 @@ export default function Dashboard() {
               {movimentacoes.map(t => (
                 <div key={t.id} className="flex items-center gap-3 py-2.5 px-2 rounded-xl hover:bg-slate-50 transition-colors dark:hover:bg-slate-700">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0
-                    ${t.tipo === 'receita' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
+                    ${t.tipo === 'receita' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'}`}>
                     {t.tipo === 'receita' ? <TrendingUp size={15} /> : <TrendingDown size={15} />}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -615,7 +615,7 @@ export default function Dashboard() {
               Gerenciar <ChevronRight size={14} />
             </Link>
           </div>
-          <div className="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100 rounded-2xl px-5 py-4 dark:border-slate-700">
+          <div className="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100 rounded-2xl px-5 py-4 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800">
             <div className="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
               <CreditCard size={20} className="text-white" />
             </div>

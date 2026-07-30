@@ -173,9 +173,9 @@ export default function Transacoes() {
       {/* Cards de totais */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Receitas',  valor: totalReceitas, cor: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100', icon: <TrendingUp size={16} className="text-emerald-500" /> },
-          { label: 'Despesas',  valor: totalDespesas, cor: 'text-red-600',     bg: 'bg-red-50 border-red-100',         icon: <TrendingDown size={16} className="text-red-500" /> },
-          { label: 'Saldo',     valor: saldo,         cor: saldo >= 0 ? 'text-blue-700' : 'text-red-600', bg: 'bg-blue-50 border-blue-100', icon: <ArrowRightLeft size={16} className="text-blue-500" /> },
+          { label: 'Receitas',  valor: totalReceitas, cor: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-900/50', icon: <TrendingUp size={16} className="text-emerald-500" /> },
+          { label: 'Despesas',  valor: totalDespesas, cor: 'text-red-600',     bg: 'bg-red-50 border-red-100 dark:bg-red-950/40 dark:border-red-900/50',         icon: <TrendingDown size={16} className="text-red-500" /> },
+          { label: 'Saldo',     valor: saldo,         cor: saldo >= 0 ? 'text-blue-700' : 'text-red-600', bg: 'bg-blue-50 border-blue-100 dark:bg-blue-900/20 dark:border-blue-800/50', icon: <ArrowRightLeft size={16} className="text-blue-500" /> },
         ].map(c => (
           <div key={c.label} className={`${c.bg} border rounded-2xl p-4`}>
             <div className="flex items-center gap-1.5 mb-1">{c.icon}<span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{c.label}</span></div>
@@ -221,7 +221,7 @@ export default function Transacoes() {
                 {agrupadas[data].map(t => (
                   <div key={t.id} className="flex items-center gap-3 px-5 py-4 hover:bg-slate-50/50 transition-colors group">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0
-                      ${t.tipo === 'receita' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
+                      ${t.tipo === 'receita' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'}`}>
                       {t.tipo === 'receita' ? <TrendingUp size={17} /> : <TrendingDown size={17} />}
                     </div>
                     <div className="flex-1 min-w-0">
