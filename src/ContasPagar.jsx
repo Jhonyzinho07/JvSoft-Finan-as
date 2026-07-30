@@ -333,10 +333,10 @@ function ContasPagar() {
   if (erro) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 dark:bg-slate-900">
-        <div className="bg-red-50 border border-red-200 p-8 rounded-2xl max-w-lg text-center shadow-lg">
+        <div className="bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-900/50 p-8 rounded-2xl max-w-lg text-center shadow-lg">
           <AlertTriangle className="text-red-500 mx-auto mb-4" size={48} />
-          <h2 className="text-xl font-bold text-red-700 mb-2">Erro ao carregar dados</h2>
-          <p className="text-red-600 mb-6 text-sm bg-white p-3 rounded border border-red-100 dark:bg-slate-800">{erro}</p>
+          <h2 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Erro ao carregar dados</h2>
+          <p className="text-red-600 mb-6 dark:text-red-400 text-sm bg-white p-3 rounded border border-red-100 dark:bg-slate-800 dark:border-slate-700 dark:bg-slate-800">{erro}</p>
           <button onClick={carregarContas} className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 font-medium flex items-center gap-2 mx-auto">
             <RefreshCw size={16} /> Tentar Novamente
           </button>
@@ -351,11 +351,11 @@ function ContasPagar() {
         
         <header className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2 dark:text-slate-100">
+            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 dark:text-slate-100">
               <Calendar className="text-blue-600" size={32} />
               Contas a Pagar
             </h1>
-            <p className="text-gray-500 mt-2 dark:text-slate-400">Controle de pagamentos de contas avulsas e parcelamentos</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-2 dark:text-slate-400">Controle de pagamentos de contas avulsas e parcelamentos</p>
           </div>
           <button 
             onClick={() => setShowModal(true)}
@@ -368,44 +368,44 @@ function ContasPagar() {
 
         {/* BARRA DE NAVEGAÇÃO DE MESES */}
         <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-100 mb-8 dark:bg-slate-800 dark:border-slate-700">
-          <button onClick={() => alterarMes(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-600 dark:text-slate-300">
+          <button onClick={() => alterarMes(-1)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-600 dark:text-slate-300">
             <ChevronLeft size={24} />
           </button>
           <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
             {MESES[mesAtual]} {anoAtual}
           </h2>
-          <button onClick={() => alterarMes(1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-600 dark:text-slate-300">
+          <button onClick={() => alterarMes(1)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-600 dark:text-slate-300">
             <ChevronRight size={24} />
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-blue-500 dark:bg-slate-800">
-            <div className="flex items-center gap-2 text-gray-500 mb-2 dark:text-slate-400">
+          <div className="bg-white p-6 dark:bg-slate-800 rounded-2xl shadow-md border-l-4 border-blue-500 dark:bg-slate-800">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-2 dark:text-slate-400">
               <DollarSign size={20} />
               <span className="text-sm font-medium">Total Geral</span>
             </div>
-            <p className="text-2xl font-bold text-gray-800 dark:text-slate-100">
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">
               {formatarMoeda(totais.geral)}
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-green-500 dark:bg-slate-800">
-            <div className="flex items-center gap-2 text-gray-500 mb-2 dark:text-slate-400">
+          <div className="bg-white p-6 dark:bg-slate-800 rounded-2xl shadow-md border-l-4 border-green-500 dark:bg-slate-800">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-2 dark:text-slate-400">
               <CheckCircle size={20} />
               <span className="text-sm font-medium">Total Pago</span>
             </div>
-            <p className="text-2xl font-bold text-green-600">
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
               {formatarMoeda(totais.pago)}
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-red-500 dark:bg-slate-800">
-            <div className="flex items-center gap-2 text-gray-500 mb-2 dark:text-slate-400">
+          <div className="bg-white p-6 dark:bg-slate-800 rounded-2xl shadow-md border-l-4 border-red-500 dark:bg-slate-800">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-2 dark:text-slate-400">
               <TrendingDown size={20} />
               <span className="text-sm font-medium">Total Pendente</span>
             </div>
-            <p className="text-2xl font-bold text-red-600">
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
               {formatarMoeda(totais.pendente)}
             </p>
           </div>
@@ -413,7 +413,7 @@ function ContasPagar() {
 
         <div className="space-y-6">
           {datasOrdenadas.length === 0 && (
-            <div className="bg-white p-12 rounded-2xl text-center text-gray-500 shadow-md border border-dashed border-gray-300 dark:bg-slate-800 dark:text-slate-400">
+            <div className="bg-white p-12 rounded-2xl text-center text-slate-500 dark:text-slate-400 shadow-md border border-dashed border-gray-300 dark:bg-slate-800 dark:text-slate-400">
               Nenhuma conta encontrada para <strong>{MESES[mesAtual]} de {anoAtual}</strong>.
             </div>
           )}
@@ -421,7 +421,7 @@ function ContasPagar() {
           {datasOrdenadas.map(data => (
             <div key={data} className="bg-white rounded-2xl shadow-md overflow-hidden animate-fade-in dark:bg-slate-800">
               <div className="bg-gray-100 px-6 py-3 border-b border-gray-200 dark:border-slate-700">
-                <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2 dark:text-slate-200">
+                <h2 className="text-lg font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2 dark:text-slate-200">
                   <Calendar size={20} className="text-blue-600" />
                   {data}
                 </h2>
@@ -435,11 +435,11 @@ function ContasPagar() {
                         {conta.emoji}
                       </div>
                       <div className="flex-1">
-                        <p className={`font-semibold ${conta.status_pago ? 'text-gray-500 line-through' : 'text-gray-800'}`}>{conta.descricao}</p>
+                        <p className={`font-semibold ${conta.status_pago ? 'text-slate-500 dark:text-slate-400 line-through' : 'text-slate-800 dark:text-slate-100'}`}>{conta.descricao}</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-sm text-gray-500 dark:text-slate-400">{conta.credor}</span>
+                          <span className="text-sm text-slate-500 dark:text-slate-400">{conta.credor}</span>
                           {conta.total_parcelas > 1 && (
-                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                            <span className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
                               <Repeat size={12} /> Parcela {conta.numero_parcela}/{conta.total_parcelas}
                             </span>
                           )}
@@ -448,7 +448,7 @@ function ContasPagar() {
                     </div>
 
                     <div className="flex items-center justify-between sm:justify-end gap-2">
-                      <p className={`text-lg font-bold mr-2 ${conta.status_pago ? 'text-green-600 line-through' : 'text-gray-800'}`}>
+                      <p className={`text-lg font-bold mr-2 ${conta.status_pago ? 'text-green-600 line-through' : 'text-slate-800 dark:text-slate-100'}`}>
                         {formatarMoeda(conta.valor)}
                       </p>
 
@@ -456,8 +456,8 @@ function ContasPagar() {
                         onClick={() => setModalPagar({ show: true, conta })}
                         className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
                           conta.status_pago 
-                          ? 'bg-green-100 text-green-700 hover:bg-green-200' 
-                          : 'bg-gray-800 text-white hover:bg-blue-600 shadow-md'
+                          ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/40'
+                          : 'bg-gray-800 text-white dark:bg-slate-700 hover:bg-blue-600 shadow-md'
                         }`}
                       >
                         {conta.status_pago ? (
@@ -469,7 +469,7 @@ function ContasPagar() {
 
                       <button
                         onClick={() => abrirEditar(conta)}
-                        className="p-2 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all md:opacity-0 group-hover:opacity-100 dark:hover:bg-slate-700"
+                        className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-500 hover:bg-blue-50 dark:bg-blue-900/20 rounded-xl transition-all md:opacity-0 group-hover:opacity-100 dark:hover:bg-slate-700"
                         title="Editar Conta"
                       >
                         <Pencil size={18} />
@@ -477,7 +477,7 @@ function ContasPagar() {
 
                       <button
                         onClick={() => setModalExcluir({ show: true, conta, escopo: 'unica' })}
-                        className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all md:opacity-0 group-hover:opacity-100"
+                        className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:bg-red-900/20 rounded-xl transition-all md:opacity-0 group-hover:opacity-100"
                         title="Excluir Conta Definitivamente"
                       >
                         <Trash2 size={20} />
@@ -623,7 +623,7 @@ function ContasPagar() {
                 <button
                   type="button"
                   onClick={() => setModalPagar({ show: false, conta: null })}
-                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200"
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 dark:bg-slate-700 rounded-xl font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors dark:text-slate-200"
                 >
                   Cancelar
                 </button>
@@ -661,14 +661,14 @@ function ContasPagar() {
                   </p>
                   <div className="space-y-3 mb-6">
                     <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${modalExcluir.escopo === 'unica' ? 'border-red-500 bg-red-50 dark:border-red-800 dark:bg-red-950/40' : 'border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700'}`}>
-                      <input type="radio" name="escopoExclusao" value="unica" checked={modalExcluir.escopo === 'unica'} onChange={() => setModalExcluir({...modalExcluir, escopo: 'unica'})} className="w-4 h-4 text-red-600" />
+                      <input type="radio" name="escopoExclusao" value="unica" checked={modalExcluir.escopo === 'unica'} onChange={() => setModalExcluir({...modalExcluir, escopo: 'unica'})} className="w-4 h-4 text-red-600 dark:text-red-400" />
                       <div>
                         <p className="font-semibold text-slate-800 text-sm dark:text-slate-100">Apenas esta parcela</p>
                         <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">Exclui apenas a parcela {modalExcluir.conta.numero_parcela}/{modalExcluir.conta.total_parcelas}.</p>
                       </div>
                     </label>
                     <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${modalExcluir.escopo === 'todas' ? 'border-red-500 bg-red-50 dark:border-red-800 dark:bg-red-950/40' : 'border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700'}`}>
-                      <input type="radio" name="escopoExclusao" value="todas" checked={modalExcluir.escopo === 'todas'} onChange={() => setModalExcluir({...modalExcluir, escopo: 'todas'})} className="w-4 h-4 text-red-600" />
+                      <input type="radio" name="escopoExclusao" value="todas" checked={modalExcluir.escopo === 'todas'} onChange={() => setModalExcluir({...modalExcluir, escopo: 'todas'})} className="w-4 h-4 text-red-600 dark:text-red-400" />
                       <div>
                         <p className="font-semibold text-slate-800 text-sm dark:text-slate-100">Todas as pendentes</p>
                         <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">Cancela e exclui as parcelas futuras desta compra.</p>
@@ -686,7 +686,7 @@ function ContasPagar() {
                 <button
                   type="button"
                   onClick={() => setModalExcluir({ show: false, conta: null, escopo: 'unica' })}
-                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200"
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 dark:bg-slate-700 rounded-xl font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors dark:text-slate-200"
                 >
                   Cancelar
                 </button>
@@ -766,13 +766,13 @@ function ContasPagar() {
                 </div>
               </div>
               {modalEditar.conta?.total_parcelas > 1 && (
-                <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-900/50 dark:text-amber-400 rounded-xl px-4 py-3">
                   ⚠️ Esta conta faz parte de um parcelamento. A edição afeta apenas esta parcela individual.
                 </p>
               )}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setModalEditar({ show: false, conta: null })}
-                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200">
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 dark:bg-slate-700 rounded-xl font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors dark:text-slate-200">
                   Cancelar
                 </button>
                 <button type="submit" disabled={salvando}

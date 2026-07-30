@@ -97,7 +97,7 @@ export default function Login() {
           </div>
 
           {/* Card do Formulário */}
-          <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-8 border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
+          <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none p-8 border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email */}
               <div>
@@ -111,7 +111,7 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400 dark:border-slate-700 dark:text-slate-100"
+                    className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400 dark:placeholder-slate-500 dark:border-slate-700 dark:text-slate-100"
                     placeholder="seu@email.com"
                   />
                 </div>
@@ -130,13 +130,13 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
-                    className="w-full pl-12 pr-12 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400 dark:border-slate-700 dark:text-slate-100"
+                    className="w-full pl-12 pr-12 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400 dark:placeholder-slate-500 dark:border-slate-700 dark:text-slate-100"
                     placeholder="••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -145,7 +145,7 @@ export default function Login() {
 
               {/* Erro */}
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+                <div className="bg-red-50 border border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-900/50 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
                   {error}
                 </div>
               )}
@@ -212,7 +212,7 @@ export default function Login() {
                 {isSignUp ? 'Já tem uma conta?' : 'Não tem uma conta?'}{' '}
                 <button
                   onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors"
                 >
                   {isSignUp ? 'Fazer Login' : 'Criar Conta'}
                 </button>
