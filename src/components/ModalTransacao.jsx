@@ -11,6 +11,7 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
   const [data, _setData] = useState(new Date().toISOString().split('T')[0])
   const [categoriaId, setCategoriaId] = useState('')
   const [cartaoId, setCartaoId] = useState('')
+  const [parcelas, setParcelas] = useState('1')
   const [categorias, setCategorias] = useState([])
   const [cartoes, setCartoes] = useState([])
   const [loading, setLoading] = useState(false)
@@ -18,7 +19,7 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
   useEffect(() => {
     async function carregarDados() {
       const { data: catData } = await supabase.from('categorias').select('id, nome, tipo')
-      const { data: cartData } = await supabase.from('cartoes').select('id, nome')
+      const { data: cartData } = await supabase.from('cartoes').select('id, nome, dia_vencimento')
       if (catData) setCategorias(catData)
       if (cartData) setCartoes(cartData)
     }
@@ -27,33 +28,81 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
 
   const categoriasFiltradas = categorias.filter(c => c.tipo === tipo)
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
 
     try {
       const valorNumerico = parseFloat(valor.replace(',', '.'))
       
-      // 1. Inserir a Transação (Se tiver cartão_id, ela é registrada mas não é "dinheiro vivo")
-      const { error: errTrans } = await supabase.from('transacoes').insert([{
-        tipo,
-        descricao,
-        valor: valorNumerico,
-        data_transacao: data,
-        categoria_id: categoriaId || null,
-        cartao_id: cartaoId || null // Se for null, sai do saldo. Se tiver ID, vai pro cartão.
-      }])
+      const numParcelas = parseInt(parcelas) || 1
 
-      if (errTrans) throw errTrans
+      if (tipo === 'despesa' && cartaoId && numParcelas > 1) {
+        // Parcelamento no cartão
+        const valorParcela = valorNumerico / numParcelas
+        const cartaoSelecionado = cartoes.find(c => c.id === cartaoId)
 
-      // 2. Se for despesa no cartão, atualiza a fatura do cartão automaticamente
-      if (tipo === 'despesa' && cartaoId) {
-        // Precisamos buscar o valor atual da fatura antes de somar
+        let transacoesParceladas = []
+
+        // Data base para cálculo
+        let dataBase = new Date()
+
+        for (let i = 0; i < numParcelas; i++) {
+          let dataVencimento = new Date(dataBase)
+          // Avança os meses
+          dataVencimento.setMonth(dataBase.getMonth() + i)
+
+          // Se tiver dia_vencimento no cartão, ajusta
+          if (cartaoSelecionado && cartaoSelecionado.dia_vencimento) {
+            // Se hoje já passou do dia de vencimento, a primeira parcela é pro mês que vem
+            let mesAjuste = dataBase.getMonth() + i
+            if (i === 0 && dataBase.getDate() > cartaoSelecionado.dia_vencimento) {
+              mesAjuste += 1
+            }
+            dataVencimento = new Date(dataBase.getFullYear(), mesAjuste, cartaoSelecionado.dia_vencimento)
+          }
+
+          transacoesParceladas.push({
+            tipo,
+            descricao: `${descricao} - Parcela ${i + 1}/${numParcelas}`,
+            valor: parseFloat(valorParcela.toFixed(2)),
+            data_transacao: dataVencimento.toISOString().split('T')[0],
+            categoria_id: categoriaId || null,
+            cartao_id: cartaoId
+          })
+        }
+
+        const { error: errTrans } = await supabase.from('transacoes').insert(transacoesParceladas)
+        if (errTrans) throw errTrans
+
+        // Atualiza a fatura do cartão SOMENTE com o valor da primeira parcela
         const { data: cartaoAtual } = await supabase.from('cartoes').select('fatura_atual').eq('id', cartaoId).single()
         
         await supabase.from('cartoes')
-          .update({ fatura_atual: Number(cartaoAtual.fatura_atual) + valorNumerico })
+          .update({ fatura_atual: Number(cartaoAtual.fatura_atual) + parseFloat(valorParcela.toFixed(2)) })
           .eq('id', cartaoId)
+
+      } else {
+        // Fluxo normal (sem parcelamento ou sem cartão)
+        const { error: errTrans } = await supabase.from('transacoes').insert([{
+          tipo,
+          descricao,
+          valor: valorNumerico,
+          data_transacao: data,
+          categoria_id: categoriaId || null,
+          cartao_id: cartaoId || null // Se for null, sai do saldo. Se tiver ID, vai pro cartão.
+        }])
+
+        if (errTrans) throw errTrans
+
+        // Se for despesa no cartão à vista (1 parcela), atualiza a fatura do cartão
+        if (tipo === 'despesa' && cartaoId) {
+          const { data: cartaoAtual } = await supabase.from('cartoes').select('fatura_atual').eq('id', cartaoId).single()
+
+          await supabase.from('cartoes')
+            .update({ fatura_atual: Number(cartaoAtual.fatura_atual) + valorNumerico })
+            .eq('id', cartaoId)
+        }
       }
 
       onClose()
@@ -100,14 +149,27 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
             </div>
           </div>
 
-          {/* NOVO CAMPO: Escolher Cartão */}
+                    {/* NOVO CAMPO: Escolher Cartão */}
           {tipo === 'despesa' && (
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Pagar com Cartão (Opcional)</label>
-              <select value={cartaoId} onChange={(e) => setCartaoId(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white dark:border-slate-700 dark:bg-slate-800">
-                <option value="">Dinheiro / Débito (Sai do Saldo)</option>
-                {cartoes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
-              </select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Pagar com Cartão (Opcional)</label>
+                <select value={cartaoId} onChange={(e) => { setCartaoId(e.target.value); if (!e.target.value) setParcelas('1'); }} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white dark:border-slate-700 dark:bg-slate-800">
+                  <option value="">Dinheiro / Débito</option>
+                  {cartoes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                </select>
+              </div>
+              {cartaoId && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Parcelas</label>
+                  <select value={parcelas} onChange={(e) => setParcelas(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white dark:border-slate-700 dark:bg-slate-800">
+                    <option value="1">1x (À vista)</option>
+                    {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24].map(n => (
+                      <option key={n} value={n}>{n}x</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           )}
 
