@@ -4,6 +4,8 @@ import { supabase } from '../supabaseClient';
 import { useToast } from '../components/Toast';
 import { Mail, Lock, Eye, EyeOff, LogIn, User } from 'lucide-react';
 import logoEmpresa from '../assets/logo.png';
+import ModalDocumento from '../components/ModalDocumento';
+import { ConteudoTermosDeUso, ConteudoPoliticaPrivacidade } from '../components/DocumentosConteudo';
 
 export default function Login() {
   const toast = useToast()
@@ -17,6 +19,8 @@ export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [modalTermosOpen, setModalTermosOpen] = useState(false);
+  const [modalPrivacidadeOpen, setModalPrivacidadeOpen] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState(null);
   const [lockCountdown, setLockCountdown] = useState(0);
@@ -119,7 +123,7 @@ export default function Login() {
           password,
           options: {
             data: {
-              nome: name.trim(), // Save the name in the user's metadata
+              full_name: name.trim(), // Save the name in the user's metadata
             }
           }
         });
@@ -302,7 +306,7 @@ export default function Login() {
                     className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 bg-transparent focus:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-700"
                   />
                   <label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
-                    Eu concordo com os <a href="#" onClick={(e) => e.preventDefault()} className="text-blue-600 hover:underline dark:text-blue-400">Termos de Uso</a> e a <a href="#" onClick={(e) => e.preventDefault()} className="text-blue-600 hover:underline dark:text-blue-400">Política de Privacidade</a>.
+                    Eu concordo com os <button type="button" onClick={(e) => { e.preventDefault(); setModalTermosOpen(true); }} className="text-blue-600 hover:underline dark:text-blue-400">Termos de Uso</button> e a <button type="button" onClick={(e) => { e.preventDefault(); setModalPrivacidadeOpen(true); }} className="text-blue-600 hover:underline dark:text-blue-400">Política de Privacidade</button>.
                   </label>
                 </div>
               )}
@@ -473,6 +477,22 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      <ModalDocumento
+        isOpen={modalTermosOpen}
+        onClose={() => setModalTermosOpen(false)}
+        titulo="Termos de Uso"
+      >
+        <ConteudoTermosDeUso />
+      </ModalDocumento>
+
+      <ModalDocumento
+        isOpen={modalPrivacidadeOpen}
+        onClose={() => setModalPrivacidadeOpen(false)}
+        titulo="Política de Privacidade"
+      >
+        <ConteudoPoliticaPrivacidade />
+      </ModalDocumento>
     </div>
   );
 }
