@@ -620,8 +620,8 @@ export default function Dashboard() {
               <CreditCard size={20} className="text-white" />
             </div>
             <div>
-              <p className="text-xs text-blue-600 font-semibold">Total em faturas abertas</p>
-              <p className="text-2xl font-extrabold text-blue-900">{formatarMoeda(totalFaturas)}</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold">Total em faturas abertas</p>
+              <p className="text-2xl font-extrabold text-blue-900 dark:text-blue-100">{formatarMoeda(totalFaturas)}</p>
             </div>
           </div>
         </div>
