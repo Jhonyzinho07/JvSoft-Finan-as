@@ -21,34 +21,56 @@ export default function Login() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [modalTermosOpen, setModalTermosOpen] = useState(false);
   const [modalPrivacidadeOpen, setModalPrivacidadeOpen] = useState(false);
-  const [loginAttempts, setLoginAttempts] = useState(0);
-  const [lockedUntil, setLockedUntil] = useState(null);
-  const [lockCountdown, setLockCountdown] = useState(0);
+      const [lockCountdown, setLockCountdown] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
 
 
   useEffect(() => {
     let interval;
-    if (lockedUntil) {
+    if (isLocked && lockCountdown > 0) {
       interval = setInterval(() => {
-        const now = new Date();
-        const timeLeft = Math.ceil((lockedUntil.getTime() - now.getTime()) / 1000);
-        if (timeLeft <= 0) {
-          setLockedUntil(null);
-          setLockCountdown(0);
-          setLoginAttempts(0); // Reset attempts after lock expires
-          setError('');
-          clearInterval(interval);
-        } else {
-          setLockCountdown(timeLeft);
-        }
+        setLockCountdown((prev) => {
+          if (prev <= 1) {
+            setIsLocked(false);
+            setError('');
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [lockedUntil]);
+  }, [isLocked, lockCountdown]);
 
-  const isLocked = lockedUntil && new Date() < lockedUntil;
+  // Checar status de bloqueio no backend quando email muda ou monta
+  useEffect(() => {
+    const checkLockStatus = async () => {
+      if (email.trim().length > 5 && !isSignUp && !isForgotPassword) {
+         try {
+           const { data, error } = await supabase.rpc('check_login_status', { p_email: email.trim() });
+           if (!error && data) {
+             if (data.is_locked) {
+               setIsLocked(true);
+               setLockCountdown(data.time_left);
+               setError(`Muitas tentativas inválidas. Aguarde.`);
+             } else {
+               setIsLocked(false);
+               setLockCountdown(0);
+               if (error === 'Muitas tentativas inválidas. Aguarde.') setError('');
+             }
+           }
+         } catch(e) { console.error(e) }
+      }
+    };
+
+    const delayDebounce = setTimeout(() => {
+      checkLockStatus();
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [email, isSignUp, isForgotPassword]);
 
   const validatePassword = (pass) => {
     const minLength = 8;
@@ -94,9 +116,23 @@ export default function Login() {
     setError('');
     setLoading(true);
 
+
     const sanitizedEmail = email.trim();
 
+    // Check again before submitting
+    if (!isSignUp) {
+       const { data: statusData } = await supabase.rpc('check_login_status', { p_email: sanitizedEmail });
+       if (statusData && statusData.is_locked) {
+           setIsLocked(true);
+           setLockCountdown(statusData.time_left);
+           setError('Muitas tentativas. Tente novamente mais tarde.');
+           setLoading(false);
+           return;
+       }
+    }
+
     try {
+
       if (isSignUp) {
         const passwordError = validatePassword(password);
         if (passwordError) {
@@ -139,24 +175,32 @@ export default function Login() {
           password,
         });
 
+
         if (error) throw error;
+        // Limpar tentativas em caso de sucesso
+        await supabase.rpc('reset_login_attempts', { p_email: sanitizedEmail });
 
         navigate('/dashboard');
+
       }
     } catch (_err) {
+
       // TRADUÇÃO DE ERROS DO SUPABASE PARA PORTUGUÊS
       if (_err.message === 'User already registered') {
         setError('Este e-mail já está em uso.');
       } else if (_err.message === 'Invalid login credentials') {
-        const newAttempts = loginAttempts + 1;
-        setLoginAttempts(newAttempts);
-
-        if (newAttempts >= 3) {
-          const lockTime = new Date(new Date().getTime() + 30 * 1000); // 30 segundos
-          setLockedUntil(lockTime);
-          setError('Muitas tentativas inválidas. Conta bloqueada por 30 segundos.');
+        if (!isSignUp) {
+           // Registra falha no backend
+           const { data: failData } = await supabase.rpc('register_login_failure', { p_email: sanitizedEmail });
+           if (failData && failData.is_locked) {
+              setIsLocked(true);
+              setLockCountdown(failData.time_left);
+              setError('Muitas tentativas inválidas. Conta bloqueada temporariamente.');
+           } else {
+              setError('E-mail ou senha incorretos. Tente novamente.');
+           }
         } else {
-          setError('E-mail ou senha incorretos. Tente novamente.');
+           setError('E-mail ou senha incorretos. Tente novamente.');
         }
       } else {
         setError('Ocorreu um erro ao tentar fazer login. Verifique sua conexão.');
@@ -191,7 +235,8 @@ export default function Login() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
         <div className="w-full max-w-md">
           {/* Logo da Empresa */}
-          <div className="text-center mb-8">
+<div className="text-center mb-8">
+
             <div className="inline-flex items-center justify-center w-24 h-24 mb-4">
               <img 
                 src={logoEmpresa} 
