@@ -150,3 +150,20 @@ Com esta implementação, **cada usuário acessa APENAS seus próprios dados**, 
 - Tenha acesso à chave anon do Supabase
 
 A segurança é garantida pelo **banco de dados PostgreSQL + RLS**, não apenas pelo frontend!
+
+---
+
+## 5. Medidas Adicionais de Segurança no Frontend (Tela de Login) e Conformidade LGPD
+
+Como parte do processo de robustez do projeto, implementamos medidas extras diretamente na interface de autenticação (\`src/pages/Login.jsx\`), abrangendo tanto a prevenção de abusos quanto as exigências legais de proteção de dados.
+
+### Conformidade com a LGPD
+* **Consentimento Explícito e Obrigatório:** Para criar uma conta, é exigida a aceitação manual dos Termos de Uso e Política de Privacidade. O \`checkbox\` de concordância é padrão desmarcado, garantindo o "opt-in" do usuário, em conformidade com as diretrizes da LGPD sobre consentimento livre, informado e inequívoco.
+
+### Prevenção a Ataques de Força Bruta e Engenharia Social (Client-Side)
+* **Rate Limiting (Bloqueio Temporário):** Implementado um bloqueio de 30 segundos no botão de login após 3 tentativas consecutivas com credenciais inválidas. Isso atrasa varreduras automáticas de força bruta. *(Nota: O Supabase já aplica um rate limit severo de rede por IP, esta camada serve para dar feedback visual imediato e poupar requisições desnecessárias).*
+* **Validação Rígida de Senhas (Fortalecimento):** Novas contas só podem ser criadas se a senha escolhida atender a requisitos mínimos: 8 caracteres de comprimento, conter pelo menos 1 número e 1 caractere especial.
+
+### Práticas Recomendadas de Preenchimento Seguro
+* **Autofill (autoComplete):** Foram incluídas as tags de \`autoComplete\` ("email", "current-password" e "new-password") nos formulários. Essa prática promove a utilização de gerenciadores de senhas seguros por parte do usuário (como 1Password, Bitwarden ou gerenciadores nativos), reduzindo o reuso de senhas fracas.
+* **Sanitização Básica:** Todos os e-mails inseridos sofrem \`trim()\` antes do envio, prevenindo erros acidentais de digitação que gerariam registros duplicados indesejados no Supabase Auth.
