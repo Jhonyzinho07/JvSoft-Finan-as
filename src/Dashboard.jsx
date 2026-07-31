@@ -227,8 +227,8 @@ export default function Dashboard() {
           <LayoutDashboard size={18} className="text-white" />
         </div>
         <div>
-          <h1 className="font-extrabold text-slate-800 text-lg leading-tight dark:text-slate-100">Dashboard</h1>
-          <p className="text-slate-400 text-xs">
+          <h1 className="font-extrabold text-card-foreground text-lg leading-tight dark:text-slate-100">Dashboard</h1>
+          <p className="text-muted-foreground text-xs">
             {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
           </p>
         </div>
@@ -239,7 +239,7 @@ export default function Dashboard() {
         
         {/* Banner Vencidas (Vermelho) — só aparece se "Alertas de Vencimento" estiver ativo em Configurações */}
         {alertasAtivos && contasVencidas.length > 0 && (
-          <div className="bg-red-50 border border-red-200 dark:bg-red-950/40 dark:border-red-900/50 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-destructive/10 border border-destructive/20 rounded-2xl overflow-hidden shadow-minimal">
             <div className="px-5 py-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
@@ -289,7 +289,7 @@ export default function Dashboard() {
 
         {/* Banner Vencem em breve (Amarelo) — mesma regra de "Alertas de Vencimento" */}
         {alertasAtivos && contasEmBreve.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-900/50 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-amber-100/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl overflow-hidden shadow-minimal">
             <div className="px-5 py-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
@@ -339,7 +339,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── Card de saldo ─────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-600 rounded-3xl p-6 text-white relative overflow-hidden shadow-xl mt-2">
+      <div className="bg-primary rounded-3xl p-6 text-primary-foreground relative overflow-hidden shadow-float mt-2">
         <div className="absolute -top-12 -right-12 w-52 h-52 bg-white/5 rounded-full pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white/5 rounded-full pointer-events-none" />
         <div className="relative z-10">
@@ -364,27 +364,27 @@ export default function Dashboard() {
       </div>
 
       {/* ── CARD PRINCIPAL: Compromissos Financeiros ───────────────────────── */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
+      <div className="bg-card rounded-3xl border border-border shadow-minimal overflow-hidden">
 
         <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="font-extrabold text-slate-800 text-base dark:text-slate-100">Compromissos Financeiros</h2>
-              <p className="text-slate-400 text-xs mt-0.5">
+              <h2 className="font-extrabold text-card-foreground text-base dark:text-slate-100">Compromissos Financeiros</h2>
+              <p className="text-muted-foreground text-xs mt-0.5">
                 {compromissos.length > 0
                   ? `${compromissos.filter(c => c.tipo === 'parcelamento').length} parcelamento${compromissos.filter(c => c.tipo === 'parcelamento').length !== 1 ? 's' : ''} · ${compromissos.filter(c => c.tipo === 'avulsa').length} conta${compromissos.filter(c => c.tipo === 'avulsa').length !== 1 ? 's' : ''} avulsa${compromissos.filter(c => c.tipo === 'avulsa').length !== 1 ? 's' : ''}`
                   : 'Nenhum compromisso pendente'}
               </p>
             </div>
             <div className="text-right shrink-0">
-              <p className="text-[11px] text-slate-400 font-medium uppercase tracking-wide">Total em aberto</p>
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Total em aberto</p>
               <p className="text-2xl font-extrabold text-red-600 leading-tight">{formatarMoeda(totalDividas)}</p>
             </div>
           </div>
         </div>
 
         {compromissos.length === 0 ? (
-          <div className="py-16 flex flex-col items-center gap-3 text-slate-400">
+          <div className="py-16 flex flex-col items-center gap-3 text-muted-foreground">
             <CheckCircle2 size={40} className="text-emerald-400" />
             <p className="font-bold text-slate-600 text-base dark:text-slate-300">Tudo em dia!</p>
             <p className="text-sm">Nenhum compromisso pendente no momento.</p>
@@ -426,7 +426,7 @@ export default function Dashboard() {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-bold text-slate-800 text-sm truncate dark:text-slate-100">{c.descricao}</p>
+                          <p className="font-bold text-card-foreground text-sm truncate dark:text-slate-100">{c.descricao}</p>
                           
                           {isVencida && (
                             <span className="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:border-red-900/50 px-2 py-0.5 rounded-full shrink-0">
@@ -446,10 +446,10 @@ export default function Dashboard() {
                             </span>
                           )}
                           {c.categoria?.nome && (
-                            <span className="text-[11px] text-slate-400">{c.categoria.nome}</span>
+                            <span className="text-[11px] text-muted-foreground">{c.categoria.nome}</span>
                           )}
                           {c.proximaParcela && (
-                            <span className="text-[11px] text-slate-400">
+                            <span className="text-[11px] text-muted-foreground">
                               Vence {new Date(c.proximaParcela + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                             </span>
                           )}
@@ -458,12 +458,12 @@ export default function Dashboard() {
                     </div>
 
                     <div className="text-right shrink-0">
-                      <p className="text-base font-extrabold text-slate-800 dark:text-slate-100">{formatarMoeda(c.valorRestante)}</p>
-                      <p className="text-[11px] text-slate-400">restante</p>
+                      <p className="text-base font-extrabold text-card-foreground">{formatarMoeda(c.valorRestante)}</p>
+                      <p className="text-[11px] text-muted-foreground">restante</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-[11px] text-slate-500 flex-wrap mb-3 dark:text-slate-400">
+                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground flex-wrap mb-3 dark:text-muted-foreground">
                     <span className="font-semibold text-slate-600 dark:text-slate-300">{formatarMoeda(c.valorTotal)} total</span>
                     <span className="text-slate-300">·</span>
                     <span className="flex items-center gap-1">
@@ -481,7 +481,7 @@ export default function Dashboard() {
 
                   {c.tipo === 'parcelamento' && (
                     <div className="mb-3">
-                      <div className="flex justify-between text-[10px] text-slate-400 mb-1">
+                      <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                         <span>{pctPago.toFixed(0)}% pago</span>
                         <span>{(100 - pctPago).toFixed(0)}% restante</span>
                       </div>
@@ -496,7 +496,7 @@ export default function Dashboard() {
                         style={{ width: `${pctDoTotal}%`, backgroundColor: cor + 'aa' }}
                       />
                     </div>
-                    <span className="text-[10px] text-slate-400 shrink-0 w-14 text-right font-medium">
+                    <span className="text-[10px] text-muted-foreground shrink-0 w-14 text-right font-medium">
                       {pctDoTotal.toFixed(1)}% do total
                     </span>
                   </div>
@@ -519,9 +519,9 @@ export default function Dashboard() {
       {/* ── Gráfico + Movimentações ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 dark:bg-slate-800 dark:border-slate-700">
-          <h2 className="font-bold text-slate-800 text-sm mb-0.5 dark:text-slate-100">Fluxo dos Últimos 6 Meses</h2>
-          <p className="text-slate-400 text-xs mb-5">Receitas vs. despesas mês a mês</p>
+        <div className="bg-card rounded-3xl border border-border shadow-minimal p-6">
+          <h2 className="font-bold text-card-foreground text-sm mb-0.5 dark:text-slate-100">Fluxo dos Últimos 6 Meses</h2>
+          <p className="text-muted-foreground text-xs mb-5">Receitas vs. despesas mês a mês</p>
           {temGrafico ? (
             <>
               <ResponsiveContainer width="100%" height={190}>
@@ -544,27 +544,27 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
               <div className="flex items-center justify-center gap-5 mt-2">
-                <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground dark:text-muted-foreground">
                   <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block" /> Receitas
                 </span>
-                <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground dark:text-muted-foreground">
                   <span className="w-2.5 h-2.5 rounded-sm bg-red-400 inline-block" /> Despesas
                 </span>
               </div>
             </>
           ) : (
-            <div className="h-[190px] flex flex-col items-center justify-center gap-2 text-slate-400">
+            <div className="h-[190px] flex flex-col items-center justify-center gap-2 text-muted-foreground">
               <Wallet size={28} className="text-slate-300" />
               <p className="text-sm">Nenhuma movimentação registrada.</p>
             </div>
           )}
         </div>
 
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 dark:bg-slate-800 dark:border-slate-700">
+        <div className="bg-card rounded-3xl border border-border shadow-minimal p-6">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="font-bold text-slate-800 text-sm mb-0.5 dark:text-slate-100">Movimentações Recentes</h2>
-              <p className="text-slate-400 text-xs">Últimas transações do mês</p>
+              <h2 className="font-bold text-card-foreground text-sm mb-0.5 dark:text-slate-100">Movimentações Recentes</h2>
+              <p className="text-muted-foreground text-xs">Últimas transações do mês</p>
             </div>
             <Link to="/transacoes"
               className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors">
@@ -573,7 +573,7 @@ export default function Dashboard() {
           </div>
 
           {movimentacoes.length === 0 ? (
-            <div className="h-[190px] flex flex-col items-center justify-center gap-2 text-slate-400">
+            <div className="h-[190px] flex flex-col items-center justify-center gap-2 text-muted-foreground">
               <Wallet size={28} className="text-slate-300" />
               <p className="text-sm">Nenhuma movimentação neste mês.</p>
             </div>
@@ -586,8 +586,8 @@ export default function Dashboard() {
                     {t.tipo === 'receita' ? <TrendingUp size={15} /> : <TrendingDown size={15} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 truncate dark:text-slate-100">{t.descricao}</p>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-sm font-semibold text-card-foreground truncate dark:text-slate-100">{t.descricao}</p>
+                    <p className="text-[11px] text-muted-foreground">
                       {new Date(t.data_transacao + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                       {t.categorias?.nome ? ` · ${t.categorias.nome}` : ''}
                     </p>
@@ -604,11 +604,11 @@ export default function Dashboard() {
 
       {/* ── Faturas abertas ───────────────────────────────────────────────── */}
       {totalFaturas > 0 && (
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 dark:bg-slate-800 dark:border-slate-700">
+        <div className="bg-card rounded-3xl border border-border shadow-minimal p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="font-bold text-slate-800 text-sm mb-0.5 dark:text-slate-100">Faturas Abertas</h2>
-              <p className="text-slate-400 text-xs">Gastos acumulados nos cartões</p>
+              <h2 className="font-bold text-card-foreground text-sm mb-0.5 dark:text-slate-100">Faturas Abertas</h2>
+              <p className="text-muted-foreground text-xs">Gastos acumulados nos cartões</p>
             </div>
             <Link to="/cartoes"
               className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors">

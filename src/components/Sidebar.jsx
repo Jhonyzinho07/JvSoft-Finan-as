@@ -36,7 +36,7 @@ export default function Sidebar({ setUsuario }) {
   ]
 
   return (
-    <aside className="w-64 bg-white dark:bg-slate-800 border-r border-blue-100 dark:border-slate-700 hidden lg:flex flex-col shadow-soft transition-colors">
+    <aside className="w-64 bg-card border-r border-border hidden lg:flex flex-col shadow-minimal transition-colors">
       {/* Cabeçalho do Sidebar (Logo — não muda com o tema) */}
       <div className="p-6 flex items-center gap-3">
         <img 
@@ -45,8 +45,8 @@ export default function Sidebar({ setUsuario }) {
           className="w-12 h-12 object-contain drop-shadow-sm" 
         />
         <div>
-          <h1 className="font-bold text-xl text-slate-800 dark:text-slate-100">JvSoft</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Finanças Pessoais</p>
+          <h1 className="font-bold text-xl text-card-foreground">JvSoft</h1>
+          <p className="text-xs text-muted-foreground font-medium">Finanças Pessoais</p>
         </div>
       </div>
 
@@ -60,8 +60,8 @@ export default function Sidebar({ setUsuario }) {
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive
-                  ? 'bg-gradient-to-r from-blue-900 to-cyan-500 text-white shadow-md'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-900 dark:hover:text-cyan-400'
+                  ? 'bg-accent text-accent-foreground shadow-subtle'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               }`
             }
           >
@@ -75,14 +75,14 @@ export default function Sidebar({ setUsuario }) {
       </nav>
 
       {/* Rodapé do Sidebar (Configurações e Logout) */}
-      <div className="p-4 border-t border-blue-50 dark:border-slate-700 space-y-1.5">
+      <div className="p-4 border-t border-border space-y-1.5">
         <NavLink
           to="/configuracoes"
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
               isActive
-                ? 'bg-gradient-to-r from-blue-900 to-cyan-500 text-white shadow-md'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-900 dark:hover:text-cyan-400'
+                ? 'bg-accent text-accent-foreground shadow-subtle'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`
           }
         >
@@ -92,7 +92,7 @@ export default function Sidebar({ setUsuario }) {
 
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all duration-200"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
         >
           <LogOut size={20} />
           <span className="font-medium text-sm">Sair da conta</span>

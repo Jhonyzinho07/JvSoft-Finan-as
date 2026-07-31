@@ -188,7 +188,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex">
       {/* Lado Esquerdo - Formulário */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br bg-background dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
         <div className="w-full max-w-md">
           {/* Logo da Empresa */}
           <div className="text-center mb-8">

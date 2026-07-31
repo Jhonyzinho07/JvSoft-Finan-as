@@ -30,7 +30,7 @@ const PoliticaPrivacidade = lazy(() => import('./pages/PoliticaPrivacidade'))
 function PageLoader() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+      <div className="w-10 h-10 border-4 border-muted border-t-primary rounded-full animate-spin" />
     </div>
   )
 }
@@ -61,8 +61,8 @@ function AppContent() {
 
   if (carregando) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
-        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-16 h-16 border-4 border-muted border-t-primary rounded-full animate-spin mx-auto"></div>
       </div>
     )
   }
@@ -73,7 +73,7 @@ function AppContent() {
   // Se não estiver logado e for rota pública, mostra apenas as rotas públicas (sem Sidebar, etc)
   if (!usuario && isPublicRoute) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-background">
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/termos" element={<TermosDeUso />} />
@@ -87,7 +87,7 @@ function AppContent() {
 
   if (!usuario) {
     return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50"><div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" /></div>}>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><div className="w-16 h-16 border-4 border-muted border-t-primary rounded-full animate-spin" /></div>}>
         <Login />
       </Suspense>
     )
@@ -95,15 +95,15 @@ function AppContent() {
 
   // Layout Base da Aplicação (Sidebar + Conteúdo Dinâmico)
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
+    <div className="flex min-h-screen bg-background transition-colors">
       <Sidebar telaAtual={location.pathname.replace('/', '')} setUsuario={setUsuario} />
       
       <main className="flex-1 overflow-auto relative pb-20 lg:pb-0">
         
         {/* Header Mobile Otimizado (com a sua Logo oficial) */}
-        <header className="lg:hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-30 px-4 py-3 flex items-center justify-between border-b border-blue-100 dark:border-slate-700">
+        <header className="lg:hidden bg-background/80 backdrop-blur-md shadow-minimal sticky top-0 z-30 px-4 py-3 flex items-center justify-between border-b border-border">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo JvSoft" className="w-8 h-8 object-contain rounded-lg shadow-sm" />
+            <img src="/logo.png" alt="Logo JvSoft" className="w-8 h-8 object-contain rounded-lg shadow-minimal" />
             <span className="font-bold text-gray-800 dark:text-slate-100">JvSoft</span>
           </div>
           <button

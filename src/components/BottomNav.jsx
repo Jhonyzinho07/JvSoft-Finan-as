@@ -43,12 +43,12 @@ export default function BottomNav({ setUsuario }) {
 
   const linkClasses = ({ isActive }) =>
     `flex flex-col items-center justify-center gap-0.5 transition-colors ${
-      isActive ? 'text-blue-900 dark:text-cyan-400' : 'text-slate-400 dark:text-slate-500'
+      isActive ? 'text-primary' : 'text-muted-foreground'
     }`
 
   return (
     <>
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-t border-blue-100 dark:border-slate-700 z-40 pb-safe">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-background/95 backdrop-blur-md border-t border-border z-40 pb-safe">
         <div className="grid grid-cols-5 h-16">
           {itensPrincipais.map((item) => (
             <NavLink key={item.path} to={item.path} className={linkClasses}>
@@ -58,7 +58,7 @@ export default function BottomNav({ setUsuario }) {
           ))}
           <button
             onClick={() => setShowMais(true)}
-            className="flex flex-col items-center justify-center gap-0.5 text-slate-400"
+            className="flex flex-col items-center justify-center gap-0.5 text-muted-foreground"
           >
             <MoreHorizontal size={22} />
             <span className="text-[10px] font-medium">Mais</span>
@@ -69,15 +69,15 @@ export default function BottomNav({ setUsuario }) {
       {/* Gaveta "Mais" - Portal garante que fica por cima de tudo, sem depender do container pai */}
       {showMais && createPortal(
         <div
-          className="lg:hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-end animate-fade-in"
+          className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end animate-fade-in"
           onClick={() => setShowMais(false)}
         >
           <div
-            className="bg-white dark:bg-slate-800 w-full rounded-t-3xl p-4 pb-8"
+            className="bg-card w-full rounded-t-3xl p-4 pb-8"
             style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-600 rounded-full mx-auto mb-5" />
+            <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-5" />
             <div className="grid grid-cols-4 gap-3 mb-4">
               {itensMais.map((item) => (
                 <NavLink
@@ -87,8 +87,8 @@ export default function BottomNav({ setUsuario }) {
                   className={({ isActive }) =>
                     `flex flex-col items-center justify-center gap-2 p-3 rounded-2xl transition-colors ${
                       isActive
-                        ? 'bg-gradient-to-r from-blue-900 to-cyan-500 text-white shadow-md'
-                        : 'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                        ? 'bg-accent text-accent-foreground shadow-subtle'
+                        : 'bg-muted text-muted-foreground'
                     }`
                   }
                 >
@@ -99,7 +99,7 @@ export default function BottomNav({ setUsuario }) {
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 font-semibold"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-destructive bg-destructive/10 font-semibold"
             >
               <LogOut size={18} /> Sair da conta
             </button>
