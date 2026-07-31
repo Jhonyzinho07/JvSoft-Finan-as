@@ -580,7 +580,7 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-1">
               {movimentacoes.map(t => (
-                <div key={t.id} className="flex items-center gap-3 py-2.5 px-2 rounded-xl hover:bg-slate-50 transition-colors dark:hover:bg-slate-700">
+                <div key={t.id} className="flex items-center gap-3 py-2.5 px-2 rounded-xl ">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0
                     ${t.tipo === 'receita' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'}`}>
                     {t.tipo === 'receita' ? <TrendingUp size={15} /> : <TrendingDown size={15} />}
