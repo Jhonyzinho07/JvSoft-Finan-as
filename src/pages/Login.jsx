@@ -14,17 +14,54 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState(null);
+
+  const isLocked = lockedUntil && new Date() < lockedUntil;
+
+  const validatePassword = (pass) => {
+    const minLength = 8;
+    const hasNumber = /\d/;
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
+
+    if (pass.length < minLength) return 'A senha deve ter pelo menos 8 caracteres.';
+    if (!hasNumber.test(pass)) return 'A senha deve conter pelo menos um número.';
+    if (!hasSpecialChar.test(pass)) return 'A senha deve conter pelo menos um caractere especial.';
+    return null;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isLocked) {
+      setError('Muitas tentativas. Tente novamente mais tarde.');
+      return;
+    }
+
     setError('');
     setLoading(true);
 
+    const sanitizedEmail = email.trim();
+
     try {
       if (isSignUp) {
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+          setError(passwordError);
+          setLoading(false);
+          return;
+        }
+
+        if (!termsAccepted) {
+          setError('Você deve aceitar os Termos de Uso e a Política de Privacidade para criar uma conta.');
+          setLoading(false);
+          return;
+        }
+
         // Registro de novo usuário
         const { error } = await supabase.auth.signUp({
-          email,
+          email: sanitizedEmail,
           password,
         });
 
@@ -35,7 +72,7 @@ export default function Login() {
       } else {
         // Login de usuário existente
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: sanitizedEmail,
           password,
         });
 
@@ -46,7 +83,16 @@ export default function Login() {
     } catch (_err) {
       // TRADUÇÃO DE ERROS DO SUPABASE PARA PORTUGUÊS
       if (_err.message === 'Invalid login credentials') {
-        setError('E-mail ou senha incorretos. Tente novamente.');
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+
+        if (newAttempts >= 3) {
+          const lockTime = new Date(new Date().getTime() + 30 * 1000); // 30 segundos
+          setLockedUntil(lockTime);
+          setError('Muitas tentativas inválidas. Conta bloqueada por 30 segundos.');
+        } else {
+          setError('E-mail ou senha incorretos. Tente novamente.');
+        }
       } else {
         setError('Ocorreu um erro ao tentar fazer login. Verifique sua conexão.');
       }
@@ -77,7 +123,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex">
       {/* Lado Esquerdo - Formulário */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
         <div className="w-full max-w-md">
           {/* Logo da Empresa */}
           <div className="text-center mb-8">
@@ -109,6 +155,7 @@ export default function Login() {
                   <input
                     type="email"
                     value={email}
+                    autoComplete="email"
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400 dark:placeholder-slate-500 dark:border-slate-700 dark:text-slate-100"
@@ -127,6 +174,7 @@ export default function Login() {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
+                    autoComplete={isSignUp ? "new-password" : "current-password"}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
@@ -143,6 +191,22 @@ export default function Login() {
                 </div>
               </div>
 
+              {/* LGPD Checkbox */}
+              {isSignUp && (
+                <div className="flex items-start gap-2 mt-4 mb-4">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-700"
+                  />
+                  <label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-300">
+                    Eu concordo com os <a href="#" className="text-blue-600 hover:underline dark:text-blue-400">Termos de Uso</a> e a <a href="#" className="text-blue-600 hover:underline dark:text-blue-400">Política de Privacidade</a>.
+                  </label>
+                </div>
+              )}
+
               {/* Erro */}
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-900/50 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
@@ -153,7 +217,7 @@ export default function Login() {
               {/* Botão Submit */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isLocked}
                 className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
               >
                 <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
