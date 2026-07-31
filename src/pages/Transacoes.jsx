@@ -42,6 +42,7 @@ export default function Transacoes() {
         .gte('data_transacao', primeiroDia)
         .lte('data_transacao', ultimoDia)
         .order('data_transacao', { ascending: false })
+        .order('created_at', { ascending: false })
 
       setTransacoes(data || [])
 
