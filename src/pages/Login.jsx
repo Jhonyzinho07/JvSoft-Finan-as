@@ -235,19 +235,7 @@ export default function Login() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
         <div className="w-full max-w-md">
           {/* Logo da Empresa */}
-
-          {/* Logo Mobile */}
-          <div className="flex lg:hidden justify-center mb-8">
-             <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 p-3 shadow-sm border border-blue-100">
-               <img
-                 src={logoEmpresa}
-                 alt="Logo JvSoft"
-                 className="w-full h-full object-contain"
-               />
-             </div>
-          </div>
-
-          <div className="text-center mb-8">
+<div className="text-center mb-8">
 
             <div className="inline-flex items-center justify-center w-24 h-24 mb-4">
               <img 
