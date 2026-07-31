@@ -429,6 +429,23 @@ export default function Configuracoes() {
           </div>
         </div>
       )}
+
+      {/* Modais de Termos e Privacidade */}
+      <ModalDocumento
+        isOpen={modalTermosOpen}
+        onClose={() => setModalTermosOpen(false)}
+        titulo="Termos de Uso"
+      >
+        <ConteudoTermosDeUso />
+      </ModalDocumento>
+
+      <ModalDocumento
+        isOpen={modalPrivacidadeOpen}
+        onClose={() => setModalPrivacidadeOpen(false)}
+        titulo="Política de Privacidade"
+      >
+        <ConteudoPoliticaPrivacidade />
+      </ModalDocumento>
     </div>
   )
 }
