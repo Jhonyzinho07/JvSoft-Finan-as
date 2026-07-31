@@ -288,7 +288,7 @@ export default function Configuracoes() {
         {/* Botão trocar senha */}
         <button
           onClick={() => setModalSenha(true)}
-          className="mt-4 w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group"
+          className="mt-4 w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-600 transition-colors group"
         >
           <span className="flex items-center gap-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
             <KeyRound size={18} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
@@ -305,7 +305,7 @@ export default function Configuracoes() {
         </h2>
         <div className="space-y-1">
 
-          <div className="py-3.5 px-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex flex-col gap-3">
+          <div className="py-3.5 px-2 rounded-xl transition-colors flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <Moon size={18} className="text-slate-500 dark:text-slate-400" />
               <div>
@@ -335,7 +335,7 @@ export default function Configuracoes() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between py-3.5 px-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+          <div className="flex items-center justify-between py-3.5 px-2 rounded-xl transition-colors">
             <div className="flex items-center gap-3">
               {notificacoes ? <Bell size={18} className="text-slate-500 dark:text-slate-400" /> : <BellOff size={18} className="text-slate-500 dark:text-slate-400" />}
               <div>
@@ -352,7 +352,7 @@ export default function Configuracoes() {
             <Toggle ativo={notificacoes} onChange={handleToggleNotificacoes} />
           </div>
 
-          <div className="flex items-center justify-between py-3.5 px-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+          <div className="flex items-center justify-between py-3.5 px-2 rounded-xl transition-colors">
             <div className="flex items-center gap-3">
               <Sun size={18} className="text-slate-500 dark:text-slate-400" />
               <div>
@@ -370,11 +370,11 @@ export default function Configuracoes() {
       <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 transition-colors">
         <h2 className="font-bold text-slate-700 dark:text-slate-200 text-sm mb-4">Sobre o App</h2>
         <div className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
-              <button onClick={() => setModalTermosOpen(true)} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group">
+              <button onClick={() => setModalTermosOpen(true)} className="w-full flex items-center justify-between p-3 rounded-xl transition-colors group">
                 <div className="flex items-center gap-3"><span className="text-slate-700 dark:text-slate-200">Termos de Uso</span></div>
                 <ChevronRight size={18} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
               </button>
-              <button onClick={() => setModalPrivacidadeOpen(true)} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group">
+              <button onClick={() => setModalPrivacidadeOpen(true)} className="w-full flex items-center justify-between p-3 rounded-xl transition-colors group">
                 <div className="flex items-center gap-3"><span className="text-slate-700 dark:text-slate-200">Política de Privacidade</span></div>
                 <ChevronRight size={18} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
               </button>

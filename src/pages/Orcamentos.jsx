@@ -266,7 +266,7 @@ export default function Orcamentos() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 border border-slate-200 rounded-xl font-semibold text-slate-600 hover:bg-slate-50 transition-colors dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
+                  className="flex-1 py-3 border border-slate-200 rounded-xl font-semibold text-slate-600 transition-colors dark:border-slate-700 dark:text-slate-300"
                 >
                   Cancelar
                 </button>

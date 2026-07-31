@@ -416,7 +416,7 @@ export default function Dashboard() {
               }
 
               return (
-                <div key={c.id || idx} className="px-6 py-5 hover:bg-slate-50/50 transition-colors">
+                <div key={c.id || idx} className="px-6 py-5 transition-colors">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div
