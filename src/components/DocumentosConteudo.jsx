@@ -6,7 +6,7 @@ export function ConteudoTermosDeUso() {
       <section>
         <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">1. Aceitação dos Termos</h2>
         <p>
-          Ao acessar e usar o aplicativo <strong>Jv Soft Finanças</strong>, você concorda em cumprir e ficar vinculado aos seguintes Termos de Uso. Se você não concorda com qualquer parte destes termos, não deve usar nosso aplicativo.
+          Ao acessar e usar o aplicativo <strong>Jv Soft Finanças</strong>, mantido pela <strong>JvSoft soluções em tecnologia</strong>, você concorda em cumprir e ficar vinculado aos seguintes Termos de Uso. Se você não concorda com qualquer parte destes termos, não deve usar nosso aplicativo.
         </p>
       </section>
 
@@ -36,7 +36,7 @@ export function ConteudoTermosDeUso() {
       <section>
         <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">5. Responsabilidades do Usuário</h2>
         <ul className="list-disc pl-6 space-y-2">
-          <li>Os dados inseridos no aplicativo são de sua inteira responsabilidade. O <strong>Jv Soft Finanças</strong> não se responsabiliza por decisões financeiras tomadas com base nas informações inseridas no aplicativo.</li>
+          <li>Os dados inseridos no aplicativo são de sua inteira responsabilidade. A <strong>JvSoft soluções em tecnologia</strong> e o <strong>Jv Soft Finanças</strong> não se responsabilizam por decisões financeiras tomadas com base nas informações inseridas no aplicativo.</li>
           <li>Você concorda em não usar o aplicativo para qualquer fim ilegal ou não autorizado.</li>
         </ul>
       </section>
@@ -44,14 +44,14 @@ export function ConteudoTermosDeUso() {
       <section>
         <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">6. Propriedade Intelectual</h2>
         <p>
-          Todos os direitos, títulos e interesses relativos ao aplicativo, incluindo, mas não se limitando a, design, código-fonte, textos e logotipos, são de propriedade exclusiva do <strong>Jv Soft Finanças</strong>.
+          Todos os direitos, títulos e interesses relativos ao aplicativo, incluindo, mas não se limitando a, design, código-fonte, textos e logotipos, são de propriedade exclusiva da <strong>JvSoft soluções em tecnologia</strong>.
         </p>
       </section>
 
       <section>
         <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">7. Limitação de Responsabilidade</h2>
         <p>
-          O aplicativo é fornecido "no estado em que se encontra". Não garantimos que o serviço será ininterrupto, livre de erros ou totalmente seguro. Em nenhuma circunstância o <strong>Jv Soft Finanças</strong> será responsável por quaisquer danos diretos, indiretos, incidentais ou consequenciais resultantes do uso ou da incapacidade de usar o aplicativo.
+          O aplicativo é fornecido "no estado em que se encontra". Não garantimos que o serviço será ininterrupto, livre de erros ou totalmente seguro. Em nenhuma circunstância a <strong>JvSoft soluções em tecnologia</strong> será responsável por quaisquer danos diretos, indiretos, incidentais ou consequenciais resultantes do uso ou da incapacidade de usar o aplicativo.
         </p>
       </section>
 
@@ -65,7 +65,7 @@ export function ConteudoTermosDeUso() {
       <section>
         <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">9. Contato</h2>
         <p>
-          Se você tiver alguma dúvida sobre estes Termos de Uso, entre em contato conosco através dos canais de suporte disponíveis no aplicativo.
+          Se você tiver alguma dúvida sobre estes Termos de Uso, entre em contato conosco através dos canais de suporte disponíveis no aplicativo ou pelo e-mail <strong>jvsoft.solucoes@gmail.com</strong>.
         </p>
       </section>
     </div>
@@ -78,7 +78,7 @@ export function ConteudoPoliticaPrivacidade() {
       <section>
         <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">1. Introdução</h2>
         <p>
-          A sua privacidade é fundamental para nós. Esta Política de Privacidade explica como o <strong>Jv Soft Finanças</strong> coleta, usa, compartilha e protege as suas informações pessoais, em conformidade com a Lei Geral de Proteção de Dados Pessoais (LGPD - Lei nº 13.709/2018).
+          A sua privacidade é fundamental para nós. Esta Política de Privacidade explica como a <strong>JvSoft soluções em tecnologia</strong>, mantenedora do aplicativo <strong>Jv Soft Finanças</strong>, coleta, usa, compartilha e protege as suas informações pessoais, em conformidade com a Lei Geral de Proteção de Dados Pessoais (LGPD - Lei nº 13.709/2018).
         </p>
       </section>
 
@@ -103,7 +103,7 @@ export function ConteudoPoliticaPrivacidade() {
       <section>
         <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">4. Serviços de Terceiros e Compartilhamento</h2>
         <p>
-          O <strong>Jv Soft Finanças</strong> utiliza exclusivamente os serviços do <strong>Supabase</strong> para banco de dados e autenticação de usuários.
+          A <strong>JvSoft soluções em tecnologia</strong> utiliza exclusivamente no <strong>Jv Soft Finanças</strong> os serviços do <strong>Supabase</strong> para banco de dados e autenticação de usuários.
         </p>
         <ul className="list-disc pl-6 mt-2 space-y-2">
           <li>Os dados são armazenados na infraestrutura do Supabase, que possui rigorosos padrões de segurança internacional.</li>
@@ -146,7 +146,7 @@ export function ConteudoPoliticaPrivacidade() {
       <section>
         <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">9. Contato</h2>
         <p>
-          Para exercer seus direitos relativos à LGPD ou esclarecer dúvidas sobre esta Política de Privacidade, entre em contato através dos canais de suporte disponíveis no aplicativo.
+          Para exercer seus direitos relativos à LGPD ou esclarecer dúvidas sobre esta Política de Privacidade, entre em contato através dos canais de suporte disponíveis no aplicativo ou pelo e-mail <strong>jvsoft.solucoes@gmail.com</strong>.
         </p>
       </section>
     </div>

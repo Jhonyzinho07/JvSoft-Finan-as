@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../supabaseClient'
 import { useToast } from '../components/Toast'
 import {
-  User, LogOut, Shield, Bell, Moon, Sun, Loader2,
+  User, LogOut, Shield, Bell, Moon, Sun, Loader2, AlertTriangle, Trash2,
   ChevronRight, KeyRound, Save, X, Check, Camera, BellOff, Monitor
 } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
@@ -34,6 +34,8 @@ export default function Configuracoes() {
   const [loading, setLoading]       = useState(false)
   const [salvando, setSalvando]     = useState(false)
   const [modalSenha, setModalSenha] = useState(false)
+  const [modalExcluirConta, setModalExcluirConta] = useState(false)
+  const [loadingExcluir, setLoadingExcluir] = useState(false)
 
   // Prefs persistidas no localStorage
   const [notificacoes, setNotificacoes]         = useState(() => localStorage.getItem('pref_notif') !== 'false')
@@ -153,6 +155,23 @@ export default function Configuracoes() {
   }
 
   // ── Troca de senha (exige a senha atual) ────────────────────────────
+
+  const handleExcluirConta = async () => {
+    setLoadingExcluir(true)
+    try {
+      const { error } = await supabase.rpc('delete_user')
+      if (error) throw error
+
+      await supabase.auth.signOut()
+      window.location.href = '/'
+    } catch (error) {
+      toast.error('Erro ao excluir conta. Tente novamente mais tarde.')
+      console.error(error)
+      setLoadingExcluir(false)
+      setModalExcluirConta(false)
+    }
+  }
+
   const handleTrocarSenha = async (e) => {
     e.preventDefault()
     if (!senhaAtual) {
@@ -364,15 +383,65 @@ export default function Configuracoes() {
         </div>
       </div>
 
-      {/* Logout */}
-      <button
-        onClick={handleLogout}
-        disabled={loading}
-        className="w-full flex items-center justify-center gap-3 p-4 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 rounded-2xl font-bold hover:bg-red-100 dark:hover:bg-red-950/60 transition-all border border-red-100 dark:border-red-900/50"
-      >
-        {loading ? <Loader2 className="animate-spin" size={20} /> : <LogOut size={20} />}
-        {loading ? 'Saindo...' : 'Encerrar Sessão'}
-      </button>
+
+      {/* Botões de Ação Perigosa */}
+      <div className="flex flex-col gap-4">
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          disabled={loading || loadingExcluir}
+          className="w-full flex items-center justify-center gap-3 p-4 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 rounded-2xl font-bold hover:bg-red-100 dark:hover:bg-red-950/60 transition-all border border-red-100 dark:border-red-900/50"
+        >
+          {loading ? <Loader2 className="animate-spin" size={20} /> : <LogOut size={20} />}
+          {loading ? 'Saindo...' : 'Encerrar Sessão'}
+        </button>
+
+        {/* Excluir Conta */}
+        <button
+          onClick={() => setModalExcluirConta(true)}
+          disabled={loading || loadingExcluir}
+          className="w-full flex items-center justify-center gap-3 p-4 bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 rounded-2xl font-bold hover:bg-red-50 dark:hover:bg-slate-700 transition-all border border-red-200 dark:border-red-900/50"
+        >
+          <Trash2 size={20} />
+          Excluir Minha Conta
+        </button>
+      </div>
+
+      {/* Modal Excluir Conta */}
+      {modalExcluirConta && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden p-6 border border-red-100 dark:border-red-900/30">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
+                <AlertTriangle size={32} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Atenção!</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Tem certeza que deseja excluir sua conta? Esta ação é irreversível e apagará todos os seus dados e registros financeiros permanentemente.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setModalExcluirConta(false)}
+                disabled={loadingExcluir}
+                className="flex-1 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleExcluirConta}
+                disabled={loadingExcluir}
+                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold flex justify-center items-center gap-2 hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {loadingExcluir ? <Loader2 size={18} className="animate-spin" /> : 'Excluir Conta'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Modal troca de senha */}
       {modalSenha && (
