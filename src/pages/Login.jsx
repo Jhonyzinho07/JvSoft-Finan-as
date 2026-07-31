@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useToast } from '../components/Toast';
-import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, User } from 'lucide-react';
 import logoEmpresa from '../assets/logo.png';
 
 export default function Login() {
@@ -10,13 +10,39 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState(null);
+  const [lockCountdown, setLockCountdown] = useState(0);
+
+
+  useEffect(() => {
+    let interval;
+    if (lockedUntil) {
+      interval = setInterval(() => {
+        const now = new Date();
+        const timeLeft = Math.ceil((lockedUntil.getTime() - now.getTime()) / 1000);
+        if (timeLeft <= 0) {
+          setLockedUntil(null);
+          setLockCountdown(0);
+          setLoginAttempts(0); // Reset attempts after lock expires
+          setError('');
+          clearInterval(interval);
+        } else {
+          setLockCountdown(timeLeft);
+        }
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [lockedUntil]);
 
   const isLocked = lockedUntil && new Date() < lockedUntil;
 
@@ -29,6 +55,28 @@ export default function Login() {
     if (!hasNumber.test(pass)) return 'A senha deve conter pelo menos um número.';
     if (!hasSpecialChar.test(pass)) return 'A senha deve conter pelo menos um caractere especial.';
     return null;
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!email) {
+      setError('Por favor, insira seu e-mail para recuperar a senha.');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success('Se o e-mail existir em nossa base, você receberá um link para redefinir sua senha.');
+      setIsForgotPassword(false);
+    } catch (_err) {
+      setError('Ocorreu um erro ao tentar recuperar a senha. Verifique sua conexão.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -59,10 +107,21 @@ export default function Login() {
           return;
         }
 
+        if (!name.trim()) {
+          setError('Por favor, informe como gostaria de ser chamado.');
+          setLoading(false);
+          return;
+        }
+
         // Registro de novo usuário
         const { error } = await supabase.auth.signUp({
           email: sanitizedEmail,
           password,
+          options: {
+            data: {
+              nome: name.trim(), // Save the name in the user's metadata
+            }
+          }
         });
 
         if (error) throw error;
@@ -82,7 +141,9 @@ export default function Login() {
       }
     } catch (_err) {
       // TRADUÇÃO DE ERROS DO SUPABASE PARA PORTUGUÊS
-      if (_err.message === 'Invalid login credentials') {
+      if (_err.message === 'User already registered') {
+        setError('Este e-mail já está em uso.');
+      } else if (_err.message === 'Invalid login credentials') {
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
 
@@ -138,21 +199,45 @@ export default function Login() {
               JvSoft Finanças
             </h1>
             <p className="text-slate-600 dark:text-slate-300">
-              {isSignUp ? 'Crie sua conta gratuita' : 'Bem-vindo de volta!'}
+              {isForgotPassword ? 'Recupere sua conta' : isSignUp ? 'Crie sua conta gratuita' : 'Bem-vindo de volta!'}
             </p>
           </div>
 
           {/* Card do Formulário */}
           <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none p-8 border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={isForgotPassword ? handleForgotPassword : handleSubmit} className="space-y-6">
+
+              {/* Nome (Apenas Cadastro) */}
+              {isSignUp && !isForgotPassword && (
+                <div>
+                  <label htmlFor="name-input" className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">
+                    Nome que quer ser chamado
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                      id="name-input"
+                      type="text"
+                      value={name}
+                      autoComplete="name"
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400 dark:placeholder-slate-500 dark:border-slate-700 dark:text-slate-100"
+                      placeholder="Seu nome ou apelido"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">
+                <label htmlFor="email-input" className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">
                   Email
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input
+                    id="email-input"
                     type="email"
                     value={email}
                     autoComplete="email"
@@ -164,53 +249,73 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* Senha */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">
-                  Senha
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    autoComplete={isSignUp ? "new-password" : "current-password"}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className="w-full pl-12 pr-12 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400 dark:placeholder-slate-500 dark:border-slate-700 dark:text-slate-100"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
+              {/* Senha (Não mostra no Forgot Password) */}
+              {!isForgotPassword && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label htmlFor="password-input" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                      Senha
+                    </label>
+                    {!isSignUp && (
+                      <button
+                        type="button"
+                        onClick={() => setIsForgotPassword(true)}
+                        className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                      >
+                        Esqueceu a senha?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                      id="password-input"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      autoComplete={isSignUp ? "new-password" : "current-password"}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={8}
+                      className="w-full pl-12 pr-12 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300 text-slate-800 placeholder-slate-400 dark:placeholder-slate-500 dark:border-slate-700 dark:text-slate-100"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* LGPD Checkbox */}
-              {isSignUp && (
+              {isSignUp && !isForgotPassword && (
                 <div className="flex items-start gap-2 mt-4 mb-4">
                   <input
                     type="checkbox"
                     id="terms"
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-700"
+                    className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 bg-transparent focus:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-700"
                   />
-                  <label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-300">
-                    Eu concordo com os <a href="/termos" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline dark:text-blue-400">Termos de Uso</a> e a <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline dark:text-blue-400">Política de Privacidade</a>.
+                  <label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+                    Eu concordo com os <a href="#" onClick={(e) => e.preventDefault()} className="text-blue-600 hover:underline dark:text-blue-400">Termos de Uso</a> e a <a href="#" onClick={(e) => e.preventDefault()} className="text-blue-600 hover:underline dark:text-blue-400">Política de Privacidade</a>.
                   </label>
                 </div>
               )}
 
-              {/* Erro */}
+              {/* Erro e Bloqueio */}
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-900/50 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
-                  {error}
+                <div className="bg-red-50 border border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-900/50 dark:text-red-400 px-4 py-3 rounded-xl text-sm flex flex-col gap-1">
+                  <span>{error}</span>
+                  {isLocked && lockCountdown > 0 && (
+                    <span className="font-semibold text-xs opacity-80">
+                      Aguarde {lockCountdown} segundos para tentar novamente.
+                    </span>
+                  )}
                 </div>
               )}
 
@@ -226,6 +331,8 @@ export default function Login() {
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                     Processando...
                   </span>
+                ) : isForgotPassword ? (
+                  'Recuperar Senha'
                 ) : isSignUp ? (
                   'Criar Conta'
                 ) : (
@@ -235,52 +342,71 @@ export default function Login() {
             </form>
 
             {/* Divisor */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-slate-500 dark:bg-slate-800 dark:text-slate-400">ou continue com</span>
-              </div>
-            </div>
+            {!isForgotPassword && (
+              <>
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-white text-slate-500 dark:bg-slate-800 dark:text-slate-400">ou continue com</span>
+                  </div>
+                </div>
 
-            {/* Google Login */}
-            <button
-              onClick={handleGoogleLogin}
-              className="w-full py-3.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 flex items-center justify-center gap-3 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M23.766 12.2764c0-.8942-.0793-1.7553-.2238-2.5886H12v4.9097h6.6095c-.2874 1.5386-1.1581 2.8437-2.4689 3.7214v3.0392h3.9426c2.3043-2.1178 3.6828-5.2408 3.6828-9.0817z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 24.0003c3.3086 0 6.0825-1.0938 8.0832-2.9392l-3.9426-3.0392c-1.0856.7308-2.4786 1.1668-4.1406 1.1668-3.1979 0-5.9063-2.1564-6.8719-5.0507H1.0847v3.1363C3.0968 21.2679 7.3086 24.0003 12 24.0003z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.1281 14.138c-.2424-.7263-.3795-1.5029-.3795-2.3069s.1371-1.5806.3795-2.3069V6.3878H1.0847C.3943 7.7686 0 9.3371 0 11.8311s.3943 4.0625 1.0847 5.4433l4.0434-3.1364z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 4.8116c1.8076 0 3.4286.6218 4.7035 1.8378l3.5308-3.5308C18.0932 1.1264 15.3086 0 12 0 7.3086 0 3.0968 2.7324 1.0847 6.3878l4.0434 3.1364c.9656-2.8943 3.674-5.0507 6.8719-5.0507z"
-                />
-              </svg>
-              Google
-            </button>
+                {/* Google Login */}
+                <button
+                  onClick={handleGoogleLogin}
+                  className="w-full py-3.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 flex items-center justify-center gap-3 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M23.766 12.2764c0-.8942-.0793-1.7553-.2238-2.5886H12v4.9097h6.6095c-.2874 1.5386-1.1581 2.8437-2.4689 3.7214v3.0392h3.9426c2.3043-2.1178 3.6828-5.2408 3.6828-9.0817z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24.0003c3.3086 0 6.0825-1.0938 8.0832-2.9392l-3.9426-3.0392c-1.0856.7308-2.4786 1.1668-4.1406 1.1668-3.1979 0-5.9063-2.1564-6.8719-5.0507H1.0847v3.1363C3.0968 21.2679 7.3086 24.0003 12 24.0003z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.1281 14.138c-.2424-.7263-.3795-1.5029-.3795-2.3069s.1371-1.5806.3795-2.3069V6.3878H1.0847C.3943 7.7686 0 9.3371 0 11.8311s.3943 4.0625 1.0847 5.4433l4.0434-3.1364z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.8116c1.8076 0 3.4286.6218 4.7035 1.8378l3.5308-3.5308C18.0932 1.1264 15.3086 0 12 0 7.3086 0 3.0968 2.7324 1.0847 6.3878l4.0434 3.1364c.9656-2.8943 3.674-5.0507 6.8719-5.0507z"
+                    />
+                  </svg>
+                  Google
+                </button>
+              </>
+            )}
 
             {/* Toggle Sign Up / Login */}
             <div className="mt-6 text-center">
-              <p className="text-slate-600 dark:text-slate-300">
-                {isSignUp ? 'Já tem uma conta?' : 'Não tem uma conta?'}{' '}
-                <button
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors"
-                >
-                  {isSignUp ? 'Fazer Login' : 'Criar Conta'}
-                </button>
-              </p>
+              {isForgotPassword ? (
+                <p className="text-slate-600 dark:text-slate-300">
+                  Lembrou da senha?{' '}
+                  <button
+                    onClick={() => setIsForgotPassword(false)}
+                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors"
+                  >
+                    Voltar para o Login
+                  </button>
+                </p>
+              ) : (
+                <p className="text-slate-600 dark:text-slate-300">
+                  {isSignUp ? 'Já tem uma conta?' : 'Não tem uma conta?'}{' '}
+                  <button
+                    onClick={() => {
+                      setIsSignUp(!isSignUp);
+                      setError('');
+                    }}
+                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors"
+                  >
+                    {isSignUp ? 'Fazer Login' : 'Criar Conta'}
+                  </button>
+                </p>
+              )}
             </div>
           </div>
 
