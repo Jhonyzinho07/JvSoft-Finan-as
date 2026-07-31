@@ -23,6 +23,8 @@ const CartoesCredito  = lazy(() => import('./pages/CartoesCredito'))
 const Orcamentos      = lazy(() => import('./pages/Orcamentos'))
 const Relatorios      = lazy(() => import('./pages/Relatorios'))
 const Configuracoes   = lazy(() => import('./pages/Configuracoes'))
+const TermosDeUso     = lazy(() => import('./pages/TermosDeUso'))
+const PoliticaPrivacidade = lazy(() => import('./pages/PoliticaPrivacidade'))
 
 // Spinner reutilizado enquanto a rota carrega
 function PageLoader() {
@@ -61,6 +63,24 @@ function AppContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
         <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+      </div>
+    )
+  }
+
+
+  const isPublicRoute = location.pathname === '/termos' || location.pathname === '/privacidade'
+
+  // Se não estiver logado e for rota pública, mostra apenas as rotas públicas (sem Sidebar, etc)
+  if (!usuario && isPublicRoute) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/termos" element={<TermosDeUso />} />
+            <Route path="/privacidade" element={<PoliticaPrivacidade />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </div>
     )
   }

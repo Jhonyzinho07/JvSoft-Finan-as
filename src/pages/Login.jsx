@@ -202,7 +202,7 @@ export default function Login() {
                     className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-700"
                   />
                   <label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-300">
-                    Eu concordo com os <a href="#" className="text-blue-600 hover:underline dark:text-blue-400">Termos de Uso</a> e a <a href="#" className="text-blue-600 hover:underline dark:text-blue-400">Política de Privacidade</a>.
+                    Eu concordo com os <a href="/termos" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline dark:text-blue-400">Termos de Uso</a> e a <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline dark:text-blue-400">Política de Privacidade</a>.
                   </label>
                 </div>
               )}
