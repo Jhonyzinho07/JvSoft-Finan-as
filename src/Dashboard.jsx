@@ -27,7 +27,8 @@ async function carregarDados() {
   ] = await Promise.all([
     supabase.from('transacoes').select('*, categorias(nome, cor)')
       .gte('data_transacao', primeiroDia).lte('data_transacao', ultimoDia)
-      .order('data_transacao', { ascending: false }),
+      .order('data_transacao', { ascending: false })
+        .order('created_at', { ascending: false }),
     supabase.from('transacoes').select('tipo, valor')
       .gte('data_transacao', primeiroDiaMesAnt).lte('data_transacao', ultimoDiaMesAnt),
     supabase.from('cartoes').select('fatura_atual, nome'),
