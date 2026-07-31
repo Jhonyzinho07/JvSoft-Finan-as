@@ -6,6 +6,8 @@ import {
   ChevronRight, KeyRound, Save, X, Check, Camera, BellOff, Monitor
 } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
+import ModalDocumento from '../components/ModalDocumento'
+import { ConteudoTermosDeUso, ConteudoPoliticaPrivacidade } from '../components/DocumentosConteudo'
 
 const TAMANHO_MAX_AVATAR = 3 * 1024 * 1024 // 3MB
 
@@ -48,6 +50,10 @@ export default function Configuracoes() {
   const [nome, setNome]                     = useState('')
   const [avatarUrl, setAvatarUrl]           = useState(null)
   const [avatarFile, setAvatarFile]         = useState(null)
+
+  // Modais de documentos
+  const [modalTermosOpen, setModalTermosOpen] = useState(false)
+  const [modalPrivacidadeOpen, setModalPrivacidadeOpen] = useState(false)
   const [avatarPreview, setAvatarPreview]   = useState(null)
 
   useEffect(() => {
@@ -345,6 +351,14 @@ export default function Configuracoes() {
       <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 transition-colors">
         <h2 className="font-bold text-slate-700 dark:text-slate-200 text-sm mb-4">Sobre o App</h2>
         <div className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+              <button onClick={() => setModalTermosOpen(true)} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group">
+                <div className="flex items-center gap-3"><span className="text-slate-700 dark:text-slate-200">Termos de Uso</span></div>
+                <ChevronRight size={18} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
+              </button>
+              <button onClick={() => setModalPrivacidadeOpen(true)} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group">
+                <div className="flex items-center gap-3"><span className="text-slate-700 dark:text-slate-200">Política de Privacidade</span></div>
+                <ChevronRight size={18} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
+              </button>
           <div className="flex justify-between"><span>Versão</span><span className="font-semibold text-slate-700 dark:text-slate-200">1.0.0</span></div>
           <div className="flex justify-between"><span>Desenvolvido por</span><span className="font-semibold text-slate-700 dark:text-slate-200">JVSoft</span></div>
         </div>
