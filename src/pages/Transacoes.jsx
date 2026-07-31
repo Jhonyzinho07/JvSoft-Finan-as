@@ -219,7 +219,7 @@ export default function Transacoes() {
               </div>
               <div className="divide-y divide-slate-50 dark:divide-slate-700">
                 {agrupadas[data].map(t => (
-                  <div key={t.id} className="flex items-center gap-3 px-5 py-4 hover:bg-slate-50/50 transition-colors group">
+                  <div key={t.id} className="flex items-center gap-3 px-5 py-4 transition-colors group">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0
                       ${t.tipo === 'receita' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'}`}>
                       {t.tipo === 'receita' ? <TrendingUp size={17} /> : <TrendingDown size={17} />}

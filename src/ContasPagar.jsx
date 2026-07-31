@@ -429,7 +429,7 @@ function ContasPagar() {
               
               <div className="divide-y divide-gray-100 dark:divide-slate-700">
                 {contasAgrupadas[data].map(conta => (
-                  <div key={conta.id} className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group ${conta.status_pago ? 'bg-green-50/50 dark:bg-green-900/10' : ''}`}>
+                  <div key={conta.id} className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors group ${conta.status_pago ? 'bg-green-50/50 dark:bg-green-900/10' : ''}`}>
                     <div className="flex items-center gap-3 flex-1">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-lg shadow-sm" style={{ backgroundColor: conta.cor }}>
                         {conta.emoji}
