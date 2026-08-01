@@ -65,7 +65,7 @@ export function ConteudoTermosDeUso() {
       <section>
         <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">9. Contato</h2>
         <p>
-          Se você tiver alguma dúvida sobre estes Termos de Uso, entre em contato conosco através dos canais de suporte disponíveis no aplicativo ou pelo e-mail <strong>jvsoft.solucoes@gmail.com</strong>.
+          Se você tiver alguma dúvida sobre estes Termos de Uso, entre em contato conosco através dos canais de suporte disponíveis no aplicativo ou pelo e-mail <a href="mailto:jvsoft.solucoes@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline"><strong>jvsoft.solucoes@gmail.com</strong></a>.
         </p>
       </section>
     </div>
@@ -106,7 +106,7 @@ export function ConteudoPoliticaPrivacidade() {
           A <strong>JvSoft soluções em tecnologia</strong> utiliza exclusivamente no <strong>Jv Soft Finanças</strong> os serviços do <strong>Supabase</strong> para banco de dados e autenticação de usuários.
         </p>
         <ul className="list-disc pl-6 mt-2 space-y-2">
-          <li>Os dados são armazenados na infraestrutura do Supabase, que possui rigorosos padrões de segurança internacional.</li>
+          <li>Seus dados são armazenados na infraestrutura do Supabase, na região <strong>sa-east-1 (São Paulo, Brasil)</strong> — ou seja, permanecem em território nacional, sem transferência internacional.</li>
           <li><strong>Não vendemos, alugamos ou compartilhamos</strong> seus dados pessoais ou financeiros com anunciantes, agências de marketing ou outros serviços de terceiros.</li>
         </ul>
       </section>
@@ -119,7 +119,14 @@ export function ConteudoPoliticaPrivacidade() {
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">6. Seus Direitos (LGPD)</h2>
+        <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">6. Retenção de Dados</h2>
+        <p>
+          Mantemos seus dados enquanto sua conta estiver ativa. Caso você solicite a exclusão da conta, todos os dados pessoais e financeiros associados são apagados permanentemente em até 24 horas, conforme detalhado na seção 8.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">7. Seus Direitos (LGPD)</h2>
         <p>Como titular dos dados, você tem o direito de:</p>
         <ul className="list-disc pl-6 mt-2 space-y-2">
           <li>Acessar, corrigir ou atualizar seus dados a qualquer momento.</li>
@@ -130,23 +137,23 @@ export function ConteudoPoliticaPrivacidade() {
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">7. Exclusão de Dados</h2>
+        <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">8. Exclusão de Dados</h2>
         <p>
           Você pode solicitar a exclusão da sua conta através das configurações do aplicativo. Ao fazer isso, todos os seus dados pessoais e financeiros serão permanentemente apagados dos nossos servidores.
         </p>
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">8. Atualizações desta Política</h2>
+        <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">9. Atualizações desta Política</h2>
         <p>
           Esta Política de Privacidade pode ser atualizada periodicamente. Recomendamos que você revise esta página regularmente para estar ciente de quaisquer alterações.
         </p>
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">9. Contato</h2>
+        <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">10. Contato</h2>
         <p>
-          Para exercer seus direitos relativos à LGPD ou esclarecer dúvidas sobre esta Política de Privacidade, entre em contato através dos canais de suporte disponíveis no aplicativo ou pelo e-mail <strong>jvsoft.solucoes@gmail.com</strong>.
+          Para exercer seus direitos relativos à LGPD ou esclarecer dúvidas sobre esta Política de Privacidade, entre em contato através dos canais de suporte disponíveis no aplicativo ou pelo e-mail <a href="mailto:jvsoft.solucoes@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline"><strong>jvsoft.solucoes@gmail.com</strong></a>.
         </p>
       </section>
     </div>
