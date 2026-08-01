@@ -154,12 +154,19 @@ export default function Login() {
         }
 
         // Registro de novo usuário
+        // terms_accepted/terms_version vão no metadata para o trigger do banco
+        // (registrar_aceite_termos_novo_usuario) gravar o consentimento com
+        // timestamp auditável em public.termos_aceites — não dá pra inserir
+        // isso direto do client aqui porque, com confirmação de e-mail ativa,
+        // ainda não existe sessão autenticada neste momento.
         const { error } = await supabase.auth.signUp({
           email: sanitizedEmail,
           password,
           options: {
             data: {
               full_name: name.trim(), // Save the name in the user's metadata
+              terms_accepted: true,
+              terms_version: '1.0',
             }
           }
         });
