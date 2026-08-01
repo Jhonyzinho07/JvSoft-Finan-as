@@ -107,6 +107,22 @@ export default function Transacoes() {
   const excluir = async (t) => {
     if (!window.confirm(`Excluir "${t.descricao}"?`)) return
     try {
+      if (t.cartao_id && t.conta_consumo_id) {
+        // Find the linked bill
+        const { data: fatura } = await supabase.from('contas').select('id, valor').eq('id', t.conta_consumo_id).single()
+
+        if (fatura) {
+          const novoValor = Number(fatura.valor) - Number(t.valor)
+          if (novoValor <= 0) {
+            // Delete the bill if it hits 0
+            await supabase.from('contas').delete().eq('id', fatura.id)
+          } else {
+            // Update the bill
+            await supabase.from('contas').update({ valor: novoValor }).eq('id', fatura.id)
+          }
+        }
+      }
+
       const { error } = await supabase.from('transacoes').delete().eq('id', t.id)
       if (error) throw error
       toast.success('Transação excluída.')

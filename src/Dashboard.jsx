@@ -32,7 +32,7 @@ async function carregarDados() {
         .order('created_at', { ascending: false }),
     supabase.from('transacoes').select('tipo, valor')
       .gte('data_transacao', primeiroDiaMesAnt).lte('data_transacao', ultimoDiaMesAnt),
-    supabase.from('cartoes').select('fatura_atual, nome'),
+    supabase.from('cartoes').select('nome'),
     supabase.from('contas')
       .select('*, categorias(nome, icone, cor)')
       .order('data_vencimento', { ascending: true }),
@@ -59,7 +59,7 @@ async function carregarDados() {
     else saldo -= v
   })
 
-  const totalFaturas = cartoes?.reduce((acc, c) => acc + Number(c.fatura_atual), 0) || 0
+  const totalFaturas = contas?.filter(c => !c.status_pago && c.descricao?.startsWith('Fatura:')).reduce((acc, c) => acc + Number(c.valor), 0) || 0
 
   // ── Alertas: separando Vencidas e Vencem em Breve (2 dias) ────────
   const dataAtual = new Date()
