@@ -379,3 +379,47 @@ CREATE TRIGGER set_user_id_orcamentos BEFORE INSERT ON orcamentos
 DROP TRIGGER IF EXISTS set_user_id_investimentos ON investimentos;
 CREATE TRIGGER set_user_id_investimentos BEFORE INSERT ON investimentos
     FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+-- ============================================
+-- 13. Tabela de Inscrições de Push
+-- ============================================
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  endpoint TEXT NOT NULL,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(endpoint)
+);
+
+ALTER TABLE push_subscriptions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Acesso total às inscrições de push" ON push_subscriptions;
+CREATE POLICY "Acesso total às inscrições de push" ON push_subscriptions
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+DROP TRIGGER IF EXISTS set_user_id_push_subscriptions ON push_subscriptions;
+CREATE TRIGGER set_user_id_push_subscriptions BEFORE INSERT ON push_subscriptions
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+
+-- ============================================
+-- 14. CRON para disparo diário de Push
+-- ============================================
+-- Extensão necessária para Cron Jobs
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- Criar a Job para executar a Edge Function diariamente as 8h da manhã
+SELECT cron.schedule(
+  'enviar-notificacoes-push',
+  '0 8 * * *', -- Todos os dias as 08:00
+  $$
+  SELECT net.http_post(
+      url:='https://gukwebektgetxpzhuzop.supabase.co/functions/v1/send-push-notifications',
+      headers:='{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY"}'::jsonb,
+      body:='{}'::jsonb
+  ) as request_id;
+  $$
+);
