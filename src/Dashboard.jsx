@@ -62,7 +62,7 @@ async function carregarDados() {
     else saldo -= v
   })
 
-  const totalFaturas = contas?.filter(c => !c.status_pago && c.descricao?.startsWith('Fatura:')).reduce((acc, c) => acc + Number(c.valor), 0) || 0
+  const totalFaturas = todasContas?.filter(c => !c.status_pago && c.descricao?.startsWith('Fatura:')).reduce((acc, c) => acc + Number(c.valor), 0) || 0
 
   // ── Alertas: separando Vencidas e Vencem em Breve (2 dias) ────────
   const dataAtual = new Date()
