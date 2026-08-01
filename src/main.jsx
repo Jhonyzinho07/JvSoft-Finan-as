@@ -2,6 +2,12 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { registerSW } from 'virtual:pwa-register'
+
+// Registra o Service Worker
+if ('serviceWorker' in navigator) {
+  registerSW({ immediate: true })
+}
 import { BrowserRouter } from 'react-router-dom'
 // 1. Importar as ferramentas do React Query
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
