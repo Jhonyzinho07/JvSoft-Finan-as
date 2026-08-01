@@ -71,12 +71,12 @@ function ContasPagar() {
         .select(`*, credores:credor_id (nome, emoji, cor), categorias (nome)`)
         .gte('data_vencimento', primeiroDia)
         .lte('data_vencimento', ultimoDia)
-        .order('dia_vencimento', { ascending: true }) 
+        .order('data_vencimento', { ascending: true })
 
       if (errorContas) throw new Error(`Erro ao buscar contas: ${errorContas.message}`)
 
       const todasContas = (contasConsumo || []).map(c => {
-        const vencimentoFormatado = c.dia_vencimento ? `Dia ${String(c.dia_vencimento).padStart(2, '0')}` : 'Sem data'
+        const vencimentoFormatado = c.data_vencimento ? `Dia ${String(new Date(c.data_vencimento + 'T12:00:00').getDate()).padStart(2, '0')}` : 'Sem data'
         return {
           id: c.id,
           credor: c.categorias?.nome || c.credores?.nome || 'Outros',
@@ -87,7 +87,7 @@ function ContasPagar() {
           vencimento: vencimentoFormatado,
           status_pago: c.status_pago,
           categoria_id: c.categoria_id,
-          dia_ordenacao: c.dia_vencimento || 99,
+          dia_ordenacao: c.data_vencimento ? new Date(c.data_vencimento + 'T12:00:00').getDate() : 99,
           id_parcelamento: c.id_parcelamento || null,
           numero_parcela: c.numero_parcela || null,
           total_parcelas: c.total_parcelas || null
@@ -163,7 +163,6 @@ function ContasPagar() {
           descricao: novaConta.descricao,
           valor: valorFormatado,
           data_vencimento: novaConta.data_vencimento,
-          dia_vencimento: dataObj.getDate(),
           categoria_id: novaConta.categoria_id || null,
           status_pago: false
         }])
@@ -208,7 +207,6 @@ function ContasPagar() {
         descricao: contaEditando.descricao,
         valor: valorFormatado,
         data_vencimento: contaEditando.data_vencimento,
-        dia_vencimento: dataObj.getDate(),
         categoria_id: contaEditando.categoria_id || null,
       }).eq('id', modalEditar.conta.id)
       if (error) throw error
