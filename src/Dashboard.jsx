@@ -14,7 +14,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 
 async function carregarDados() {
   const hoje = new Date()
-  const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString()
+  const primeiroDia6Meses = new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1).toISOString()
   const ultimoDia   = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59).toISOString()
   const primeiroDiaMesAnt = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1).toISOString()
   const ultimoDiaMesAnt   = new Date(hoje.getFullYear(), hoje.getMonth(), 0, 23, 59, 59).toISOString()
@@ -27,7 +27,7 @@ async function carregarDados() {
     { data: todasTransacoes },
   ] = await Promise.all([
     supabase.from('transacoes').select('*, categorias(nome, cor)')
-      .gte('data_transacao', primeiroDia).lte('data_transacao', ultimoDia)
+      .gte('data_transacao', primeiroDia6Meses).lte('data_transacao', ultimoDia)
       .order('data_transacao', { ascending: false })
         .order('created_at', { ascending: false }),
     supabase.from('transacoes').select('tipo, valor')
@@ -42,9 +42,12 @@ async function carregarDados() {
   // ── Totais do mês e Saldo Histórico ─────────────────────────────────────────
   let receitasMes = 0, despesasMes = 0, receitasMesAnt = 0, despesasMesAnt = 0
   transacoes?.forEach(t => {
-    const v = Number(t.valor)
-    if (t.tipo === 'receita') receitasMes += v
-    else despesasMes += v
+    const d = new Date(t.data_transacao + 'T12:00:00')
+    if (d.getFullYear() === hoje.getFullYear() && d.getMonth() === hoje.getMonth()) {
+      const v = Number(t.valor)
+      if (t.tipo === 'receita') receitasMes += v
+      else despesasMes += v
+    }
   })
   transacoesMesAnt?.forEach(t => {
     const v = Number(t.valor)
@@ -574,7 +577,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="font-bold text-slate-800 text-sm mb-0.5 dark:text-slate-100">Movimentações Recentes</h2>
-              <p className="text-slate-400 text-xs">Últimas transações do mês</p>
+              <p className="text-slate-400 text-xs">Últimas transações</p>
             </div>
             <Link to="/transacoes"
               className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors">
@@ -585,7 +588,7 @@ export default function Dashboard() {
           {movimentacoes.length === 0 ? (
             <div className="h-[190px] flex flex-col items-center justify-center gap-2 text-slate-400">
               <Wallet size={28} className="text-slate-300" />
-              <p className="text-sm">Nenhuma movimentação neste mês.</p>
+              <p className="text-sm">Nenhuma movimentação encontrada.</p>
             </div>
           ) : (
             <div className="space-y-1">
