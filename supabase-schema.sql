@@ -408,18 +408,44 @@ CREATE TRIGGER set_user_id_push_subscriptions BEFORE INSERT ON push_subscription
 -- ============================================
 -- 14. CRON para disparo diário de Push
 -- ============================================
--- Extensão necessária para Cron Jobs
+-- Extensões necessárias para Cron Jobs e para o Vault (segurança)
 CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS supabase_vault;
+
+-- =================================================================================
+-- ATENÇÃO: CONFIGURAÇÃO DE SEGURANÇA (SUPABASE VAULT)
+-- Antes de ativar ou rodar este job, execute os seguintes comandos no SQL Editor
+-- para salvar de forma segura a sua URL e a Service Role Key:
+--
+-- SELECT vault.create_secret('https://SEU_PROJETO_ID.supabase.co', 'supabase_project_url');
+-- SELECT vault.create_secret('SUA_SERVICE_ROLE_KEY_AQUI', 'supabase_service_role_key');
+-- =================================================================================
+
+-- Remover o job antigo se existir, para evitar conflitos na recriação
+SELECT cron.unschedule('enviar-notificacoes-push');
 
 -- Criar a Job para executar a Edge Function diariamente as 8h da manhã
 SELECT cron.schedule(
   'enviar-notificacoes-push',
   '0 8 * * *', -- Todos os dias as 08:00
   $$
-  SELECT net.http_post(
-      url:='https://gukwebektgetxpzhuzop.supabase.co/functions/v1/send-push-notifications',
-      headers:='{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY"}'::jsonb,
-      body:='{}'::jsonb
-  ) as request_id;
+  DO $do$
+  DECLARE
+    v_url text;
+    v_key text;
+  BEGIN
+    -- Busca a URL base do projeto e a Service Role Key do Supabase Vault
+    SELECT decrypted_secret INTO v_url FROM vault.decrypted_secrets WHERE name = 'supabase_project_url';
+    SELECT decrypted_secret INTO v_key FROM vault.decrypted_secrets WHERE name = 'supabase_service_role_key';
+
+    IF v_url IS NOT NULL AND v_key IS NOT NULL THEN
+      PERFORM net.http_post(
+          url := v_url || '/functions/v1/send-push-notifications',
+          headers := jsonb_build_object('Authorization', 'Bearer ' || v_key, 'Content-Type', 'application/json'),
+          body := '{}'::jsonb
+      );
+    END IF;
+  END;
+  $do$;
   $$
 );
