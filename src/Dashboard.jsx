@@ -24,6 +24,7 @@ async function carregarDados() {
     { data: transacoesMesAnt },
     { data: cartoes },
     { data: todasContas },   // pagas E pendentes — para calcular total real da dívida
+    { data: todasTransacoes },
   ] = await Promise.all([
     supabase.from('transacoes').select('*, categorias(nome, cor)')
       .gte('data_transacao', primeiroDia).lte('data_transacao', ultimoDia)
@@ -35,9 +36,10 @@ async function carregarDados() {
     supabase.from('contas')
       .select('*, categorias(nome, icone, cor)')
       .order('data_vencimento', { ascending: true }),
+    supabase.from('transacoes').select('tipo, valor'),
   ])
 
-  // ── Totais do mês ──────────────────────────────────────────────────────────
+  // ── Totais do mês e Saldo Histórico ─────────────────────────────────────────
   let receitasMes = 0, despesasMes = 0, receitasMesAnt = 0, despesasMesAnt = 0
   transacoes?.forEach(t => {
     const v = Number(t.valor)
@@ -49,7 +51,14 @@ async function carregarDados() {
     if (t.tipo === 'receita') receitasMesAnt += v
     else despesasMesAnt += v
   })
-  const saldo = receitasMes - despesasMes
+
+  let saldo = 0
+  todasTransacoes?.forEach(t => {
+    const v = Number(t.valor)
+    if (t.tipo === 'receita') saldo += v
+    else saldo -= v
+  })
+
   const totalFaturas = cartoes?.reduce((acc, c) => acc + Number(c.fatura_atual), 0) || 0
 
   // ── Alertas: separando Vencidas e Vencem em Breve (2 dias) ────────
@@ -344,7 +353,7 @@ export default function Dashboard() {
         <div className="absolute -top-12 -right-12 w-52 h-52 bg-white/5 rounded-full pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white/5 rounded-full pointer-events-none" />
         <div className="relative z-10">
-          <p className="text-blue-200 text-sm font-medium mb-1">Saldo do mês</p>
+          <p className="text-blue-200 text-sm font-medium mb-1">Saldo</p>
           <p className={`text-4xl md:text-5xl font-extrabold tracking-tight mb-6 ${saldo >= 0 ? 'text-white' : 'text-red-300'}`}>
             {formatarMoeda(saldo)}
           </p>
