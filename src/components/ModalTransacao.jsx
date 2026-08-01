@@ -37,72 +37,93 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
       
       const numParcelas = parseInt(parcelas) || 1
 
-      if (tipo === 'despesa' && cartaoId && numParcelas > 1) {
-        // Parcelamento no cartão
-        const valorParcela = valorNumerico / numParcelas
+
+      if (tipo === 'despesa' && cartaoId) {
         const cartaoSelecionado = cartoes.find(c => c.id === cartaoId)
-
-        let transacoesParceladas = []
-
-        // Data base para cálculo
-        let dataBase = new Date()
+        let transacoesInserir = []
+        let dataBase = new Date(data + 'T12:00:00')
 
         for (let i = 0; i < numParcelas; i++) {
-          let dataVencimento = new Date(dataBase)
-          // Avança os meses
-          dataVencimento.setMonth(dataBase.getMonth() + i)
+          let valorFatura = numParcelas > 1 ? parseFloat((valorNumerico / numParcelas).toFixed(2)) : valorNumerico
+          let descricaoTx = numParcelas > 1 ? `${descricao} - Parcela ${i + 1}/${numParcelas}` : descricao
 
-          // Se tiver dia_vencimento no cartão, ajusta
+          let dataVencimentoFatura = new Date(dataBase)
+          dataVencimentoFatura.setMonth(dataBase.getMonth() + i)
+
+          // Lógica de fechamento (pode não estar perfeito se ModalTransacao não trouxer dia_fechamento, mas usa o que tem)
           if (cartaoSelecionado && cartaoSelecionado.dia_vencimento) {
-            // Se hoje já passou do dia de vencimento, a primeira parcela é pro mês que vem
             let mesAjuste = dataBase.getMonth() + i
-            if (i === 0 && dataBase.getDate() > cartaoSelecionado.dia_vencimento) {
+            // Simplificado: Assumindo fechamento 7 dias antes do vencimento se não disponível no payload atual do modal
+            let diaFechamento = cartaoSelecionado.dia_fechamento || (cartaoSelecionado.dia_vencimento - 7);
+            if (diaFechamento < 1) diaFechamento = 1;
+
+            if (i === 0 && dataBase.getDate() >= diaFechamento) {
               mesAjuste += 1
             }
-            dataVencimento = new Date(dataBase.getFullYear(), mesAjuste, cartaoSelecionado.dia_vencimento)
+            dataVencimentoFatura = new Date(dataBase.getFullYear(), mesAjuste, cartaoSelecionado.dia_vencimento)
           }
 
-          transacoesParceladas.push({
+          const dataVencString = dataVencimentoFatura.toISOString().split('T')[0]
+          const mesAno = `${String(dataVencimentoFatura.getMonth() + 1).padStart(2, '0')}/${dataVencimentoFatura.getFullYear()}`
+          const descricaoFatura = `Fatura: ${cartaoSelecionado?.nome || 'Cartão'}`
+
+          let { data: faturas } = await supabase
+            .from('contas')
+            .select('id, valor, data_vencimento')
+            .eq('descricao', descricaoFatura)
+            .eq('status_pago', false)
+
+          let faturaId = null
+
+          let faturaExistente = faturas?.find(f => {
+             if(!f.data_vencimento) return false;
+             const dv = new Date(f.data_vencimento + 'T12:00:00');
+             return dv.getMonth() === dataVencimentoFatura.getMonth() && dv.getFullYear() === dataVencimentoFatura.getFullYear();
+          });
+
+          if (faturaExistente) {
+            const novoValor = Number(faturaExistente.valor) + valorFatura;
+            await supabase.from('contas').update({ valor: novoValor }).eq('id', faturaExistente.id);
+            faturaId = faturaExistente.id;
+          } else {
+            const { data: novaFatura, error: errFatura } = await supabase.from('contas').insert([{
+              descricao: descricaoFatura,
+              valor: valorFatura,
+              data_vencimento: dataVencString,
+              status_pago: false,
+              categoria_id: categoriaId || null,
+              mes_referencia: mesAno
+            }]).select().single();
+            if (!errFatura && novaFatura) {
+               faturaId = novaFatura.id;
+            }
+          }
+
+          transacoesInserir.push({
             tipo,
-            descricao: `${descricao} - Parcela ${i + 1}/${numParcelas}`,
-            valor: parseFloat(valorParcela.toFixed(2)),
-            data_transacao: dataVencimento.toISOString().split('T')[0],
+            descricao: descricaoTx,
+            valor: valorFatura,
+            data_transacao: numParcelas > 1 ? dataVencString : data,
             categoria_id: categoriaId || null,
-            cartao_id: cartaoId
+            cartao_id: cartaoId,
+            conta_consumo_id: faturaId // Link
           })
         }
-
-        const { error: errTrans } = await supabase.from('transacoes').insert(transacoesParceladas)
+        const { error: errTrans } = await supabase.from('transacoes').insert(transacoesInserir)
         if (errTrans) throw errTrans
 
-        // Atualiza a fatura do cartão SOMENTE com o valor da primeira parcela
-        const { data: cartaoAtual } = await supabase.from('cartoes').select('fatura_atual').eq('id', cartaoId).single()
-        
-        await supabase.from('cartoes')
-          .update({ fatura_atual: Number(cartaoAtual.fatura_atual) + parseFloat(valorParcela.toFixed(2)) })
-          .eq('id', cartaoId)
-
       } else {
-        // Fluxo normal (sem parcelamento ou sem cartão)
+        // Fluxo normal (sem cartão)
         const { error: errTrans } = await supabase.from('transacoes').insert([{
           tipo,
           descricao,
           valor: valorNumerico,
           data_transacao: data,
           categoria_id: categoriaId || null,
-          cartao_id: cartaoId || null // Se for null, sai do saldo. Se tiver ID, vai pro cartão.
+          conta_id: null // Ignorado cartão
         }])
 
         if (errTrans) throw errTrans
-
-        // Se for despesa no cartão à vista (1 parcela), atualiza a fatura do cartão
-        if (tipo === 'despesa' && cartaoId) {
-          const { data: cartaoAtual } = await supabase.from('cartoes').select('fatura_atual').eq('id', cartaoId).single()
-
-          await supabase.from('cartoes')
-            .update({ fatura_atual: Number(cartaoAtual.fatura_atual) + valorNumerico })
-            .eq('id', cartaoId)
-        }
       }
 
       onClose()

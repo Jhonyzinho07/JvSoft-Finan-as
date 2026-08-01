@@ -13,11 +13,10 @@ export default function CartoesCredito() {
   const [salvando, setSalvando] = useState(false)
   
   const [showModalNovo, setShowModalNovo] = useState(false)
-  const [novoCartao, setNovoCartao] = useState({ nome: '', limite: '', fatura_atual: '', dia_fechamento: '', dia_vencimento: '', cor: '#1e40af' })
+  const [novoCartao, setNovoCartao] = useState({ nome: '', limite: '', dia_fechamento: '', dia_vencimento: '', cor: '#1e40af' })
 
   const [modalGasto, setModalGasto] = useState({ show: false, cartao: null, valor: '', descricao: 'Compra Rápida', parcelas: '1' })
   const [modalEditar, setModalEditar] = useState({ show: false, cartao: null, limite: '' })
-  const [modalFechar, setModalFechar] = useState({ show: false, cartao: null })
 
   const carregarCartoes = async () => {
     setLoading(true)
@@ -39,13 +38,13 @@ export default function CartoesCredito() {
     await supabase.from('cartoes').insert([{
       nome: novoCartao.nome,
       limite: parseFloat(novoCartao.limite.replace(',', '.')),
-      fatura_atual: novoCartao.fatura_atual ? parseFloat(novoCartao.fatura_atual.replace(',', '.')) : 0,
+
       dia_fechamento: parseInt(novoCartao.dia_fechamento),
       dia_vencimento: parseInt(novoCartao.dia_vencimento),
       cor: novoCartao.cor
     }])
     setShowModalNovo(false)
-    setNovoCartao({ nome: '', limite: '', fatura_atual: '', dia_fechamento: '', dia_vencimento: '', cor: '#1e40af' })
+    setNovoCartao({ nome: '', limite: '', dia_fechamento: '', dia_vencimento: '', cor: '#1e40af' })
     carregarCartoes()
     setSalvando(false)
   }
@@ -80,53 +79,74 @@ export default function CartoesCredito() {
         if (novaCat) categoriaId = novaCat.id
       }
 
-      if (numParcelas > 1) {
-        const valorParcela = valorGasto / numParcelas
-        let transacoesParceladas = []
-        let dataBase = new Date()
 
-        for (let i = 0; i < numParcelas; i++) {
-          let dataVencimento = new Date(dataBase)
-          dataVencimento.setMonth(dataBase.getMonth() + i)
+      let transacoesInserir = []
+      let dataBase = new Date()
 
-          if (cartao && cartao.dia_vencimento) {
-            let mesAjuste = dataBase.getMonth() + i
-            if (i === 0 && dataBase.getDate() > cartao.dia_vencimento) {
-              mesAjuste += 1
-            }
-            dataVencimento = new Date(dataBase.getFullYear(), mesAjuste, cartao.dia_vencimento)
+      for (let i = 0; i < numParcelas; i++) {
+        let valorFatura = numParcelas > 1 ? parseFloat((valorGasto / numParcelas).toFixed(2)) : valorGasto
+        let descricaoTx = numParcelas > 1 ? `${descricaoOriginal} - Parcela ${i + 1}/${numParcelas}` : descricaoOriginal
+
+        let dataVencimentoFatura = new Date(dataBase)
+        dataVencimentoFatura.setMonth(dataBase.getMonth() + i)
+
+        if (cartao.dia_fechamento && cartao.dia_vencimento) {
+          let mesAjuste = dataBase.getMonth() + i
+          if (i === 0 && dataBase.getDate() >= cartao.dia_fechamento) {
+            mesAjuste += 1 // Compra após o fechamento cai no mês seguinte
           }
-
-          transacoesParceladas.push({
-            tipo: 'despesa',
-            descricao: `${descricaoOriginal} - Parcela ${i + 1}/${numParcelas}`,
-            valor: parseFloat(valorParcela.toFixed(2)),
-            data_transacao: dataVencimento.toISOString().split('T')[0],
-            categoria_id: categoriaId,
-            cartao_id: cartao.id
-          })
+          dataVencimentoFatura = new Date(dataBase.getFullYear(), mesAjuste, cartao.dia_vencimento)
         }
 
-        await supabase.from('transacoes').insert(transacoesParceladas)
+        const dataVencString = dataVencimentoFatura.toISOString().split('T')[0]
+        const mesAno = `${String(dataVencimentoFatura.getMonth() + 1).padStart(2, '0')}/${dataVencimentoFatura.getFullYear()}`
+        const descricaoFatura = `Fatura: ${cartao.nome}`
 
-        await supabase.from('cartoes')
-          .update({ fatura_atual: Number(cartao.fatura_atual) + parseFloat(valorParcela.toFixed(2)) })
-          .eq('id', cartao.id)
+        // Procurar Fatura Aberta no mês exato
+        let { data: faturas } = await supabase
+          .from('contas')
+          .select('id, valor, data_vencimento')
+          .eq('descricao', descricaoFatura)
+          .eq('status_pago', false)
 
-      } else {
-        await supabase.from('transacoes').insert([{
+        let faturaId = null
+
+        let faturaExistente = faturas?.find(f => {
+           if(!f.data_vencimento) return false;
+           const dv = new Date(f.data_vencimento + 'T12:00:00');
+           return dv.getMonth() === dataVencimentoFatura.getMonth() && dv.getFullYear() === dataVencimentoFatura.getFullYear();
+        });
+
+        if (faturaExistente) {
+          const novoValor = Number(faturaExistente.valor) + valorFatura;
+          await supabase.from('contas').update({ valor: novoValor }).eq('id', faturaExistente.id);
+          faturaId = faturaExistente.id;
+        } else {
+          const { data: novaFatura, error: errFatura } = await supabase.from('contas').insert([{
+            descricao: descricaoFatura,
+            valor: valorFatura,
+            data_vencimento: dataVencString,
+            status_pago: false,
+            categoria_id: categoriaId,
+            mes_referencia: mesAno
+          }]).select().single();
+          if (!errFatura && novaFatura) {
+             faturaId = novaFatura.id;
+          }
+        }
+
+        transacoesInserir.push({
           tipo: 'despesa',
-          descricao: descricaoOriginal,
-          valor: valorGasto,
-          data_transacao: new Date().toISOString().split('T')[0],
+          descricao: descricaoTx,
+          valor: valorFatura,
+          data_transacao: numParcelas > 1 ? dataVencString : new Date().toISOString().split('T')[0],
           categoria_id: categoriaId,
-          cartao_id: cartao.id
-        }])
-
-        await supabase.from('cartoes')
-          .update({ fatura_atual: Number(cartao.fatura_atual) + valorGasto })
-          .eq('id', cartao.id)
+          cartao_id: cartao.id,
+          conta_consumo_id: faturaId // Link para apagar ou abater depois
+        })
       }
+
+      await supabase.from('transacoes').insert(transacoesInserir)
       
       setModalGasto({ show: false, cartao: null, valor: '', descricao: 'Compra Rápida', parcelas: '1' })
       carregarCartoes()
@@ -159,81 +179,7 @@ export default function CartoesCredito() {
     }
   }
 
-  const confirmarFechamento = async (e) => {
-    e.preventDefault()
-    setSalvando(true)
-    try {
-      const cartao = modalFechar.cartao
-      
-      // INTELIGÊNCIA DE CATEGORIA: Procura a categoria "Cartão", se não achar, cria.
-      let cartaoCategoriaId = null
-      
-      try {
-        const { data: categorias } = await supabase.from('categorias').select('id').ilike('nome', 'Cartão').eq('tipo', 'despesa')
-        
-        if (categorias && categorias.length > 0) {
-          cartaoCategoriaId = categorias[0].id
-        } else {
-          // Cria a categoria caso ela não exista
-          const { data: novaCategoria, error: errCategoria } = await supabase
-            .from('categorias')
-            .insert([{ nome: 'Cartão', tipo: 'despesa' }])
-            .select()
-
-          if (errCategoria) {
-            // Código 23505 = violação da trava UNIQUE: outra aba/clique já
-            // criou a categoria entre a busca e a criação. Buscamos a que
-            // já existe em vez de falhar ou duplicar.
-            if (errCategoria.code === '23505') {
-              const { data: categoriaExistente } = await supabase
-                .from('categorias').select('id').ilike('nome', 'Cartão').eq('tipo', 'despesa').limit(1)
-              cartaoCategoriaId = categoriaExistente?.[0]?.id || null
-            } else {
-              throw errCategoria
-            }
-          } else if (novaCategoria && novaCategoria.length > 0) {
-            cartaoCategoriaId = novaCategoria[0].id
-          }
-        }
-      } catch (err) {
-        console.error("Não foi possível processar a categoria. A fatura será salva sem categoria.", err)
-      }
-      
-      // Calcula a data REAL de vencimento da fatura (não só o dia solto).
-      // Se o dia de vencimento do cartão já passou neste mês, a fatura
-      // vence no mês seguinte; senão, vence ainda neste mês.
-      const hoje = new Date()
-      let mesVencimento = hoje.getMonth()
-      if (hoje.getDate() > cartao.dia_vencimento) {
-        mesVencimento += 1
-      }
-      const dataVencimentoFatura = new Date(hoje.getFullYear(), mesVencimento, cartao.dia_vencimento)
-        .toISOString().split('T')[0]
-
-      // Envia a fatura com o ID da categoria que encontramos/criamos
-      await supabase.from('contas').insert([{
-        descricao: `Fatura: ${cartao.nome}`,
-        valor: cartao.fatura_atual,
-        data_vencimento: dataVencimentoFatura,
-        dia_vencimento: cartao.dia_vencimento,
-        categoria_id: cartaoCategoriaId,
-        status_pago: false,
-        status: 'pendente'
-      }])
-
-      await supabase.from('cartoes').update({ fatura_atual: 0 }).eq('id', cartao.id)
-
-      setModalFechar({ show: false, cartao: null })
-      carregarCartoes()
-    } catch (_error) {
-      toast.error('Erro ao fechar fatura. Tente novamente.')
-    } finally {
-      setSalvando(false)
-    }
-  }
-
-
-  const opcoesCores = [
+    const opcoesCores = [
     { nome: 'Azul Escuro', valor: '#1e40af' }, { nome: 'Roxo Nubank', valor: '#820ad1' },
     { nome: 'Laranja Inter', valor: '#f97316' }, { nome: 'Vermelho Santander', valor: '#dc2626' },
     { nome: 'Verde', valor: '#10b981' }, { nome: 'Preto Black', valor: '#171717' },
@@ -263,11 +209,11 @@ export default function CartoesCredito() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {cartoes.map((cartao) => {
             
-            const faturasFechadasPendentes = contasPendentes
+            const faturasPendentes = contasPendentes
               .filter(conta => conta.descricao === `Fatura: ${cartao.nome}`)
               .reduce((total, conta) => total + Number(conta.valor), 0)
             
-            const limiteComprometido = Number(cartao.fatura_atual) + faturasFechadasPendentes
+            const limiteComprometido = faturasPendentes
             const limiteRestante = Number(cartao.limite) - limiteComprometido
             const porcentagemUso = cartao.limite > 0 ? (limiteComprometido / cartao.limite) * 100 : 0
             const estourado = porcentagemUso >= 100
@@ -294,14 +240,9 @@ export default function CartoesCredito() {
                     
                     <div className="mb-4">
                       <p className="text-white/70 text-xs font-medium uppercase tracking-widest mb-1">Fatura Aberta</p>
-                      <p className="text-3xl font-bold leading-none">{formatarMoeda(cartao.fatura_atual)}</p>
+                      <p className="text-3xl font-bold leading-none">{formatarMoeda(faturasPendentes)}</p>
+
                       
-                      {faturasFechadasPendentes > 0 && (
-                        <div className="mt-2 inline-flex items-center gap-1.5 bg-black/20 px-2.5 py-1 rounded-full text-xs font-medium text-white/90">
-                          <AlertTriangle size={12} />
-                          +{formatarMoeda(faturasFechadasPendentes)} aguardando pgto
-                        </div>
-                      )}
                     </div>
                     
                     <div className="flex justify-between items-end text-sm">
@@ -331,17 +272,11 @@ export default function CartoesCredito() {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => setModalGasto({ show: true, cartao, valor: '' })} 
-                      className="flex-1 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2 border border-slate-200 shadow-sm dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
+                      className="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2 border border-slate-200 shadow-sm dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
                     >
                       <Plus size={16} /> Lançar Gasto
                     </button>
-                    <button 
-                      onClick={() => setModalFechar({ show: true, cartao })} 
-                      disabled={cartao.fatura_atual <= 0} 
-                      className="flex-1 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2 border border-blue-200 shadow-sm disabled:opacity-50 disabled:grayscale dark:bg-slate-800"
-                    >
-                      <Send size={16} /> Fechar Fatura
-                    </button>
+
                   </div>
                 </div>
               </div>
@@ -365,16 +300,10 @@ export default function CartoesCredito() {
                   <input type="text" required value={novoCartao.nome} onChange={(e) => setNovoCartao({...novoCartao, nome: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:border-slate-700" placeholder="Ex: Nubank, Itaú..." />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
+                <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Limite Total (R$)</label>
                     <input type="number" step="0.01" required value={novoCartao.limite} onChange={(e) => setNovoCartao({...novoCartao, limite: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:border-slate-700" placeholder="0.00" />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Fatura Atual (R$)</label>
-                    <input type="number" step="0.01" value={novoCartao.fatura_atual} onChange={(e) => setNovoCartao({...novoCartao, fatura_atual: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:border-slate-700" placeholder="Opcional" />
-                  </div>
-                </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -475,38 +404,6 @@ export default function CartoesCredito() {
         document.body
       )}
 
-      {/* MODAL 4: Fechar Fatura (Agora com visual padronizado) */}
-      {modalFechar.show && createPortal(
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col dark:bg-slate-800">
-            <div className="shrink-0 bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white rounded-t-3xl">
-              <h2 className="font-bold text-lg flex items-center gap-2"><Send size={20} /> Fechar Fatura</h2>
-              <button onClick={() => setModalFechar({ show: false, cartao: null })} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
-            </div>
-            <div className="p-6 text-center">
-              <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle size={32} />
-              </div>
-              <h2 className="font-bold text-xl text-slate-800 mb-2 dark:text-slate-100">Confirma o Fechamento?</h2>
-              <p className="text-slate-500 text-sm mb-6 dark:text-slate-400">
-                O valor de <strong className="text-slate-800 dark:text-slate-100">{formatarMoeda(modalFechar.cartao?.fatura_atual)}</strong> será enviado para a tela de <strong>Contas a Pagar</strong>. <br/><br/>
-                O limite deste cartão continuará bloqueado até que você registre o pagamento na outra tela.
-              </p>
-              
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setModalFechar({ show: false, cartao: null })} className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors dark:text-slate-200 dark:bg-slate-700">
-                  Cancelar
-                </button>
-                <button type="button" onClick={confirmarFechamento} disabled={salvando} className="flex-1 py-3 bg-gradient-to-r from-blue-900 to-cyan-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex justify-center items-center gap-2">
-                  {salvando ? <Loader2 className="animate-spin w-5 h-5"/> : 'Sim, Fechar'}
-                </button>
-              </div>
-            </div>
           </div>
-        </div>,
-        document.body
-      )}
-
-    </div>
   )
 }
