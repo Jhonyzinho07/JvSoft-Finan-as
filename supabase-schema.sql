@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS categorias (
   icone VARCHAR(50) DEFAULT '📁',
   cor VARCHAR(7) DEFAULT '#6b7280',
   tipo VARCHAR(20) DEFAULT 'despesa', -- 'receita' ou 'despesa'
-  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- 2. Tabela de Contas Bancárias
@@ -21,7 +22,8 @@ CREATE TABLE IF NOT EXISTS contas_bancarias (
   saldo_inicial DECIMAL(15,2) DEFAULT 0,
   instituicao VARCHAR(100),
   ativo BOOLEAN DEFAULT true,
-  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- 3. Tabela de Credores
@@ -31,7 +33,8 @@ CREATE TABLE IF NOT EXISTS credores (
   emoji VARCHAR(10) DEFAULT '💰',
   cor VARCHAR(7) DEFAULT '#6b7280',
   tipo VARCHAR(50) DEFAULT 'outro',
-  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- 4. Tabela de Receitas Fixas
@@ -43,7 +46,8 @@ CREATE TABLE IF NOT EXISTS receitas (
   categoria_id UUID REFERENCES categorias(id),
   conta_id UUID REFERENCES contas_bancarias(id),
   ativo BOOLEAN DEFAULT true,
-  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- 5. Tabela de Dívidas/Parcelamentos
@@ -61,7 +65,8 @@ CREATE TABLE IF NOT EXISTS dividas (
   taxa_juros DECIMAL(5,2) DEFAULT 0,
   status VARCHAR(20) DEFAULT 'pendente', -- 'pendente', 'pago', 'cancelado'
   observacoes TEXT,
-  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- 6. Tabela de Contas de Consumo (água, luz, etc.)
@@ -77,7 +82,8 @@ CREATE TABLE IF NOT EXISTS contas (
   conta_id UUID REFERENCES contas_bancarias(id),
   mes_referencia VARCHAR(7), -- Formato: MM/YYYY
   observacoes TEXT,
-  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- 7. Tabela de Transações
@@ -93,7 +99,8 @@ CREATE TABLE IF NOT EXISTS transacoes (
   conta_consumo_id UUID REFERENCES contas(id),
   observacoes TEXT,
   recorrente BOOLEAN DEFAULT false,
-  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- 8. Tabela de Cartões de Crédito
@@ -107,7 +114,8 @@ CREATE TABLE IF NOT EXISTS cartoes_credito (
   dia_vencimento INTEGER,
   dia_fechamento INTEGER,
   ativo BOOLEAN DEFAULT true,
-  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- 9. Tabela de Faturas de Cartão
@@ -121,7 +129,8 @@ CREATE TABLE IF NOT EXISTS cartao_faturas (
   vencimento DATE,
   data_pagamento DATE,
   status VARCHAR(20) DEFAULT 'aberta', -- 'aberta', 'fechada', 'paga', 'atrasada'
-  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- 10. Tabela de Metas Financeiras
@@ -136,7 +145,8 @@ CREATE TABLE IF NOT EXISTS metas_financeiras (
   categoria VARCHAR(50), -- 'viagem', 'casa', 'carro', 'emergencia', 'investimento'
   concluida BOOLEAN DEFAULT false,
   data_conclusao DATE,
-  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- 11. Tabela de Orçamentos
@@ -149,7 +159,8 @@ CREATE TABLE IF NOT EXISTS orcamentos (
   ano INTEGER NOT NULL,
   alerta_percentual INTEGER DEFAULT 80, -- Alertar quando atingir X% do orçamento
   criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(categoria_id, mes, ano)
+  UNIQUE(categoria_id, mes, ano),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- 12. Tabela de Investimentos
@@ -166,7 +177,8 @@ CREATE TABLE IF NOT EXISTS investimentos (
   corretora VARCHAR(100),
   observacoes TEXT,
   criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- ============================================
@@ -226,18 +238,42 @@ ALTER TABLE orcamentos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE investimentos ENABLE ROW LEVEL SECURITY;
 
 -- Criar políticas para permitir acesso total (em produção, ajuste conforme autenticação)
-CREATE POLICY "Acesso total às categorias" ON categorias FOR ALL USING (true);
-CREATE POLICY "Acesso total às contas bancárias" ON contas_bancarias FOR ALL USING (true);
-CREATE POLICY "Acesso total aos credores" ON credores FOR ALL USING (true);
-CREATE POLICY "Acesso total às receitas" ON receitas FOR ALL USING (true);
-CREATE POLICY "Acesso total às dívidas" ON dividas FOR ALL USING (true);
-CREATE POLICY "Acesso total às contas" ON contas FOR ALL USING (true);
-CREATE POLICY "Acesso total às transações" ON transacoes FOR ALL USING (true);
-CREATE POLICY "Acesso total aos cartões" ON cartoes_credito FOR ALL USING (true);
-CREATE POLICY "Acesso total às faturas" ON cartao_faturas FOR ALL USING (true);
-CREATE POLICY "Acesso total às metas" ON metas_financeiras FOR ALL USING (true);
-CREATE POLICY "Acesso total aos orçamentos" ON orcamentos FOR ALL USING (true);
-CREATE POLICY "Acesso total aos investimentos" ON investimentos FOR ALL USING (true);
+DROP POLICY IF EXISTS "Acesso total às categorias" ON categorias;
+CREATE POLICY "Acesso total às categorias" ON categorias
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Acesso total às contas bancárias" ON contas_bancarias;
+CREATE POLICY "Acesso total às contas bancárias" ON contas_bancarias
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Acesso total aos credores" ON credores;
+CREATE POLICY "Acesso total aos credores" ON credores
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Acesso total às receitas" ON receitas;
+CREATE POLICY "Acesso total às receitas" ON receitas
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Acesso total às dívidas" ON dividas;
+CREATE POLICY "Acesso total às dívidas" ON dividas
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Acesso total às contas" ON contas;
+CREATE POLICY "Acesso total às contas" ON contas
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Acesso total às transações" ON transacoes;
+CREATE POLICY "Acesso total às transações" ON transacoes
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Acesso total aos cartões" ON cartoes_credito;
+CREATE POLICY "Acesso total aos cartões" ON cartoes_credito
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Acesso total às faturas" ON cartao_faturas;
+CREATE POLICY "Acesso total às faturas" ON cartao_faturas
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Acesso total às metas" ON metas_financeiras;
+CREATE POLICY "Acesso total às metas" ON metas_financeiras
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Acesso total aos orçamentos" ON orcamentos;
+CREATE POLICY "Acesso total aos orçamentos" ON orcamentos
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Acesso total aos investimentos" ON investimentos;
+CREATE POLICY "Acesso total aos investimentos" ON investimentos
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- ============================================
 -- ÍNDICES PARA PERFORMANCE
@@ -282,3 +318,64 @@ $$ LANGUAGE plpgsql;
 -- ============================================
 -- FIM DO SCRIPT
 -- ============================================
+
+
+-- ============================================
+-- TRIGGER PARA PREENCHER USER_ID AUTOMATICAMENTE
+-- ============================================
+
+CREATE OR REPLACE FUNCTION public.set_user_id_on_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.user_id := auth.uid();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS set_user_id_categorias ON categorias;
+CREATE TRIGGER set_user_id_categorias BEFORE INSERT ON categorias
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+DROP TRIGGER IF EXISTS set_user_id_contas_bancarias ON contas_bancarias;
+CREATE TRIGGER set_user_id_contas_bancarias BEFORE INSERT ON contas_bancarias
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+DROP TRIGGER IF EXISTS set_user_id_credores ON credores;
+CREATE TRIGGER set_user_id_credores BEFORE INSERT ON credores
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+DROP TRIGGER IF EXISTS set_user_id_receitas ON receitas;
+CREATE TRIGGER set_user_id_receitas BEFORE INSERT ON receitas
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+DROP TRIGGER IF EXISTS set_user_id_dividas ON dividas;
+CREATE TRIGGER set_user_id_dividas BEFORE INSERT ON dividas
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+DROP TRIGGER IF EXISTS set_user_id_contas ON contas;
+CREATE TRIGGER set_user_id_contas BEFORE INSERT ON contas
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+DROP TRIGGER IF EXISTS set_user_id_transacoes ON transacoes;
+CREATE TRIGGER set_user_id_transacoes BEFORE INSERT ON transacoes
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+DROP TRIGGER IF EXISTS set_user_id_cartoes_credito ON cartoes_credito;
+CREATE TRIGGER set_user_id_cartoes_credito BEFORE INSERT ON cartoes_credito
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+DROP TRIGGER IF EXISTS set_user_id_cartao_faturas ON cartao_faturas;
+CREATE TRIGGER set_user_id_cartao_faturas BEFORE INSERT ON cartao_faturas
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+DROP TRIGGER IF EXISTS set_user_id_metas_financeiras ON metas_financeiras;
+CREATE TRIGGER set_user_id_metas_financeiras BEFORE INSERT ON metas_financeiras
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+DROP TRIGGER IF EXISTS set_user_id_orcamentos ON orcamentos;
+CREATE TRIGGER set_user_id_orcamentos BEFORE INSERT ON orcamentos
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
+
+DROP TRIGGER IF EXISTS set_user_id_investimentos ON investimentos;
+CREATE TRIGGER set_user_id_investimentos BEFORE INSERT ON investimentos
+    FOR EACH ROW EXECUTE FUNCTION set_user_id_on_insert();
