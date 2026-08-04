@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useRealtime } from './hooks/useRealtime'
 import { supabase } from './supabaseClient'
 import { formatarMoeda } from './utils/helpers'
 import { useToast } from './components/Toast'
@@ -15,6 +16,9 @@ const MESES = [
 
 function ContasPagar() {
   const toast = useToast()
+  useRealtime(['contas', 'categorias'], () => {
+    carregarContas()
+  })
   const dataHoje = new Date()
 
   const [contas, setContas] = useState([])

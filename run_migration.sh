@@ -1,2 +1,3 @@
 #!/bin/bash
-# Using the Supabase MCP to apply the SQL
+# Apply this migration in the Supabase UI later
+echo "Realtime added to supabase-schema.sql"

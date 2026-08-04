@@ -449,3 +449,25 @@ SELECT cron.schedule(
   $do$;
   $$
 );
+
+-- ============================================
+-- 15. HABILITAR REALTIME (SUBSCRIPTIONS)
+-- ============================================
+-- Adicionar as tabelas na publicação supabase_realtime
+BEGIN;
+  DROP PUBLICATION IF EXISTS supabase_realtime;
+  CREATE PUBLICATION supabase_realtime;
+COMMIT;
+
+ALTER PUBLICATION supabase_realtime ADD TABLE categorias;
+ALTER PUBLICATION supabase_realtime ADD TABLE contas_bancarias;
+ALTER PUBLICATION supabase_realtime ADD TABLE credores;
+ALTER PUBLICATION supabase_realtime ADD TABLE receitas;
+ALTER PUBLICATION supabase_realtime ADD TABLE dividas;
+ALTER PUBLICATION supabase_realtime ADD TABLE contas;
+ALTER PUBLICATION supabase_realtime ADD TABLE transacoes;
+ALTER PUBLICATION supabase_realtime ADD TABLE cartoes_credito;
+ALTER PUBLICATION supabase_realtime ADD TABLE cartao_faturas;
+ALTER PUBLICATION supabase_realtime ADD TABLE metas_financeiras;
+ALTER PUBLICATION supabase_realtime ADD TABLE orcamentos;
+ALTER PUBLICATION supabase_realtime ADD TABLE investimentos;

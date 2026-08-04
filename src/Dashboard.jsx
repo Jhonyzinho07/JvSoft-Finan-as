@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useRealtime } from './hooks/useRealtime'
 import { supabase } from './supabaseClient'
 import { formatarMoeda } from './utils/helpers'
 import { useTheme } from './contexts/ThemeContext'
@@ -204,6 +205,11 @@ function BarraDupla({ pctPago, cor }) {
 
 export default function Dashboard() {
   const { isDark } = useTheme()
+  const queryClient = useQueryClient()
+
+  useRealtime(['transacoes', 'contas', 'cartoes'], () => {
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+  })
 
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard'],
