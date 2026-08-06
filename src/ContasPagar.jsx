@@ -426,6 +426,9 @@ function ContasPagar() {
                 <h2 className="text-lg font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2 dark:text-slate-200">
                   <Calendar size={20} className="text-blue-600" />
                   {data}
+                  {contasAgrupadas[data].filter(c => !c.status_pago).reduce((acc, c) => acc + Number(c.valor), 0) > 0 && (
+                    <span> - {formatarMoeda(contasAgrupadas[data].filter(c => !c.status_pago).reduce((acc, c) => acc + Number(c.valor), 0))}</span>
+                  )}
                 </h2>
               </div>
               
