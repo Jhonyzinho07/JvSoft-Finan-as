@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { CreditCard, Plus, Trash2, Loader2, Nfc, Edit, CheckCircle, X, DollarSign, Send, AlertTriangle } from 'lucide-react'
+import { CreditCard, Plus, Trash2, Loader2, Nfc, Edit, X, DollarSign, } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import { formatarMoeda } from '../utils/helpers'
 import { useToast } from '../components/Toast'
@@ -69,84 +69,23 @@ export default function CartoesCredito() {
       const numParcelas = parseInt(modalGasto.parcelas) || 1
       const descricaoOriginal = modalGasto.descricao || 'Compra Rápida'
       const cartao = modalGasto.cartao
+      const t0 = performance.now()
 
-      // Primeiro precisamos achar/criar uma categoria padrão para Cartão se não for fornecida
-      const { data: categoriaData } = await supabase.from('categorias').select('id').eq('nome', 'Cartão').single()
-      let categoriaId = categoriaData ? categoriaData.id : null
+      const { error } = await supabase.rpc('lancar_gasto_cartao', {
+        p_valor_gasto: valorGasto,
+        p_num_parcelas: numParcelas,
+        p_descricao_original: descricaoOriginal,
+        p_cartao_id: cartao.id,
+        p_cartao_nome: cartao.nome,
+        p_cartao_dia_fechamento: cartao.dia_fechamento || null,
+        p_cartao_dia_vencimento: cartao.dia_vencimento || null
+      })
 
-      if (!categoriaId) {
-        const { data: novaCat } = await supabase.from('categorias').insert([{ nome: 'Cartão', tipo: 'despesa', cor: '#ef4444' }]).select().single()
-        if (novaCat) categoriaId = novaCat.id
-      }
+      const t1 = performance.now()
+      console.log(`Performance (lancar_gasto_cartao): ${t1 - t0} ms`)
 
+      if (error) throw error
 
-      let transacoesInserir = []
-      let dataBase = new Date()
-
-      for (let i = 0; i < numParcelas; i++) {
-        let valorFatura = numParcelas > 1 ? parseFloat((valorGasto / numParcelas).toFixed(2)) : valorGasto
-        let descricaoTx = numParcelas > 1 ? `${descricaoOriginal} - Parcela ${i + 1}/${numParcelas}` : descricaoOriginal
-
-        let dataVencimentoFatura = new Date(dataBase)
-        dataVencimentoFatura.setMonth(dataBase.getMonth() + i)
-
-        if (cartao.dia_fechamento && cartao.dia_vencimento) {
-          let mesAjuste = dataBase.getMonth() + i
-          if (i === 0 && dataBase.getDate() >= cartao.dia_fechamento) {
-            mesAjuste += 1 // Compra após o fechamento cai no mês seguinte
-          }
-          dataVencimentoFatura = new Date(dataBase.getFullYear(), mesAjuste, cartao.dia_vencimento)
-        }
-
-        const dataVencString = dataVencimentoFatura.toISOString().split('T')[0]
-        const mesAno = `${String(dataVencimentoFatura.getMonth() + 1).padStart(2, '0')}/${dataVencimentoFatura.getFullYear()}`
-        const descricaoFatura = `Fatura: ${cartao.nome}`
-
-        // Procurar Fatura Aberta no mês exato
-        let { data: faturas } = await supabase
-          .from('contas')
-          .select('id, valor, data_vencimento')
-          .eq('descricao', descricaoFatura)
-          .eq('status_pago', false)
-
-        let faturaId = null
-
-        let faturaExistente = faturas?.find(f => {
-           if(!f.data_vencimento) return false;
-           const dv = new Date(f.data_vencimento + 'T12:00:00');
-           return dv.getMonth() === dataVencimentoFatura.getMonth() && dv.getFullYear() === dataVencimentoFatura.getFullYear();
-        });
-
-        if (faturaExistente) {
-          const novoValor = Number(faturaExistente.valor) + valorFatura;
-          await supabase.from('contas').update({ valor: novoValor }).eq('id', faturaExistente.id);
-          faturaId = faturaExistente.id;
-        } else {
-          const { data: novaFatura, error: errFatura } = await supabase.from('contas').insert([{
-            descricao: descricaoFatura,
-            valor: valorFatura,
-            data_vencimento: dataVencString,
-            status_pago: false,
-            categoria_id: categoriaId,
-            mes_referencia: mesAno
-          }]).select().single();
-          if (!errFatura && novaFatura) {
-             faturaId = novaFatura.id;
-          }
-        }
-
-        transacoesInserir.push({
-          tipo: 'despesa',
-          descricao: descricaoTx,
-          valor: valorFatura,
-          data_transacao: numParcelas > 1 ? dataVencString : new Date().toISOString().split('T')[0],
-          categoria_id: categoriaId,
-          cartao_id: cartao.id,
-          conta_consumo_id: faturaId // Link para apagar ou abater depois
-        })
-      }
-
-      await supabase.from('transacoes').insert(transacoesInserir)
       
       setModalGasto({ show: false, cartao: null, valor: '', descricao: 'Compra Rápida', parcelas: '1' })
       carregarCartoes()
