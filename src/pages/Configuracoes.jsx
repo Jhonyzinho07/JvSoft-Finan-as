@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { validarSenha, REGRA_SENHA } from '../utils/senha'
 import ModalOverlay from '../components/ModalOverlay'
 import { supabase } from '../supabaseClient'
 import { useToast } from '../components/Toast'
@@ -190,8 +191,9 @@ export default function Configuracoes() {
       toast.warning('As senhas não coincidem.')
       return
     }
-    if (senhaNova.length < 6) {
-      toast.warning('A nova senha precisa ter pelo menos 6 caracteres.')
+    const problemaSenha = validarSenha(senhaNova)
+    if (problemaSenha) {
+      toast.warning(problemaSenha)
       return
     }
     setSalvando(true)
@@ -471,10 +473,11 @@ export default function Configuracoes() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nova Senha</label>
-                <input type="password" required minLength={6} value={senhaNova}
+                <input type="password" required minLength={8} autoComplete="new-password" value={senhaNova}
                   onChange={e => setSenhaNova(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
-                  placeholder="Mínimo 6 caracteres" />
+                  placeholder="Mínimo 8 caracteres" />
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{REGRA_SENHA}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Confirmar Nova Senha</label>
@@ -488,7 +491,7 @@ export default function Configuracoes() {
                 {senhaConf && senhaNova !== senhaConf && (
                   <p className="text-xs text-red-500 mt-1">As senhas não coincidem.</p>
                 )}
-                {senhaConf && senhaNova === senhaConf && senhaConf.length >= 6 && (
+                {senhaConf && senhaNova === senhaConf && senhaConf.length >= 8 && (
                   <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1"><Check size={12} /> Senhas coincidem!</p>
                 )}
               </div>

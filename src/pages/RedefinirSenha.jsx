@@ -3,14 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { KeyRound, Loader2 } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import { useToast } from '../components/Toast'
+import { validarSenha, REGRA_SENHA } from '../utils/senha'
 
-// Mesmas regras usadas no cadastro (Login.jsx)
-function validarSenha(senha) {
-  if (senha.length < 8) return 'A senha deve ter pelo menos 8 caracteres.'
-  if (!/\d/.test(senha)) return 'A senha deve conter pelo menos um número.'
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(senha)) return 'A senha deve conter pelo menos um caractere especial.'
-  return null
-}
 
 /**
  * Destino do link "Esqueci minha senha" (redirectTo: /reset-password).
@@ -68,7 +62,7 @@ export default function RedefinirSenha() {
             <input type="password" required autoComplete="new-password" value={confirmacao} onChange={(e) => setConfirmacao(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Mínimo de 8 caracteres, com pelo menos um número e um caractere especial.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{REGRA_SENHA}</p>
 
           {erro && <p className="text-sm text-red-600 dark:text-red-400">{erro}</p>}
 

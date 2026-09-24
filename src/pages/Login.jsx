@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { validarSenha, REGRA_SENHA } from '../utils/senha';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useToast } from '../components/Toast';
@@ -72,17 +73,6 @@ export default function Login() {
     return () => clearTimeout(delayDebounce);
   }, [email, isSignUp, isForgotPassword]);
 
-  const validatePassword = (pass) => {
-    const minLength = 8;
-    const hasNumber = /\d/;
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
-
-    if (pass.length < minLength) return 'A senha deve ter pelo menos 8 caracteres.';
-    if (!hasNumber.test(pass)) return 'A senha deve conter pelo menos um número.';
-    if (!hasSpecialChar.test(pass)) return 'A senha deve conter pelo menos um caractere especial.';
-    return null;
-  };
-
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     if (!email) {
@@ -135,7 +125,7 @@ export default function Login() {
     try {
 
       if (isSignUp) {
-        const passwordError = validatePassword(password);
+        const passwordError = validarSenha(password);
         if (passwordError) {
           setError(passwordError);
           setLoading(false);
@@ -347,6 +337,9 @@ export default function Login() {
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
+                  {isSignUp && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">{REGRA_SENHA}</p>
+                  )}
                 </div>
               )}
 
