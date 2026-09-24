@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import CampoMoeda from '../components/CampoMoeda'
+import { moedaParaNumero } from '../utils/moeda'
 import ModalOverlay from '../components/ModalOverlay'
 import { PieChart, Plus, Trash2, AlertTriangle, Loader2, Target, CheckCircle } from 'lucide-react'
 import { supabase } from '../supabaseClient'
@@ -80,13 +82,18 @@ export default function Orcamentos() {
 
   const handleSalvar = async (e) => {
     e.preventDefault()
+    const limite = moedaParaNumero(novoLimite)
+    if (isNaN(limite) || limite <= 0) {
+      toast.warning('Informe o limite mensal.')
+      return
+    }
     setSalvando(true)
     try {
       const dataAtual = new Date()
-      
+
       const { error } = await supabase.from('orcamentos').insert([{
         categoria_id: novaCategoriaId,
-        limite_mensal: parseFloat(novoLimite.replace(',', '.')), // <-- CORRIGIDO AQUI!
+        limite_mensal: limite,
         mes: dataAtual.getMonth() + 1,
         ano: dataAtual.getFullYear()
       }])
@@ -252,15 +259,7 @@ export default function Orcamentos() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Qual o limite mensal? (R$)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  required
-                  value={novoLimite}
-                  onChange={(e) => setNovoLimite(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-200"
-                  placeholder="Ex: 800.00"
-                />
+                <CampoMoeda required value={novoLimite} onChange={setNovoLimite} />
               </div>
 
               <div className="flex gap-3 pt-4">

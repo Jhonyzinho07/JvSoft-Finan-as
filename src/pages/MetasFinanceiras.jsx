@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import CampoMoeda from '../components/CampoMoeda'
+import { moedaParaNumero, numeroParaMoeda } from '../utils/moeda'
 import ModalOverlay from '../components/ModalOverlay'
 import { 
   Target, Plus, Trash2, TrendingUp, TrendingDown, Calendar, Loader2, X, Award, 
@@ -61,27 +63,13 @@ export default function MetasFinanceiras() {
 
   useEffect(() => { carregarMetas() }, [])
 
-  // --- NOVA MÁSCARA MONETÁRIA INTELIGENTE (Padrão PIX) ---
-  const aplicarMascaraMoeda = (valor) => {
-    if (!valor) return ''
-    const apenasNumeros = valor.toString().replace(/\D/g, '')
-    if (apenasNumeros === '') return ''
-    const valorFloat = parseInt(apenasNumeros, 10) / 100
-    return valorFloat.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  }
-
-  // --- FUNÇÃO PARA CONVERTER A STRING PT-BR DE VOLTA PARA FLOAT DO BANCO ---
-  const converterParaFloat = (valorString) => {
-    if (!valorString) return 0
-    return parseFloat(valorString.replace(/\./g, '').replace(',', '.'))
-  }
 
   const handleSalvarMeta = async (e) => {
     e.preventDefault()
     setSalvando(true)
     
     try {
-      const valorObj = converterParaFloat(novaMeta.valor_objetivo)
+      const valorObj = moedaParaNumero(novaMeta.valor_objetivo)
       if (isNaN(valorObj) || valorObj <= 0) { toast.warning('Digite um valor válido.'); setSalvando(false); return }
 
       const { error } = await supabase.from('metas').insert([{
@@ -112,7 +100,7 @@ export default function MetasFinanceiras() {
     setSalvando(true)
     
     try {
-      const valorObj = converterParaFloat(metaEditando.valor_objetivo)
+      const valorObj = moedaParaNumero(metaEditando.valor_objetivo)
       if (isNaN(valorObj) || valorObj <= 0) { toast.warning('Digite um valor válido.'); setSalvando(false); return }
 
       const { error } = await supabase.from('metas').update({
@@ -142,7 +130,7 @@ export default function MetasFinanceiras() {
     setSalvando(true)
     
     try {
-      const valor = converterParaFloat(valorMovimento)
+      const valor = moedaParaNumero(valorMovimento)
       if (isNaN(valor) || valor <= 0) { toast.warning('Digite um valor válido.'); setSalvando(false); return }
 
       if (tipoMovimento === 'resgatar' && valor > metaSelecionada.valor_atual) {
@@ -239,7 +227,7 @@ export default function MetasFinanceiras() {
                       setMetaEditando({
                         ...meta,
                         // Formata o valor antes de jogar pro Modal
-                        valor_objetivo: aplicarMascaraMoeda(meta.valor_objetivo)
+                        valor_objetivo: numeroParaMoeda(meta.valor_objetivo)
                       }); 
                       setShowEditarModal(true);
                     }}
@@ -335,17 +323,7 @@ export default function MetasFinanceiras() {
               
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor Objetivo</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">R$</span>
-                  <input 
-                    required 
-                    type="text" 
-                    value={novaMeta.valor_objetivo} 
-                    onChange={e => setNovaMeta({...novaMeta, valor_objetivo: aplicarMascaraMoeda(e.target.value)})} 
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-100" 
-                    placeholder="0,00" 
-                  />
-                </div>
+                <CampoMoeda required value={novaMeta.valor_objetivo} onChange={(valor_objetivo) => setNovaMeta({...novaMeta, valor_objetivo})} />
               </div>
               
               <div>
@@ -403,17 +381,7 @@ export default function MetasFinanceiras() {
               
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor Objetivo</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">R$</span>
-                  <input 
-                    required 
-                    type="text" 
-                    value={metaEditando.valor_objetivo} 
-                    onChange={e => setMetaEditando({...metaEditando, valor_objetivo: aplicarMascaraMoeda(e.target.value)})} 
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-100" 
-                    placeholder="0,00"
-                  />
-                </div>
+                <CampoMoeda required value={metaEditando.valor_objetivo} onChange={(valor_objetivo) => setMetaEditando({...metaEditando, valor_objetivo})} />
               </div>
               
               <div>
@@ -480,17 +448,8 @@ export default function MetasFinanceiras() {
                 </p>
               )}
 
-              <div className="relative mb-6">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-xl">R$</span>
-                <input 
-                  required 
-                  type="text" 
-                  value={valorMovimento} 
-                  onChange={e => setValorMovimento(aplicarMascaraMoeda(e.target.value))} 
-                  className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200 font-bold text-3xl text-slate-800 text-center dark:border-slate-700 dark:text-slate-100" 
-                  autoFocus 
-                  placeholder="0,00" 
-                />
+              <div className="mb-6">
+                <CampoMoeda grande autoFocus required value={valorMovimento} onChange={setValorMovimento} />
               </div>
               <button 
                 type="submit" 

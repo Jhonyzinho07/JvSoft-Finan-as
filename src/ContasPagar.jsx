@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import CampoMoeda from './components/CampoMoeda'
+import { moedaParaNumero, numeroParaMoeda } from './utils/moeda'
 import ModalOverlay from './components/ModalOverlay'
 import { useRealtime } from './hooks/useRealtime'
 import { supabase } from './supabaseClient'
@@ -43,19 +45,6 @@ function ContasPagar() {
   const [modalEditar, setModalEditar] = useState({ show: false, conta: null })
   const [contaEditando, setContaEditando] = useState({ descricao: '', valor: '', data_vencimento: '', categoria_id: '' })
 
-  // --- MÁSCARAS MONETÁRIAS ---
-  const aplicarMascaraMoeda = (valor) => {
-    if (!valor) return ''
-    const apenasNumeros = valor.toString().replace(/\D/g, '')
-    if (apenasNumeros === '') return ''
-    const valorFloat = parseInt(apenasNumeros, 10) / 100
-    return valorFloat.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  }
-
-  const converterParaFloat = (valorString) => {
-    if (!valorString) return 0
-    return parseFloat(valorString.toString().replace(/\./g, '').replace(',', '.'))
-  }
 
 
   const carregarCategorias = async () => {
@@ -90,6 +79,7 @@ function ContasPagar() {
           valor: c.valor,
           vencimento: vencimentoFormatado,
           data_vencimento: c.data_vencimento,
+          cartao_id: c.cartao_id || null,
           status_pago: c.status_pago,
           categoria_id: c.categoria_id,
           dia_ordenacao: c.data_vencimento ? new Date(c.data_vencimento + 'T12:00:00').getDate() : 99,
@@ -144,7 +134,7 @@ function ContasPagar() {
     setSalvando(true)
     
     try {
-      const valorFormatado = converterParaFloat(novaConta.valor)
+      const valorFormatado = moedaParaNumero(novaConta.valor)
       const totalParcelas = parseInt(novaConta.parcelas) || 1
 
       if (isNaN(valorFormatado) || valorFormatado <= 0 || !novaConta.data_vencimento) {
@@ -167,6 +157,7 @@ function ContasPagar() {
           descricao: novaConta.descricao,
           valor: valorFormatado,
           data_vencimento: novaConta.data_vencimento,
+          dia_vencimento: Number(novaConta.data_vencimento.slice(8, 10)),
           categoria_id: novaConta.categoria_id || null,
           status_pago: false
         }])
@@ -189,7 +180,7 @@ function ContasPagar() {
   const abrirEditar = (conta) => {
     setContaEditando({
       descricao: conta.descricao,
-      valor: aplicarMascaraMoeda(String(Math.round(conta.valor * 100))),
+      valor: numeroParaMoeda(conta.valor),
       data_vencimento: conta.data_vencimento || '',
       categoria_id: conta.categoria_id || ''
     })
@@ -200,25 +191,26 @@ function ContasPagar() {
     e.preventDefault()
     setSalvando(true)
     try {
-      const valorFormatado = converterParaFloat(contaEditando.valor)
+      const valorFormatado = moedaParaNumero(contaEditando.valor)
       if (isNaN(valorFormatado) || valorFormatado <= 0 || !contaEditando.data_vencimento) {
         toast.warning('Preencha o valor e a data corretamente.')
         setSalvando(false)
         return
       }
-      const { error } = await supabase.from('contas').update({
-        descricao: contaEditando.descricao,
-        valor: valorFormatado,
-        data_vencimento: contaEditando.data_vencimento,
-        categoria_id: contaEditando.categoria_id || null,
-      }).eq('id', modalEditar.conta.id)
+      const { error } = await supabase.rpc('editar_conta', {
+        p_conta_id: modalEditar.conta.id,
+        p_descricao: contaEditando.descricao,
+        p_valor: valorFormatado,
+        p_data_vencimento: contaEditando.data_vencimento,
+        p_categoria_id: contaEditando.categoria_id || null,
+      })
       if (error) throw error
       toast.success('Conta atualizada com sucesso!')
       setModalEditar({ show: false, conta: null })
       carregarContas()
     } catch (err) {
       console.error('Erro ao editar conta:', err)
-      toast.error('Não foi possível salvar as alterações. Tente novamente.')
+      toast.error(err?.code === 'P0001' ? err.message : 'Não foi possível salvar as alterações. Tente novamente.')
     } finally {
       setSalvando(false)
     }
@@ -514,17 +506,7 @@ function ContasPagar() {
                   <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">
                     {parseInt(novaConta.parcelas) > 1 ? 'Valor Total (R$)' : 'Valor (R$)'}
                   </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">R$</span>
-                    <input 
-                      type="text" 
-                      required 
-                      value={novaConta.valor} 
-                      onChange={(e) => setNovaConta({...novaConta, valor: aplicarMascaraMoeda(e.target.value)})} 
-                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-100" 
-                      placeholder="0,00" 
-                    />
-                  </div>
+                  <CampoMoeda required value={novaConta.valor} onChange={(valor) => setNovaConta({...novaConta, valor})} />
                 </div>
 
                 <div>
@@ -560,7 +542,7 @@ function ContasPagar() {
                 {parseInt(novaConta.parcelas) > 1 && novaConta.valor && (
                   <p className="text-xs text-slate-500 mt-1 dark:text-slate-400">
                     {novaConta.parcelas}x de aproximadamente{' '}
-                    {formatarMoeda(converterParaFloat(novaConta.valor) / parseInt(novaConta.parcelas))}
+                    {formatarMoeda(moedaParaNumero(novaConta.valor) / parseInt(novaConta.parcelas))}
                   </p>
                 )}
               </div>
@@ -720,16 +702,11 @@ function ContasPagar() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor (R$)</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">R$</span>
-                    <input
-                      type="text" required
-                      value={contaEditando.valor}
-                      onChange={(e) => setContaEditando({...contaEditando, valor: aplicarMascaraMoeda(e.target.value)})}
-                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-100"
-                      placeholder="0,00"
-                    />
-                  </div>
+                  <CampoMoeda required value={contaEditando.valor} disabled={Boolean(modalEditar.conta?.cartao_id)}
+                    onChange={(valor) => setContaEditando({...contaEditando, valor})} />
+                  {modalEditar.conta?.cartao_id && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Fatura de cartão: o valor é a soma das compras. Edite as compras em Transações.</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Data de Vencimento</label>
