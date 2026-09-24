@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { moedaParaNumero } from '../utils/moeda'
+import CampoMoeda from './CampoMoeda'
 import ModalOverlay from './ModalOverlay'
 import { X, Loader2 } from 'lucide-react'
 import { supabase } from '../supabaseClient'
@@ -35,7 +37,7 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const valorNumerico = parseFloat(String(valor).replace(',', '.'))
+    const valorNumerico = moedaParaNumero(valor)
     if (isNaN(valorNumerico) || valorNumerico <= 0) {
       toast.warning('Digite um valor válido.')
       return
@@ -99,7 +101,7 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
           <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-4">
             <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor</label>
-                <input type="number" step="0.01" required value={valor} onChange={(e) => setValor(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" placeholder="0.00" />
+                <CampoMoeda required value={valor} onChange={setValor} />
             </div>
             <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Categoria</label>

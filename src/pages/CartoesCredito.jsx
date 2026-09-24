@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { moedaParaNumero, numeroParaMoeda } from '../utils/moeda'
+import CampoMoeda from '../components/CampoMoeda'
 import ModalOverlay from '../components/ModalOverlay'
-import { CreditCard, Plus, Trash2, Loader2, Nfc, Edit, X, DollarSign, } from 'lucide-react'
+import { CreditCard, Plus, Trash2, Loader2, Nfc, Edit, X } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import { formatarMoeda, hojeISO } from '../utils/helpers'
 import { useToast } from '../components/Toast'
@@ -37,10 +39,15 @@ export default function CartoesCredito() {
 
   const handleSalvarNovo = async (e) => {
     e.preventDefault()
+    const limite = moedaParaNumero(novoCartao.limite)
+    if (isNaN(limite) || limite <= 0) {
+      toast.warning('Informe o limite do cartão.')
+      return
+    }
     setSalvando(true)
     const { error } = await supabase.from('cartoes').insert([{
       nome: novoCartao.nome,
-      limite: parseFloat(novoCartao.limite.replace(',', '.')),
+      limite,
       dia_fechamento: parseInt(novoCartao.dia_fechamento),
       dia_vencimento: parseInt(novoCartao.dia_vencimento),
       cor: novoCartao.cor
@@ -69,7 +76,7 @@ export default function CartoesCredito() {
     e.preventDefault()
     setSalvando(true)
     try {
-      const valorGasto = parseFloat(modalGasto.valor.replace(',', '.'))
+      const valorGasto = moedaParaNumero(modalGasto.valor)
       if (isNaN(valorGasto) || valorGasto <= 0) {
         toast.warning('Por favor, digite um valor válido.')
         setSalvando(false)
@@ -101,7 +108,7 @@ export default function CartoesCredito() {
     e.preventDefault()
     setSalvando(true)
     try {
-      const novoLimite = parseFloat(modalEditar.limite.toString().replace(',', '.'))
+      const novoLimite = moedaParaNumero(modalEditar.limite)
       if (isNaN(novoLimite) || novoLimite <= 0) {
         toast.warning('Por favor, digite um valor válido.')
         setSalvando(false)
@@ -166,7 +173,7 @@ export default function CartoesCredito() {
               <div key={cartao.id} className="relative group bg-white rounded-3xl p-4 shadow-soft border border-slate-100 flex flex-col h-full dark:bg-slate-800 dark:border-slate-700">
                 
                 <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
-                  <button onClick={() => setModalEditar({ show: true, cartao, limite: cartao.limite })} className="p-2 text-white/80 hover:text-white transition-colors" title="Editar Limite">
+                  <button onClick={() => setModalEditar({ show: true, cartao, limite: numeroParaMoeda(cartao.limite) })} className="p-2 text-white/80 hover:text-white transition-colors" title="Editar Limite">
                     <Edit size={18} />
                   </button>
                   <button onClick={() => handleExcluir(cartao.id)} className="p-2 text-white/80 hover:text-red-300 transition-colors" title="Excluir Cartão">
@@ -246,7 +253,7 @@ export default function CartoesCredito() {
                 
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Limite Total (R$)</label>
-                    <input type="number" step="0.01" required value={novoCartao.limite} onChange={(e) => setNovoCartao({...novoCartao, limite: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:border-slate-700" placeholder="0.00" />
+                    <CampoMoeda required value={novoCartao.limite} onChange={(limite) => setNovoCartao({...novoCartao, limite})} />
                   </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -294,10 +301,7 @@ export default function CartoesCredito() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor da Compra (R$)</label>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input autoFocus type="number" step="0.01" required value={modalGasto.valor} onChange={(e) => setModalGasto({...modalGasto, valor: e.target.value})} className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold dark:border-slate-700" placeholder="0.00" />
-                    </div>
+                    <CampoMoeda autoFocus required value={modalGasto.valor} onChange={(valor) => setModalGasto({...modalGasto, valor})} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Parcelas</label>
@@ -331,10 +335,7 @@ export default function CartoesCredito() {
               <form onSubmit={confirmarEdicao} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Novo Limite Total (R$)</label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input autoFocus type="number" step="0.01" required value={modalEditar.limite} onChange={(e) => setModalEditar({...modalEditar, limite: e.target.value})} className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold dark:border-slate-700" placeholder="0.00" />
-                  </div>
+                  <CampoMoeda autoFocus required value={modalEditar.limite} onChange={(limite) => setModalEditar({...modalEditar, limite})} />
                 </div>
                 <button type="submit" disabled={salvando} className="w-full py-3.5 bg-gradient-to-r from-blue-900 to-cyan-500 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex justify-center items-center gap-2">
                   {salvando ? <Loader2 className="animate-spin w-5 h-5"/> : 'Salvar Alteração'}

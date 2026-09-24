@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import CampoMoeda from '../components/CampoMoeda'
+import { moedaParaNumero, numeroParaMoeda } from '../utils/moeda'
 import ModalOverlay from '../components/ModalOverlay'
 import { useRealtime } from '../hooks/useRealtime'
 import { supabase } from '../supabaseClient'
@@ -28,12 +30,6 @@ export default function Transacoes() {
   const [modalEditar, setModalEditar]   = useState({ show: false, transacao: null })
   const [editando, setEditando]         = useState({ descricao: '', valor: '', data_transacao: '', categoria_id: '', tipo: '' })
 
-  const aplicarMascara = (v) => {
-    const n = v.replace(/\D/g, '')
-    if (!n) return ''
-    return (parseInt(n, 10) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  }
-  const converterFloat = (v) => parseFloat(v.toString().replace(/\./g, '').replace(',', '.'))
 
   const carregarDados = async () => {
     setLoading(true)
@@ -72,7 +68,7 @@ export default function Transacoes() {
   const abrirEditar = (t) => {
     setEditando({
       descricao: t.descricao,
-      valor: aplicarMascara(String(Math.round(Number(t.valor) * 100))),
+      valor: numeroParaMoeda(t.valor),
       data_transacao: t.data_transacao || '',
       categoria_id: t.categoria_id || '',
       tipo: t.tipo
@@ -80,30 +76,37 @@ export default function Transacoes() {
     setModalEditar({ show: true, transacao: t })
   }
 
+  const ehCompraCartao = Boolean(modalEditar.transacao?.fatura_id)
+  const ehPagamentoConta = Boolean(modalEditar.transacao?.conta_vinculada_id)
+  const tipoTravado = ehCompraCartao || ehPagamentoConta
+
   const salvarEdicao = async (e) => {
     e.preventDefault()
     setSalvando(true)
     try {
-      const valor = converterFloat(editando.valor)
+      const valor = moedaParaNumero(editando.valor)
       if (!valor || !editando.data_transacao) {
         toast.warning('Preencha todos os campos obrigatórios.')
         setSalvando(false)
         return
       }
-      const { error } = await supabase.from('transacoes').update({
-        descricao: editando.descricao,
-        valor,
-        data_transacao: editando.data_transacao,
-        categoria_id: editando.categoria_id || null,
-        tipo: editando.tipo
-      }).eq('id', modalEditar.transacao.id)
+      // O banco mantém a fatura (compra no cartão) e a conta (pagamento) consistentes
+      const { error } = await supabase.rpc('editar_transacao', {
+        p_transacao_id: modalEditar.transacao.id,
+        p_descricao: editando.descricao,
+        p_valor: valor,
+        p_data: editando.data_transacao,
+        p_categoria_id: editando.categoria_id || null,
+        p_tipo: editando.tipo,
+      })
       if (error) throw error
       toast.success('Transação atualizada!')
       setModalEditar({ show: false, transacao: null })
       carregarDados()
     } catch (err) {
       console.error('Erro ao salvar transação:', err)
-      toast.error('Erro ao salvar. Tente novamente.')
+      // Mensagens de regra de negócio do banco (ex.: fatura já paga) são mostradas como vieram
+      toast.error(err?.code === 'P0001' ? err.message : 'Erro ao salvar. Tente novamente.')
     } finally {
       setSalvando(false)
     }
@@ -276,12 +279,13 @@ export default function Transacoes() {
               </button>
             </div>
             <form onSubmit={salvarEdicao} className="p-6 space-y-4">
-              {/* Tipo */}
+              {/* Tipo (travado em compra no cartão e em pagamento de conta) */}
               <div className="grid grid-cols-2 gap-2">
                 {['despesa','receita'].map(tipo => (
                   <button key={tipo} type="button"
+                    disabled={tipoTravado && editando.tipo !== tipo}
                     onClick={() => setEditando({...editando, tipo})}
-                    className={`py-2.5 rounded-xl font-semibold text-sm transition-all border
+                    className={`py-2.5 rounded-xl font-semibold text-sm transition-all border disabled:opacity-40 disabled:cursor-not-allowed
                       ${editando.tipo === tipo
                         ? tipo === 'receita' ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-red-500 text-white border-red-500'
                         : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
@@ -290,6 +294,9 @@ export default function Transacoes() {
                   </button>
                 ))}
               </div>
+              {ehCompraCartao && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 -mt-2">Compra no cartão: a fatura é ajustada automaticamente ao mudar valor ou data.</p>
+              )}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Descrição</label>
                 <input type="text" required value={editando.descricao}
@@ -299,13 +306,11 @@ export default function Transacoes() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor (R$)</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">R$</span>
-                    <input type="text" required value={editando.valor}
-                      onChange={e => setEditando({...editando, valor: aplicarMascara(e.target.value)})}
-                      className="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-semibold dark:border-slate-700"
-                      placeholder="0,00" />
-                  </div>
+                  <CampoMoeda required value={editando.valor} disabled={ehPagamentoConta}
+                    onChange={(valor) => setEditando({...editando, valor})} />
+                  {ehPagamentoConta && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Pagamento de conta: edite o valor pela conta em Contas a Pagar.</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Data</label>
