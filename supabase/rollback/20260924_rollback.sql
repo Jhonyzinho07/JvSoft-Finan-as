@@ -2,11 +2,10 @@
 -- ROLLBACK das migrations de 2026-09-24 (NÃO é migration — rodar à mão
 -- no SQL Editor, e só a seção necessária).
 --
--- Nenhuma dessas migrations alterou dados. Um backup completo das tabelas,
--- feito antes de qualquer mudança, está no schema `backup_20260924`
--- (não exposto pela API). Para restaurar uma tabela a partir dele:
---   INSERT INTO public.<tabela> SELECT * FROM backup_20260924.<tabela>
---   ON CONFLICT (id) DO NOTHING;   -- recoloca linhas apagadas
+-- Nenhuma dessas migrations alterou dados. A cópia de segurança feita antes
+-- das mudanças (schema backup_20260924) foi conferida contra a produção e
+-- removida em 2026-09-24, depois da validação do app; estes comandos desfazem
+-- só a estrutura (funções, permissões, colunas), não restauram dados.
 -- =====================================================================
 
 -- ── 20260924141407_movimentar_meta ─────────────────────────────────
