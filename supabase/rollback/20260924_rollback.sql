@@ -8,6 +8,11 @@
 -- só a estrutura (funções, permissões, colunas), não restauram dados.
 -- =====================================================================
 
+-- ── 20260924200200_editar_transacao_conta_e_orcamento_unico ────────
+-- DROP FUNCTION IF EXISTS public.editar_transacao(uuid, text, numeric, date, uuid, text);
+-- DROP FUNCTION IF EXISTS public.editar_conta(uuid, text, numeric, date, uuid);
+-- DROP INDEX IF EXISTS public.orcamentos_usuario_categoria_mes_key;
+
 -- ── 20260924141407_movimentar_meta ─────────────────────────────────
 -- DROP FUNCTION IF EXISTS public.movimentar_meta(uuid, text, numeric, date);
 
