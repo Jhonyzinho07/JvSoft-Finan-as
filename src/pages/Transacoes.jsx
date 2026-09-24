@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRealtime } from '../hooks/useRealtime'
 import { supabase } from '../supabaseClient'
-import { formatarMoeda } from '../utils/helpers'
+import { formatarMoeda, intervaloDoMes } from '../utils/helpers'
 import { useToast } from '../components/Toast'
 import {
   ArrowRightLeft, TrendingUp, TrendingDown, Trash2,
@@ -37,8 +37,7 @@ export default function Transacoes() {
   const carregarDados = async () => {
     setLoading(true)
     try {
-      const primeiroDia = new Date(anoAtual, mesAtual, 1).toISOString().split('T')[0]
-      const ultimoDia   = new Date(anoAtual, mesAtual + 1, 0).toISOString().split('T')[0]
+      const { inicio: primeiroDia, fim: ultimoDia } = intervaloDoMes(anoAtual, mesAtual)
 
       const { data } = await supabase
         .from('transacoes')
@@ -52,8 +51,8 @@ export default function Transacoes() {
 
       const { data: cats } = await supabase.from('categorias').select('id, nome, tipo')
       setCategorias(cats || [])
-    } catch (_err) {
-      console.error(_err)
+    } catch (err) {
+      console.error(err)
       toast.error('Erro ao carregar transações.')
     } finally {
       setLoading(false)
@@ -101,7 +100,8 @@ export default function Transacoes() {
       toast.success('Transação atualizada!')
       setModalEditar({ show: false, transacao: null })
       carregarDados()
-    } catch (_err) {
+    } catch (err) {
+      console.error('Erro ao salvar transação:', err)
       toast.error('Erro ao salvar. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -111,28 +111,17 @@ export default function Transacoes() {
   const excluir = async (t) => {
     if (!window.confirm(`Excluir "${t.descricao}"?`)) return
     try {
-      if (t.cartao_id && t.conta_consumo_id) {
-        // Find the linked bill
-        const { data: fatura } = await supabase.from('contas').select('id, valor').eq('id', t.conta_consumo_id).single()
-
-        if (fatura) {
-          const novoValor = Number(fatura.valor) - Number(t.valor)
-          if (novoValor <= 0) {
-            // Delete the bill if it hits 0
-            await supabase.from('contas').delete().eq('id', fatura.id)
-          } else {
-            // Update the bill
-            await supabase.from('contas').update({ valor: novoValor }).eq('id', fatura.id)
-          }
-        }
-      }
-
-      const { error } = await supabase.from('transacoes').delete().eq('id', t.id)
+      // Compra no cartão: o banco desconta o valor da fatura na mesma transação
+      // (e recusa se a fatura já foi paga)
+      const { error } = await supabase.rpc('excluir_transacao', { p_transacao_id: t.id })
       if (error) throw error
       toast.success('Transação excluída.')
       carregarDados()
-    } catch (_err) {
-      toast.error('Erro ao excluir.')
+    } catch (err) {
+      console.error('Erro ao excluir transação:', err)
+      toast.error(err?.message?.includes('já foi paga')
+        ? 'A fatura desta compra já foi paga. Desfaça o pagamento da fatura antes de excluir.'
+        : 'Erro ao excluir.')
     }
   }
 

@@ -32,39 +32,33 @@ export default function Relatorios() {
   const carregarDados = async () => {
     setLoading(true)
     try {
-      const { data: manuais } = await supabase.from('transacoes').select('*, categorias(nome)')
-      const { data: receitas } = await supabase.from('receitas').select('*')
-      const { data: contas } = await supabase.from('contas').select('*, credores(nome), categorias(nome)').is('status_pago', false)
+      // Relatório = transações realizadas (fonte única). Contas em aberto ainda não
+      // são gasto, e faturas de cartão já estão representadas pelas compras.
+      // Busca paginada: o PostgREST devolve no máximo 1000 linhas por consulta.
+      const TAMANHO_PAGINA = 1000
+      const transacoes = []
+      for (let inicio = 0; ; inicio += TAMANHO_PAGINA) {
+        const { data, error } = await supabase.from('transacoes')
+          .select('tipo, descricao, valor, data_transacao, categorias(nome)')
+          .order('data_transacao', { ascending: false })
+          .order('id')
+          .range(inicio, inicio + TAMANHO_PAGINA - 1)
+        if (error) throw error
+        transacoes.push(...data)
+        if (data.length < TAMANHO_PAGINA) break
+      }
 
-      const historicoUnificado = []
-
-      manuais?.forEach(m => historicoUnificado.push({
+      const historicoUnificado = transacoes.map(m => ({
         tipo: m.tipo,
         descricao: m.descricao,
         valor: Number(m.valor),
-        data: m.data_transacao || m.criado_em,
+        data: m.data_transacao,
         categoria: m.categorias?.nome || 'Geral'
-      }))
-      
-      receitas?.forEach(r => historicoUnificado.push({
-        tipo: 'receita',
-        descricao: r.descricao,
-        valor: Number(r.valor),
-        data: r.criado_em,
-        categoria: 'Receita Fixa'
-      }))
-
-      contas?.forEach(c => historicoUnificado.push({
-        tipo: 'despesa',
-        descricao: c.descricao,
-        valor: Number(c.valor),
-        data: c.criado_em,
-        categoria: c.categorias?.nome || c.credores?.nome || 'Consumo'
       }))
 
       setDadosBrutos(historicoUnificado)
-    } catch (_error) {
-      console.error("Erro ao carregar relatórios:", _error)
+    } catch (error) {
+      console.error("Erro ao carregar relatórios:", error)
     } finally {
       setLoading(false)
     }
@@ -171,7 +165,8 @@ export default function Relatorios() {
       const desenharCabecalho = (doc, numeroPagina) => {
         try {
           doc.addImage('/logo.png', 'PNG', 14, 10, 16, 16)
-        } catch (_error) {
+        } catch (error) {
+          console.error(error)
           console.warn("Logo não encontrada.")
         }
         
@@ -285,8 +280,8 @@ export default function Relatorios() {
 
       doc.save(`JvSoft_Relatorio_${dataAtual.replace(/\//g, '-')}.pdf`)
       
-    } catch (_error) {
-      console.error("Erro completo ao gerar PDF:", _error)
+    } catch (error) {
+      console.error("Erro completo ao gerar PDF:", error)
       toast.error('Erro ao gerar o PDF. Tente novamente.')
     } finally {
       setGerandoPDF(false)

@@ -3,7 +3,7 @@ import { precacheAndRoute } from 'workbox-precaching';
 // Precaching automático de assets estáticos pelo Vite
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
@@ -26,7 +26,7 @@ self.addEventListener('push', (event) => {
       event.waitUntil(
         self.registration.showNotification(title, options)
       );
-    } catch(e) {
+    } catch {
       // Se não for JSON
       event.waitUntil(
         self.registration.showNotification('JvSoft Finanças', {

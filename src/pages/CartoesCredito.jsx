@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { CreditCard, Plus, Trash2, Loader2, Nfc, Edit, X, DollarSign, } from 'lucide-react'
 import { supabase } from '../supabaseClient'
-import { formatarMoeda } from '../utils/helpers'
+import { formatarMoeda, hojeISO } from '../utils/helpers'
 import { useToast } from '../components/Toast'
 
 export default function CartoesCredito() {
@@ -21,12 +21,15 @@ export default function CartoesCredito() {
   const carregarCartoes = async () => {
     setLoading(true)
     
-    const { data: cartoesData } = await supabase.from('cartoes').select('*').order('created_at', { ascending: true })
-    const { data: contasData } = await supabase.from('contas').select('descricao, valor').eq('status_pago', false)
+    const [{ data: cartoesData, error: erroCartoes }, { data: contasData }] = await Promise.all([
+      supabase.from('cartoes').select('*').order('created_at', { ascending: true }),
+      supabase.from('contas').select('descricao, valor, cartao_id').eq('status_pago', false),
+    ])
+    if (erroCartoes) toast.error('Erro ao carregar os cartões.')
 
     setCartoes(cartoesData || [])
     setContasPendentes(contasData || [])
-    
+
     setLoading(false)
   }
 
@@ -35,23 +38,30 @@ export default function CartoesCredito() {
   const handleSalvarNovo = async (e) => {
     e.preventDefault()
     setSalvando(true)
-    await supabase.from('cartoes').insert([{
+    const { error } = await supabase.from('cartoes').insert([{
       nome: novoCartao.nome,
       limite: parseFloat(novoCartao.limite.replace(',', '.')),
-
       dia_fechamento: parseInt(novoCartao.dia_fechamento),
       dia_vencimento: parseInt(novoCartao.dia_vencimento),
       cor: novoCartao.cor
     }])
+    setSalvando(false)
+    if (error) {
+      toast.error('Não foi possível salvar o cartão. Confira os dados e tente novamente.')
+      return
+    }
     setShowModalNovo(false)
     setNovoCartao({ nome: '', limite: '', dia_fechamento: '', dia_vencimento: '', cor: '#1e40af' })
     carregarCartoes()
-    setSalvando(false)
   }
 
   const handleExcluir = async (id) => {
     if (!window.confirm('Tem certeza que deseja excluir este cartão?')) return
-    await supabase.from('cartoes').delete().eq('id', id)
+    const { error } = await supabase.from('cartoes').delete().eq('id', id)
+    if (error) {
+      toast.error('Não foi possível excluir o cartão.')
+      return
+    }
     carregarCartoes()
   }
 
@@ -66,30 +76,21 @@ export default function CartoesCredito() {
         return
       }
 
-      const numParcelas = parseInt(modalGasto.parcelas) || 1
-      const descricaoOriginal = modalGasto.descricao || 'Compra Rápida'
-      const cartao = modalGasto.cartao
-      const t0 = performance.now()
-
+      // O banco lê nome e dias de fechamento/vencimento do próprio cartão
       const { error } = await supabase.rpc('lancar_gasto_cartao', {
-        p_valor_gasto: valorGasto,
-        p_num_parcelas: numParcelas,
-        p_descricao_original: descricaoOriginal,
-        p_cartao_id: cartao.id,
-        p_cartao_nome: cartao.nome,
-        p_cartao_dia_fechamento: cartao.dia_fechamento || null,
-        p_cartao_dia_vencimento: cartao.dia_vencimento || null
+        p_cartao_id: modalGasto.cartao.id,
+        p_valor: valorGasto,
+        p_parcelas: parseInt(modalGasto.parcelas) || 1,
+        p_descricao: modalGasto.descricao || 'Compra Rápida',
+        p_data: hojeISO(),
       })
-
-      const t1 = performance.now()
-      console.log(`Performance (lancar_gasto_cartao): ${t1 - t0} ms`)
-
       if (error) throw error
 
-      
+      toast.success('Gasto lançado na fatura!')
       setModalGasto({ show: false, cartao: null, valor: '', descricao: 'Compra Rápida', parcelas: '1' })
       carregarCartoes()
-    } catch (_error) {
+    } catch (error) {
+      console.error('Erro ao lançar gasto:', error)
       toast.error('Erro ao lançar gasto. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -107,11 +108,13 @@ export default function CartoesCredito() {
         return
       }
 
-      await supabase.from('cartoes').update({ limite: novoLimite }).eq('id', modalEditar.cartao.id)
-      
+      const { error } = await supabase.from('cartoes').update({ limite: novoLimite }).eq('id', modalEditar.cartao.id)
+      if (error) throw error
+
       setModalEditar({ show: false, cartao: null, limite: '' })
       carregarCartoes()
-    } catch (_error) {
+    } catch (error) {
+      console.error('Erro ao editar cartão:', error)
       toast.error('Erro ao editar cartão. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -149,7 +152,9 @@ export default function CartoesCredito() {
           {cartoes.map((cartao) => {
             
             const faturasPendentes = contasPendentes
-              .filter(conta => conta.descricao === `Fatura: ${cartao.nome}`)
+              .filter(conta => conta.cartao_id
+                ? conta.cartao_id === cartao.id
+                : conta.descricao === `Fatura: ${cartao.nome}`) // faturas antigas, sem cartao_id
               .reduce((total, conta) => total + Number(conta.valor), 0)
             
             const limiteComprometido = faturasPendentes

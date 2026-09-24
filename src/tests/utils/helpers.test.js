@@ -8,7 +8,10 @@ import {
   filtrarTransacoesPorPeriodo,
   agruparTransacoesPorCategoria,
   obterCorStatus,
-  gerarIDUnico
+  gerarIDUnico,
+  dataISOLocal,
+  intervaloDoMes,
+  parseDataISO
 } from '../../../src/utils/helpers';
 
 describe('Helpers', () => {
@@ -172,6 +175,32 @@ describe('Helpers', () => {
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       expect(id1).toMatch(uuidRegex);
       expect(id2).toMatch(uuidRegex);
+    });
+  });
+
+  describe('datas no fuso local', () => {
+    it('dataISOLocal usa o dia local, não o UTC', () => {
+      // 23:30 local: toISOString() poderia virar o dia seguinte em fusos negativos
+      expect(dataISOLocal(new Date(2026, 8, 24, 23, 30))).toBe('2026-09-24');
+      expect(dataISOLocal(new Date(2026, 0, 5))).toBe('2026-01-05');
+    });
+
+    it('intervaloDoMes retorna primeiro e último dia', () => {
+      expect(intervaloDoMes(2026, 1)).toEqual({ inicio: '2026-02-01', fim: '2026-02-28' });
+      expect(intervaloDoMes(2024, 1)).toEqual({ inicio: '2024-02-01', fim: '2024-02-29' });
+      expect(intervaloDoMes(2026, 11)).toEqual({ inicio: '2026-12-01', fim: '2026-12-31' });
+    });
+
+    it('parseDataISO interpreta YYYY-MM-DD como meia-noite local', () => {
+      const d = parseDataISO('2026-09-01');
+      expect(d.getFullYear()).toBe(2026);
+      expect(d.getMonth()).toBe(8);
+      expect(d.getDate()).toBe(1);
+      expect(d.getHours()).toBe(0);
+    });
+
+    it('formatarData não volta um dia para datas YYYY-MM-DD', () => {
+      expect(formatarData('2026-09-01')).toBe('01/09/2026');
     });
   });
 });

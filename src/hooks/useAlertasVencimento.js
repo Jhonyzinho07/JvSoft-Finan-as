@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { supabase } from '../supabaseClient'
-import { formatarMoeda } from '../utils/helpers'
+import { formatarMoeda, hojeISO, dataISOLocal } from '../utils/helpers'
 
 const DIAS_ANTECEDENCIA = 2 // mesma janela usada no Dashboard ("vence em breve")
 const CHAVE_ULTIMA_VERIFICACAO = 'jvsoft_ultima_verificacao_alerta'
@@ -20,7 +20,7 @@ export function useAlertasVencimento(usuario, toast) {
     if (!alertaAtivo) return
 
     // Só verifica uma vez por dia, pra não repetir o alerta a cada navegação
-    const hojeStr = new Date().toISOString().split('T')[0]
+    const hojeStr = hojeISO()
     if (localStorage.getItem(CHAVE_ULTIMA_VERIFICACAO) === hojeStr) return
 
     const verificar = async () => {
@@ -33,7 +33,7 @@ export function useAlertasVencimento(usuario, toast) {
         .from('contas')
         .select('descricao, valor, data_vencimento')
         .eq('status_pago', false)
-        .lte('data_vencimento', limite.toISOString().split('T')[0])
+        .lte('data_vencimento', dataISOLocal(limite))
 
       if (error || !contas) return
 

@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react'
 import { X, Loader2 } from 'lucide-react'
 import { supabase } from '../supabaseClient'
+import { useQueryClient } from '@tanstack/react-query'
 import { useToast } from '../components/Toast'
+import { hojeISO } from '../utils/helpers'
 
 export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
   const toast = useToast()
+  const queryClient = useQueryClient()
   const [tipo, setTipo] = useState(tipoInicial)
   const [descricao, setDescricao] = useState('')
   const [valor, setValor] = useState('')
-  const [data, _setData] = useState(new Date().toISOString().split('T')[0])
+  const [data, setData] = useState(hojeISO())
   const [categoriaId, setCategoriaId] = useState('')
   const [cartaoId, setCartaoId] = useState('')
   const [parcelas, setParcelas] = useState('1')
@@ -19,7 +22,7 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
   useEffect(() => {
     async function carregarDados() {
       const { data: catData } = await supabase.from('categorias').select('id, nome, tipo')
-      const { data: cartData } = await supabase.from('cartoes').select('id, nome, dia_vencimento')
+      const { data: cartData } = await supabase.from('cartoes').select('id, nome')
       if (catData) setCategorias(catData)
       if (cartData) setCartoes(cartData)
     }
@@ -28,109 +31,45 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
 
   const categoriasFiltradas = categorias.filter(c => c.tipo === tipo)
 
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+
+    const valorNumerico = parseFloat(String(valor).replace(',', '.'))
+    if (isNaN(valorNumerico) || valorNumerico <= 0) {
+      toast.warning('Digite um valor válido.')
+      return
+    }
+
     setLoading(true)
-
     try {
-      const valorNumerico = parseFloat(valor.replace(',', '.'))
-      
-      const numParcelas = parseInt(parcelas) || 1
-
-
       if (tipo === 'despesa' && cartaoId) {
-        const cartaoSelecionado = cartoes.find(c => c.id === cartaoId)
-        let transacoesInserir = []
-        let dataBase = new Date(data + 'T12:00:00')
-
-        for (let i = 0; i < numParcelas; i++) {
-          let valorFatura = numParcelas > 1 ? parseFloat((valorNumerico / numParcelas).toFixed(2)) : valorNumerico
-          let descricaoTx = numParcelas > 1 ? `${descricao} - Parcela ${i + 1}/${numParcelas}` : descricao
-
-          let dataVencimentoFatura = new Date(dataBase)
-          dataVencimentoFatura.setMonth(dataBase.getMonth() + i)
-
-          // Lógica de fechamento (pode não estar perfeito se ModalTransacao não trouxer dia_fechamento, mas usa o que tem)
-          if (cartaoSelecionado && cartaoSelecionado.dia_vencimento) {
-            let mesAjuste = dataBase.getMonth() + i
-            // Simplificado: Assumindo fechamento 7 dias antes do vencimento se não disponível no payload atual do modal
-            let diaFechamento = cartaoSelecionado.dia_fechamento || (cartaoSelecionado.dia_vencimento - 7);
-            if (diaFechamento < 1) diaFechamento = 1;
-
-            if (i === 0 && dataBase.getDate() >= diaFechamento) {
-              mesAjuste += 1
-            }
-            dataVencimentoFatura = new Date(dataBase.getFullYear(), mesAjuste, cartaoSelecionado.dia_vencimento)
-          }
-
-          const dataVencString = dataVencimentoFatura.toISOString().split('T')[0]
-          const mesAno = `${String(dataVencimentoFatura.getMonth() + 1).padStart(2, '0')}/${dataVencimentoFatura.getFullYear()}`
-          const descricaoFatura = `Fatura: ${cartaoSelecionado?.nome || 'Cartão'}`
-
-          let { data: faturas } = await supabase
-            .from('contas')
-            .select('id, valor, data_vencimento')
-            .eq('descricao', descricaoFatura)
-            .eq('status_pago', false)
-
-          let faturaId = null
-
-          let faturaExistente = faturas?.find(f => {
-             if(!f.data_vencimento) return false;
-             const dv = new Date(f.data_vencimento + 'T12:00:00');
-             return dv.getMonth() === dataVencimentoFatura.getMonth() && dv.getFullYear() === dataVencimentoFatura.getFullYear();
-          });
-
-          if (faturaExistente) {
-            const novoValor = Number(faturaExistente.valor) + valorFatura;
-            await supabase.from('contas').update({ valor: novoValor }).eq('id', faturaExistente.id);
-            faturaId = faturaExistente.id;
-          } else {
-            const { data: novaFatura, error: errFatura } = await supabase.from('contas').insert([{
-              descricao: descricaoFatura,
-              valor: valorFatura,
-              data_vencimento: dataVencString,
-              status_pago: false,
-              categoria_id: categoriaId || null,
-              mes_referencia: mesAno
-            }]).select().single();
-            if (!errFatura && novaFatura) {
-               faturaId = novaFatura.id;
-            }
-          }
-
-          transacoesInserir.push({
-            tipo,
-            descricao: descricaoTx,
-            valor: valorFatura,
-            data_transacao: numParcelas > 1 ? dataVencString : data,
-            categoria_id: categoriaId || null,
-            cartao_id: cartaoId,
-            conta_consumo_id: faturaId // Link
-          })
-        }
-        const { error: errTrans } = await supabase.from('transacoes').insert(transacoesInserir)
-        if (errTrans) throw errTrans
-
+        // Tudo em uma única transação no banco: fatura(s) + parcela(s)
+        const { error } = await supabase.rpc('lancar_gasto_cartao', {
+          p_cartao_id: cartaoId,
+          p_valor: valorNumerico,
+          p_parcelas: parseInt(parcelas) || 1,
+          p_descricao: descricao,
+          p_data: data,
+          p_categoria_id: categoriaId || null,
+        })
+        if (error) throw error
       } else {
-        // Fluxo normal (sem cartão)
-        const { error: errTrans } = await supabase.from('transacoes').insert([{
+        const { error } = await supabase.from('transacoes').insert([{
           tipo,
           descricao,
           valor: valorNumerico,
           data_transacao: data,
           categoria_id: categoriaId || null,
-          conta_id: null // Ignorado cartão
         }])
-
-        if (errTrans) throw errTrans
+        if (error) throw error
       }
 
+      toast.success('Transação salva!')
+      // As páginas abertas se atualizam pelo Realtime; o cache do React Query é invalidado aqui
+      queryClient.invalidateQueries()
       onClose()
-      window.location.reload()
-      
     } catch (error) {
-      console.error('Erro:', error)
+      console.error('Erro ao salvar transação:', error)
       toast.error('Não foi possível salvar a transação. Tente novamente.')
     } finally {
       setLoading(false)
@@ -170,7 +109,12 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
             </div>
           </div>
 
-                    {/* NOVO CAMPO: Escolher Cartão */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">{tipo === 'despesa' && cartaoId ? 'Data da compra' : 'Data'}</label>
+            <input type="date" required value={data} onChange={(e) => setData(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
+          </div>
+
+          {/* Pagar com cartão: a compra entra na(s) fatura(s) do cartão */}
           {tipo === 'despesa' && (
             <div className="grid grid-cols-2 gap-4">
               <div>

@@ -1,10 +1,11 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from './supabaseClient'
 import { ToastProvider, useToast } from './components/Toast'
 import { useAlertasVencimento } from './hooks/useAlertasVencimento'
 import { Plus } from 'lucide-react'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { registrarPushSeAutorizado } from './utils/push'
 
 // Componentes que carregam SEMPRE (parte do shell do app)
 import Sidebar from './components/Sidebar'
@@ -25,6 +26,7 @@ const Relatorios      = lazy(() => import('./pages/Relatorios'))
 const Configuracoes   = lazy(() => import('./pages/Configuracoes'))
 const TermosDeUso     = lazy(() => import('./pages/TermosDeUso'))
 const PoliticaPrivacidade = lazy(() => import('./pages/PoliticaPrivacidade'))
+const RedefinirSenha  = lazy(() => import('./pages/RedefinirSenha'))
 
 // Spinner reutilizado enquanto a rota carrega
 function PageLoader() {
@@ -41,6 +43,10 @@ function AppContent() {
   const [usuario, setUsuario] = useState(null)
   const [carregando, setCarregando] = useState(true)
   const location = useLocation()
+  const navigate = useNavigate()
+  // Com BrowserRouter o navigate muda a cada rota; o listener de auth usa sempre o atual
+  const navigateRef = useRef(navigate)
+  navigateRef.current = navigate
   const toast = useToast()
 
   // Verifica contas vencidas/a vencer uma vez por dia (respeita as prefs de Configurações)
@@ -52,12 +58,19 @@ function AppContent() {
       setCarregando(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUsuario(session?.user ?? null)
+      // Link de "esqueci minha senha": o Supabase abre uma sessão de recuperação
+      if (event === 'PASSWORD_RECOVERY') navigateRef.current('/reset-password', { replace: true })
     })
 
     return () => subscription.unsubscribe()
   }, [])
+
+  // Assim que houver sessão, (re)registra este aparelho para notificações push
+  useEffect(() => {
+    if (usuario) registrarPushSeAutorizado()
+  }, [usuario])
 
   if (carregando) {
     return (
@@ -127,6 +140,7 @@ function AppContent() {
               <Route path="/orcamento" element={<Orcamentos />} />
               <Route path="/relatorios" element={<Relatorios />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
+              <Route path="/reset-password" element={<RedefinirSenha />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </Suspense>

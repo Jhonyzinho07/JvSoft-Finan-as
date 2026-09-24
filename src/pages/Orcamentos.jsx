@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { PieChart, Plus, Trash2, AlertTriangle, Loader2, Target, CheckCircle } from 'lucide-react'
 import { supabase } from '../supabaseClient'
-import { formatarMoeda } from '../utils/helpers'
+import { formatarMoeda, intervaloDoMes } from '../utils/helpers'
 import { useToast } from '../components/Toast'
 
 export default function Orcamentos() {
@@ -38,8 +38,7 @@ export default function Orcamentos() {
         .order('nome')
 
       // 3. Buscar Transações do mês atual para calcular o gasto
-      const primeiroDia = new Date(anoAtual, mesAtual - 1, 1).toISOString().split('T')[0]
-      const ultimoDia = new Date(anoAtual, mesAtual, 0).toISOString().split('T')[0]
+      const { inicio: primeiroDia, fim: ultimoDia } = intervaloDoMes(anoAtual, mesAtual - 1)
 
       const { data: transacoes } = await supabase
         .from('transacoes')
@@ -67,8 +66,8 @@ export default function Orcamentos() {
 
       setCategorias(categoriasDB || [])
       setOrcamentos(orcamentosCalculados)
-    } catch (_error) {
-      console.error("Erro ao carregar orçamentos:", _error)
+    } catch (error) {
+      console.error("Erro ao carregar orçamentos:", error)
     } finally {
       setLoading(false)
     }
@@ -103,8 +102,8 @@ export default function Orcamentos() {
         setNovoLimite('')
         carregarDados()
       }
-    } catch (_error) {
-      console.error('Erro ao salvar orçamento:', _error)
+    } catch (error) {
+      console.error('Erro ao salvar orçamento:', error)
       toast.error('Erro ao salvar o orçamento. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -116,7 +115,8 @@ export default function Orcamentos() {
     try {
       await supabase.from('orcamentos').delete().eq('id', id)
       carregarDados()
-    } catch (_error) {
+    } catch (error) {
+      console.error(error)
       toast.error('Erro ao excluir orçamento. Tente novamente.')
     }
   }

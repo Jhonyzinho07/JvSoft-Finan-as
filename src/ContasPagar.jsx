@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRealtime } from './hooks/useRealtime'
 import { supabase } from './supabaseClient'
-import { formatarMoeda } from './utils/helpers'
+import { formatarMoeda, hojeISO, intervaloDoMes } from './utils/helpers'
 import { useToast } from './components/Toast'
 import { 
   CheckCircle, XCircle, Calendar, DollarSign, TrendingDown, 
@@ -67,8 +67,7 @@ function ContasPagar() {
     setErro(null)
     
     try {
-      const primeiroDia = new Date(anoAtual, mesAtual, 1).toISOString().split('T')[0]
-      const ultimoDia = new Date(anoAtual, mesAtual + 1, 0).toISOString().split('T')[0]
+      const { inicio: primeiroDia, fim: ultimoDia } = intervaloDoMes(anoAtual, mesAtual)
 
       const { data: contasConsumo, error: errorContas } = await supabase
         .from('contas')
@@ -89,6 +88,7 @@ function ContasPagar() {
           descricao: c.descricao,
           valor: c.valor,
           vencimento: vencimentoFormatado,
+          data_vencimento: c.data_vencimento,
           status_pago: c.status_pago,
           categoria_id: c.categoria_id,
           dia_ordenacao: c.data_vencimento ? new Date(c.data_vencimento + 'T12:00:00').getDate() : 99,
@@ -162,7 +162,6 @@ function ContasPagar() {
         })
         if (error) throw error
       } else {
-        const dataObj = new Date(novaConta.data_vencimento + 'T00:00:00')
         const { error } = await supabase.from('contas').insert([{
           descricao: novaConta.descricao,
           valor: valorFormatado,
@@ -206,7 +205,6 @@ function ContasPagar() {
         setSalvando(false)
         return
       }
-      const dataObj = new Date(contaEditando.data_vencimento + 'T00:00:00')
       const { error } = await supabase.from('contas').update({
         descricao: contaEditando.descricao,
         valor: valorFormatado,
@@ -234,26 +232,14 @@ function ContasPagar() {
     const novoStatus = !conta.status_pago
 
     try {
-      const { error } = await supabase.from('contas').update({ status_pago: novoStatus }).eq('id', conta.id)
+      // Uma única transação no banco: marca a conta e cria/estorna a despesa vinculada.
+      // Fatura de cartão não gera despesa (as compras já foram lançadas uma a uma).
+      const { error } = await supabase.rpc('pagar_conta', {
+        p_conta_id: conta.id,
+        p_pago: novoStatus,
+        p_data: hojeISO(),
+      })
       if (error) throw error
-
-      if (novoStatus === true) {
-        const { error: errorTransacao } = await supabase.from('transacoes').insert([{
-          tipo: 'despesa',
-          descricao: `Pgto: ${conta.descricao}`,
-          valor: conta.valor,
-          data_transacao: new Date().toISOString().split('T')[0],
-          categoria_id: conta.categoria_id || null,
-          conta_vinculada_id: conta.id // vínculo exato p/ permitir estorno seguro (não mais por descrição+valor)
-        }])
-        if (errorTransacao) throw errorTransacao
-      } else {
-        // Estorno pelo vínculo exato — evita apagar a transação de outra conta com mesma descrição/valor
-        const { error: errorEstorno } = await supabase.from('transacoes')
-          .delete()
-          .eq('conta_vinculada_id', conta.id)
-        if (errorEstorno) throw errorEstorno
-      }
 
       toast.success(novoStatus ? 'Pagamento registrado com sucesso!' : 'Pagamento desfeito.')
       carregarContas()
@@ -298,7 +284,7 @@ function ContasPagar() {
         if (errorEstorno) throw errorEstorno
       }
 
-      toast.success(modalExcluir.escopo === 'parcelamento' ? 'Parcelamento excluído com sucesso!' : 'Conta excluída com sucesso!')
+      toast.success(escopo === 'todas' ? 'Parcelamento excluído com sucesso!' : 'Conta excluída com sucesso!')
       carregarContas()
       setModalExcluir({ show: false, conta: null, escopo: 'unica' })
     } catch (err) {

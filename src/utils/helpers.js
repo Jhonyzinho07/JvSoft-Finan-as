@@ -5,9 +5,41 @@ export function formatarMoeda(valor) {
   }).format(valor)
 }
 
+// Converte uma data em 'YYYY-MM-DD' usando o fuso LOCAL do navegador.
+// (toISOString() usa UTC: no Brasil, depois das 21h, já devolve o dia seguinte)
+export function dataISOLocal(data = new Date()) {
+  const ano = data.getFullYear()
+  const mes = String(data.getMonth() + 1).padStart(2, '0')
+  const dia = String(data.getDate()).padStart(2, '0')
+  return `${ano}-${mes}-${dia}`
+}
+
+export function hojeISO() {
+  return dataISOLocal(new Date())
+}
+
+// Primeiro e último dia de um mês (mes: 0-11) no formato 'YYYY-MM-DD'
+export function intervaloDoMes(ano, mes) {
+  return {
+    inicio: dataISOLocal(new Date(ano, mes, 1)),
+    fim: dataISOLocal(new Date(ano, mes + 1, 0)),
+  }
+}
+
+// 'YYYY-MM-DD' vira meia-noite LOCAL (new Date('YYYY-MM-DD') seria meia-noite UTC,
+// o que mostra o dia anterior no Brasil)
+export function parseDataISO(data) {
+  if (data instanceof Date) return data
+  if (typeof data === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data)) {
+    const [ano, mes, dia] = data.split('-').map(Number)
+    return new Date(ano, mes - 1, dia)
+  }
+  return new Date(data)
+}
+
 export function formatarData(data) {
   if (!data) return ''
-  return new Date(data).toLocaleDateString('pt-BR')
+  return parseDataISO(data).toLocaleDateString('pt-BR')
 }
 
 export function formatarDataCompleta(data) {
@@ -30,7 +62,7 @@ export function filtrarTransacoesPorPeriodo(transacoes, periodo) {
   
   switch(periodo) {
     case 'hoje':
-      filtro.setDate(agora.getDate())
+      filtro.setHours(0, 0, 0, 0)
       break
     case 'semana':
       filtro.setDate(agora.getDate() - 7)
@@ -45,7 +77,7 @@ export function filtrarTransacoesPorPeriodo(transacoes, periodo) {
       return transacoes
   }
   
-  return transacoes.filter(t => new Date(t.data) >= filtro)
+  return transacoes.filter(t => parseDataISO(t.data) >= filtro)
 }
 
 export function agruparTransacoesPorCategoria(transacoes) {
