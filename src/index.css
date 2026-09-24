@@ -41,6 +41,40 @@ html.dark ::-webkit-scrollbar-track {
   color: #64748b; /* slate-500 */
 }
 
+/* Celular: campos com menos de 16px fazem o iPhone dar zoom sozinho ao focar.
+   Seletor de elemento: classes do Tailwind (ex.: text-3xl) continuam valendo. */
+@media (max-width: 639px) {
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+
+/* Campo de data: nunca passa da largura do contêiner e fica com a mesma
+   altura dos outros campos (o Chrome soma 1px de padding interno em cima e embaixo). */
+input[type="date"] {
+  min-width: 0;
+  max-width: 100%;
+}
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+/* Safari/iOS: o campo de data nativo centraliza o texto, encolhe quando está
+   vazio e ignora largura/padding com a aparência padrão. Regras separadas
+   porque seletores desconhecidos invalidariam a regra inteira em outros navegadores. */
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.5rem;
+}
+@supports (-webkit-touch-callout: none) {
+  input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+  }
+}
+
 /* Espaço extra em dispositivos com "notch"/home indicator (iPhone) para a barra de navegação mobile */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -88,12 +122,15 @@ html.dark ::-webkit-scrollbar-track {
   100% { background-position: 0% 50%; }
 }
 
+/* Sem "forwards": o estado final já é o padrão (opacity 1, sem transform).
+   Com forwards o transform ficava aplicado e "prendia" elementos position:fixed
+   (modais, menus) dentro do contêiner animado. */
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .animate-slide-in {
-  animation: slideIn 0.4s ease-out forwards;
+  animation: slideIn 0.4s ease-out;
 }
 
 .animate-pulse-glow {

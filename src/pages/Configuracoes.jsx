@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import ModalOverlay from '../components/ModalOverlay'
 import { supabase } from '../supabaseClient'
 import { useToast } from '../components/Toast'
 import { registrarPushSeAutorizado, desregistrarPush } from '../utils/push'
@@ -416,7 +417,7 @@ export default function Configuracoes() {
 
       {/* Modal Excluir Conta */}
       {modalExcluirConta && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalOverlay>
           <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden p-6 border border-red-100 dark:border-red-900/30">
             <div className="flex flex-col items-center text-center gap-4">
               <div className="w-16 h-16 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
@@ -446,17 +447,17 @@ export default function Configuracoes() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalOverlay>
       )}
 
 
       {/* Modal troca de senha */}
       {modalSenha && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalOverlay>
           <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
             <div className="bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2"><KeyRound size={18} /> Alterar Senha</h2>
-              <button onClick={() => setModalSenha(false)} className="p-2 hover:bg-white/20 rounded-full">
+              <button onClick={() => setModalSenha(false)} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full">
                 <X size={20} />
               </button>
             </div>
@@ -503,7 +504,7 @@ export default function Configuracoes() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalOverlay>
       )}
 
       {/* Modais de Termos e Privacidade */}

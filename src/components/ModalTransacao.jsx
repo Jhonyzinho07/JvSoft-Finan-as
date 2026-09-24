@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import ModalOverlay from './ModalOverlay'
 import { X, Loader2 } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import { useQueryClient } from '@tanstack/react-query'
@@ -77,17 +78,17 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <ModalOverlay>
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden dark:bg-slate-800">
         <div className={`bg-gradient-to-r ${tipo === 'receita' ? 'from-green-600 to-emerald-400' : 'from-red-600 to-rose-400'} px-6 py-4 flex items-center justify-between text-white`}>
           <h2 className="font-bold text-lg flex items-center gap-2">Nova Transação</h2>
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full"><X size={20} /></button>
+          <button onClick={onClose} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full"><X size={20} /></button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
           <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
-            <button type="button" onClick={() => setTipo('despesa')} className={`flex-1 py-2 text-sm font-semibold rounded-lg ${tipo === 'despesa' ? 'bg-white dark:bg-slate-700 text-red-600 dark:text-red-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}>Despesa</button>
-            <button type="button" onClick={() => setTipo('receita')} className={`flex-1 py-2 text-sm font-semibold rounded-lg ${tipo === 'receita' ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}>Receita</button>
+            <button type="button" onClick={() => setTipo('despesa')} className={`flex-1 py-2.5 text-sm font-semibold rounded-lg ${tipo === 'despesa' ? 'bg-white dark:bg-slate-700 text-red-600 dark:text-red-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}>Despesa</button>
+            <button type="button" onClick={() => setTipo('receita')} className={`flex-1 py-2.5 text-sm font-semibold rounded-lg ${tipo === 'receita' ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}>Receita</button>
           </div>
 
           <div>
@@ -95,7 +96,7 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
             <input type="text" required value={descricao} onChange={(e) => setDescricao(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" placeholder="Ex: Compras" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-4">
             <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor</label>
                 <input type="number" step="0.01" required value={valor} onChange={(e) => setValor(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" placeholder="0.00" />
@@ -116,7 +117,7 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
 
           {/* Pagar com cartão: a compra entra na(s) fatura(s) do cartão */}
           {tipo === 'despesa' && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Pagar com Cartão (Opcional)</label>
                 <select value={cartaoId} onChange={(e) => { setCartaoId(e.target.value); if (!e.target.value) setParcelas('1'); }} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none bg-white dark:border-slate-700 dark:bg-slate-800">
@@ -143,6 +144,6 @@ export default function ModalTransacao({ onClose, tipoInicial = 'despesa' }) {
           </button>
         </form>
       </div>
-    </div>
+    </ModalOverlay>
   )
 }

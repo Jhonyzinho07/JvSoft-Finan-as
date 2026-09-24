@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import ModalOverlay from './ModalOverlay'
 import { X, Download, Share, PlusSquare } from 'lucide-react'
 
 export default function ModalInstalacao() {
@@ -55,9 +56,9 @@ export default function ModalInstalacao() {
   if (!showModal) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+    <ModalOverlay onClose={fecharModal} zIndex="z-[100]">
       <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden relative">
-        <button onClick={fecharModal} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-700 rounded-full p-1 transition-colors">
+        <button onClick={fecharModal} aria-label="Fechar" className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-700 rounded-full p-2.5 transition-colors">
           <X size={20} />
         </button>
 
@@ -99,6 +100,6 @@ export default function ModalInstalacao() {
           )}
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   )
 }

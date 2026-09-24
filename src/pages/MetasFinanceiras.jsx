@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { createPortal } from 'react-dom'
+import ModalOverlay from '../components/ModalOverlay'
 import { 
   Target, Plus, Trash2, TrendingUp, TrendingDown, Calendar, Loader2, X, Award, 
   Edit, Plane, Car, Home, Heart, ShoppingBag, Book, PiggyBank, Smartphone 
@@ -319,12 +319,12 @@ export default function MetasFinanceiras() {
       )}
 
       {/* MODAL 1: Nova Meta */}
-      {showNovaMetaModal && createPortal(
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] dark:bg-slate-800">
+      {showNovaMetaModal && (
+        <ModalOverlay>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90dvh] dark:bg-slate-800">
             <div className="shrink-0 bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2"><Target size={20} /> Novo Cofre</h2>
-              <button onClick={() => setShowNovaMetaModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
+              <button onClick={() => setShowNovaMetaModal(false)} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
             </div>
             
             <form onSubmit={handleSalvarMeta} className="p-6 space-y-5 overflow-y-auto custom-scrollbar">
@@ -350,7 +350,7 @@ export default function MetasFinanceiras() {
               
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Data Limite (Opcional)</label>
-                <input type="date" value={novaMeta.data_limite} onChange={e => setNovaMeta({...novaMeta, data_limite: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200" />
+                <input type="date" value={novaMeta.data_limite} onChange={e => setNovaMeta({...novaMeta, data_limite: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-base sm:text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200" />
               </div>
 
               <div>
@@ -373,7 +373,7 @@ export default function MetasFinanceiras() {
                 <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">Cor de Destaque</label>
                 <div className="flex flex-wrap gap-3">
                   {coresDisponiveis.map(cor => (
-                    <button key={cor} type="button" onClick={() => setNovaMeta({...novaMeta, cor})} className={`w-8 h-8 rounded-full shadow-sm ${novaMeta.cor === cor ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : 'hover:scale-110 transition-transform'}`} style={{ backgroundColor: cor }} />
+                    <button key={cor} type="button" aria-label={`Cor ${cor}`} onClick={() => setNovaMeta({...novaMeta, cor})} className={`w-10 h-10 rounded-full shadow-sm ${novaMeta.cor === cor ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : 'hover:scale-110 transition-transform'}`} style={{ backgroundColor: cor }} />
                   ))}
                 </div>
               </div>
@@ -383,17 +383,16 @@ export default function MetasFinanceiras() {
               </button>
             </form>
           </div>
-        </div>,
-        document.body
+        </ModalOverlay>
       )}
 
       {/* MODAL 2: Editar Meta (Padronizado e Bonito) */}
-      {showEditarModal && metaEditando && createPortal(
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] dark:bg-slate-800">
+      {showEditarModal && metaEditando && (
+        <ModalOverlay>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90dvh] dark:bg-slate-800">
             <div className="shrink-0 bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2"><Edit size={20} /> Editar Meta</h2>
-              <button onClick={() => { setShowEditarModal(false); setMetaEditando(null) }} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
+              <button onClick={() => { setShowEditarModal(false); setMetaEditando(null) }} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
             </div>
             
             <form onSubmit={handleEditarMeta} className="p-6 space-y-5 overflow-y-auto custom-scrollbar">
@@ -419,7 +418,7 @@ export default function MetasFinanceiras() {
               
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Data Limite (Opcional)</label>
-                <input type="date" value={metaEditando.data_limite || ''} onChange={e => setMetaEditando({...metaEditando, data_limite: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200" />
+                <input type="date" value={metaEditando.data_limite || ''} onChange={e => setMetaEditando({...metaEditando, data_limite: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-base sm:text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200" />
               </div>
 
               <div>
@@ -442,7 +441,7 @@ export default function MetasFinanceiras() {
                 <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">Cor de Destaque</label>
                 <div className="flex flex-wrap gap-3">
                   {coresDisponiveis.map(cor => (
-                    <button key={cor} type="button" onClick={() => setMetaEditando({...metaEditando, cor})} className={`w-8 h-8 rounded-full shadow-sm ${metaEditando.cor === cor ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : 'hover:scale-110 transition-transform'}`} style={{ backgroundColor: cor }} />
+                    <button key={cor} type="button" aria-label={`Cor ${cor}`} onClick={() => setMetaEditando({...metaEditando, cor})} className={`w-10 h-10 rounded-full shadow-sm ${metaEditando.cor === cor ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : 'hover:scale-110 transition-transform'}`} style={{ backgroundColor: cor }} />
                   ))}
                 </div>
               </div>
@@ -452,13 +451,12 @@ export default function MetasFinanceiras() {
               </button>
             </form>
           </div>
-        </div>,
-        document.body
+        </ModalOverlay>
       )}
 
       {/* MODAL 3: Movimentação (Guardar/Resgatar com Mascara Moeda) */}
-      {showMovimentoModal && metaSelecionada && createPortal(
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+      {showMovimentoModal && metaSelecionada && (
+        <ModalOverlay>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col dark:bg-slate-800">
             <div 
               className="shrink-0 px-6 py-4 flex items-center justify-between text-white rounded-t-3xl" 
@@ -467,7 +465,7 @@ export default function MetasFinanceiras() {
               <h2 className="font-bold text-lg flex items-center gap-2">
                 {tipoMovimento === 'depositar' ? <><TrendingUp size={20} /> Guardar Dinheiro</> : <><TrendingDown size={20} /> Resgatar Dinheiro</>}
               </h2>
-              <button onClick={() => setShowMovimentoModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
+              <button onClick={() => setShowMovimentoModal(false)} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
             </div>
             
             <form onSubmit={handleMovimentar} className="p-6">
@@ -504,8 +502,7 @@ export default function MetasFinanceiras() {
               </button>
             </form>
           </div>
-        </div>,
-        document.body
+        </ModalOverlay>
       )}
 
       <style dangerouslySetInnerHTML={{__html: `

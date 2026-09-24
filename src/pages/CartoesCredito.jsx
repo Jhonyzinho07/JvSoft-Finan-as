@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { createPortal } from 'react-dom'
+import ModalOverlay from '../components/ModalOverlay'
 import { CreditCard, Plus, Trash2, Loader2, Nfc, Edit, X, DollarSign, } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import { formatarMoeda, hojeISO } from '../utils/helpers'
@@ -230,12 +230,12 @@ export default function CartoesCredito() {
       )}
 
       {/* MODAL 1: Novo Cartão */}
-      {showModalNovo && createPortal(
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh] dark:bg-slate-800">
+      {showModalNovo && (
+        <ModalOverlay>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col max-h-[90dvh] dark:bg-slate-800">
             <div className="shrink-0 bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white rounded-t-3xl">
               <h2 className="font-bold text-lg flex items-center gap-2"><CreditCard size={20} /> Novo Cartão</h2>
-              <button onClick={() => setShowModalNovo(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
+              <button onClick={() => setShowModalNovo(false)} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
             </div>
             <div className="p-6 overflow-y-auto">
               <form onSubmit={handleSalvarNovo} className="space-y-4">
@@ -262,8 +262,8 @@ export default function CartoesCredito() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-slate-200">Cor do Cartão</label>
-                  <div className="flex gap-2">
-                    {opcoesCores.map(c => <button key={c.valor} type="button" onClick={() => setNovoCartao({...novoCartao, cor: c.valor})} className={`w-8 h-8 rounded-full shadow-sm hover:scale-110 transition-transform ${novoCartao.cor === c.valor ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : ''}`} style={{ backgroundColor: c.valor }} />)}
+                  <div className="flex flex-wrap gap-2">
+                    {opcoesCores.map(c => <button key={c.valor} type="button" aria-label={c.nome} title={c.nome} onClick={() => setNovoCartao({...novoCartao, cor: c.valor})} className={`w-10 h-10 rounded-full shadow-sm hover:scale-110 transition-transform ${novoCartao.cor === c.valor ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : ''}`} style={{ backgroundColor: c.valor }} />)}
                   </div>
                 </div>
                 
@@ -273,17 +273,16 @@ export default function CartoesCredito() {
               </form>
             </div>
           </div>
-        </div>,
-        document.body
+        </ModalOverlay>
       )}
 
       {/* MODAL 2: Lançar Gasto (Agora com visual padronizado) */}
-      {modalGasto.show && createPortal(
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+      {modalGasto.show && (
+        <ModalOverlay>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col dark:bg-slate-800">
             <div className="shrink-0 bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white rounded-t-3xl">
               <h2 className="font-bold text-lg flex items-center gap-2"><Plus size={20} /> Lançar Compra</h2>
-              <button onClick={() => setModalGasto({ show: false, cartao: null, valor: '', descricao: 'Compra Rápida', parcelas: '1' })} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
+              <button onClick={() => setModalGasto({ show: false, cartao: null, valor: '', descricao: 'Compra Rápida', parcelas: '1' })} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
             </div>
             <div className="p-6">
               <p className="text-sm text-slate-500 mb-4 dark:text-slate-400">Adicionando gasto no cartão <strong className="text-slate-800 dark:text-slate-100">{modalGasto.cartao?.nome}</strong></p>
@@ -316,17 +315,16 @@ export default function CartoesCredito() {
               </form>
             </div>
           </div>
-        </div>,
-        document.body
+        </ModalOverlay>
       )}
 
       {/* MODAL 3: Editar Limite (Agora com visual padronizado) */}
-      {modalEditar.show && createPortal(
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+      {modalEditar.show && (
+        <ModalOverlay>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col dark:bg-slate-800">
             <div className="shrink-0 bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white rounded-t-3xl">
               <h2 className="font-bold text-lg flex items-center gap-2"><Edit size={20} /> Editar Limite</h2>
-              <button onClick={() => setModalEditar({ show: false, cartao: null, limite: '' })} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
+              <button onClick={() => setModalEditar({ show: false, cartao: null, limite: '' })} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
             </div>
             <div className="p-6">
               <p className="text-sm text-slate-500 mb-4 dark:text-slate-400">Atualizando o limite do <strong className="text-slate-800 dark:text-slate-100">{modalEditar.cartao?.nome}</strong></p>
@@ -344,8 +342,7 @@ export default function CartoesCredito() {
               </form>
             </div>
           </div>
-        </div>,
-        document.body
+        </ModalOverlay>
       )}
 
           </div>
