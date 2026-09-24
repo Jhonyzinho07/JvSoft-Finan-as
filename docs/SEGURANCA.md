@@ -27,8 +27,13 @@ Estado em 2026-09-24. As definições que valem estão em `supabase/migrations/`
 - `register_login_failure` limita tentativas por IP para impedir que alguém bloqueie o e-mail de outra pessoa.
 - `reset_login_attempts` só pode ser chamada por usuário logado e só zera o bloqueio do próprio e-mail.
 - Esse bloqueio é uma camada de experiência de uso. A proteção real contra força bruta é o rate limit do Supabase Auth.
-  - **Recomendado:** ativar a proteção contra senhas vazadas (Authentication → Password security).
   - **Recomendado:** ativar CAPTCHA (Authentication → Bot and Abuse Protection).
+
+## Senhas
+
+- Regra única do app em `src/utils/senha.js` (cadastro, redefinição e troca de senha): mínimo de 8 caracteres, com letra, número e caractere especial.
+- No servidor (Supabase → Authentication → Email): **Minimum password length 8** e **Password requirements: Letters and digits**. Configurado em 2026-09-24. Tudo o que o app aceita também passa no servidor.
+- A proteção contra senhas vazadas (HaveIBeenPwned) não está disponível no plano atual do Supabase. Se o plano mudar, vale ativar em Authentication → Email → "Prevent use of leaked passwords".
 
 ## Segredos
 
@@ -42,4 +47,6 @@ A service role key **nunca** vai para o front-end nem para o repositório.
 
 ## Backup
 
-Antes das correções de 2026-09-24, todas as tabelas foram copiadas para o schema `backup_20260924`. Ele não fica exposto pela API. Os comandos de restauração estão em `supabase/rollback/20260924_rollback.sql`. Depois de validar o app em produção, o backup pode ser removido com `DROP SCHEMA backup_20260924 CASCADE;`.
+- A cópia de segurança feita antes das correções de 2026-09-24 (schema `backup_20260924`) foi conferida contra a produção e removida no mesmo dia, depois da validação do app.
+- Para um backup completo antes de mudanças grandes: `npx supabase db dump -f schema.sql` e `npx supabase db dump --data-only -f dados.sql`. O arquivo de dados contém dados pessoais: guarde **fora** do repositório.
+- `supabase/rollback/20260924_rollback.sql` desfaz a estrutura das migrations daquele dia (funções, permissões, colunas), não os dados.
