@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import ModalOverlay from '../components/ModalOverlay'
 import { useRealtime } from '../hooks/useRealtime'
 import { supabase } from '../supabaseClient'
 import { formatarMoeda, intervaloDoMes } from '../utils/helpers'
@@ -200,7 +201,7 @@ export default function Transacoes() {
         <input
           type="text" placeholder="Buscar transações..."
           value={busca} onChange={e => setBusca(e.target.value)}
-          className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-sm dark:border-slate-700"
+          className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-base sm:text-sm dark:border-slate-700"
         />
         {busca && (
           <button onClick={() => setBusca('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -247,12 +248,12 @@ export default function Transacoes() {
                       {t.tipo === 'receita' ? '+' : '-'}{formatarMoeda(t.valor)}
                     </p>
                     <div className="flex items-center gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      <button onClick={() => abrirEditar(t)}
-                        className="p-1.5 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors dark:hover:bg-slate-700">
+                      <button onClick={() => abrirEditar(t)} aria-label="Editar transação" title="Editar"
+                        className="p-2.5 md:p-1.5 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors dark:hover:bg-slate-700">
                         <Pencil size={15} />
                       </button>
-                      <button onClick={() => excluir(t)}
-                        className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                      <button onClick={() => excluir(t)} aria-label="Excluir transação" title="Excluir"
+                        className="p-2.5 md:p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                         <Trash2 size={15} />
                       </button>
                     </div>
@@ -266,11 +267,11 @@ export default function Transacoes() {
 
       {/* Modal de Edição */}
       {modalEditar.show && modalEditar.transacao && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalOverlay>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden dark:bg-slate-800">
             <div className="bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2"><Pencil size={18} /> Editar Transação</h2>
-              <button onClick={() => setModalEditar({ show: false, transacao: null })} className="p-2 hover:bg-white/20 rounded-full">
+              <button onClick={() => setModalEditar({ show: false, transacao: null })} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full">
                 <X size={20} />
               </button>
             </div>
@@ -310,7 +311,7 @@ export default function Transacoes() {
                   <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Data</label>
                   <input type="date" required value={editando.data_transacao}
                     onChange={e => setEditando({...editando, data_transacao: e.target.value})}
-                    className="w-full px-3 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm dark:border-slate-700" />
+                    className="w-full px-3 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-base sm:text-sm dark:border-slate-700" />
                 </div>
               </div>
               <div>
@@ -319,7 +320,7 @@ export default function Transacoes() {
                   <Tag size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <select value={editando.categoria_id}
                     onChange={e => setEditando({...editando, categoria_id: e.target.value})}
-                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 bg-white appearance-none text-sm dark:border-slate-700 dark:bg-slate-800">
+                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 bg-white appearance-none text-base sm:text-sm dark:border-slate-700 dark:bg-slate-800">
                     <option value="">Sem categoria</option>
                     {categorias.filter(c => c.tipo === editando.tipo).map(c => (
                       <option key={c.id} value={c.id}>{c.nome}</option>
@@ -339,7 +340,7 @@ export default function Transacoes() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalOverlay>
       )}
     </div>
   )

@@ -41,6 +41,14 @@ html.dark ::-webkit-scrollbar-track {
   color: #64748b; /* slate-500 */
 }
 
+/* Celular: campos com menos de 16px fazem o iPhone dar zoom sozinho ao focar.
+   Seletor de elemento: classes do Tailwind (ex.: text-3xl) continuam valendo. */
+@media (max-width: 639px) {
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+
 /* Espaço extra em dispositivos com "notch"/home indicator (iPhone) para a barra de navegação mobile */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -88,12 +96,15 @@ html.dark ::-webkit-scrollbar-track {
   100% { background-position: 0% 50%; }
 }
 
+/* Sem "forwards": o estado final já é o padrão (opacity 1, sem transform).
+   Com forwards o transform ficava aplicado e "prendia" elementos position:fixed
+   (modais, menus) dentro do contêiner animado. */
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .animate-slide-in {
-  animation: slideIn 0.4s ease-out forwards;
+  animation: slideIn 0.4s ease-out;
 }
 
 .animate-pulse-glow {

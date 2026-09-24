@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import ModalOverlay from '../components/ModalOverlay'
 import { PieChart, Plus, Trash2, AlertTriangle, Loader2, Target, CheckCircle } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import { formatarMoeda, intervaloDoMes } from '../utils/helpers'
@@ -227,7 +228,7 @@ export default function Orcamentos() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+        <ModalOverlay>
           <div className="bg-white rounded-3xl shadow-strong w-full max-w-sm overflow-hidden animate-slide-in dark:bg-slate-800">
             <div className="bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex justify-between items-center text-white">
               <h2 className="font-bold text-lg">Novo Orçamento</h2>
@@ -280,7 +281,7 @@ export default function Orcamentos() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalOverlay>
       )}
     </div>
   )

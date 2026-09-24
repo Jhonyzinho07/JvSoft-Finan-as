@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import ModalOverlay from './components/ModalOverlay'
 import { useRealtime } from './hooks/useRealtime'
 import { supabase } from './supabaseClient'
 import { formatarMoeda, hojeISO, intervaloDoMes } from './utils/helpers'
@@ -484,13 +485,13 @@ function ContasPagar() {
 
       {/* Modal de Nova Conta */}
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+        <ModalOverlay>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden dark:bg-slate-800">
             <div className="bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2">
                 <Calendar size={20} /> Nova Conta a Pagar
               </h2>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors">
+              <button onClick={() => setShowModal(false)} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -537,7 +538,7 @@ function ContasPagar() {
                       required 
                       value={novaConta.data_vencimento} 
                       onChange={(e) => setNovaConta({...novaConta, data_vencimento: e.target.value})} 
-                      className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-slate-700 text-sm dark:border-slate-700 dark:text-slate-200" 
+                      className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-slate-700 text-base sm:text-sm dark:border-slate-700 dark:text-slate-200" 
                     />
                   </div>
                 </div>
@@ -590,19 +591,19 @@ function ContasPagar() {
               </button>
             </form>
           </div>
-        </div>
+        </ModalOverlay>
       )}
 
       {/* Modal de Confirmação de Pagamento */}
       {modalPagar.show && modalPagar.conta && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+        <ModalOverlay>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden dark:bg-slate-800">
             <div className={`bg-gradient-to-r ${modalPagar.conta.status_pago ? 'from-amber-500 to-orange-500' : 'from-green-500 to-emerald-500'} px-6 py-4 flex items-center justify-between text-white`}>
               <h2 className="font-bold text-lg flex items-center gap-2">
                 {modalPagar.conta.status_pago ? <XCircle size={20} /> : <CheckCircle size={20} />}
                 {modalPagar.conta.status_pago ? 'Desfazer Pagamento' : 'Confirmar Pagamento'}
               </h2>
-              <button onClick={() => setModalPagar({ show: false, conta: null })} className="p-2 hover:bg-white/20 rounded-full transition-colors">
+              <button onClick={() => setModalPagar({ show: false, conta: null })} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -628,18 +629,18 @@ function ContasPagar() {
               </div>
             </div>
           </div>
-        </div>
+        </ModalOverlay>
       )}
 
       {/* Modal de Confirmação de Exclusão */}
       {modalExcluir.show && modalExcluir.conta && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+        <ModalOverlay>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden dark:bg-slate-800">
             <div className="bg-gradient-to-r from-red-600 to-rose-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2">
                 <Trash2 size={20} /> Excluir Conta
               </h2>
-              <button onClick={() => setModalExcluir({ show: false, conta: null, escopo: 'unica' })} className="p-2 hover:bg-white/20 rounded-full transition-colors">
+              <button onClick={() => setModalExcluir({ show: false, conta: null, escopo: 'unica' })} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -691,18 +692,18 @@ function ContasPagar() {
               </div>
             </div>
           </div>
-        </div>
+        </ModalOverlay>
       )}
 
       {/* Modal de Edição de Conta */}
       {modalEditar.show && modalEditar.conta && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+        <ModalOverlay>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden dark:bg-slate-800">
             <div className="bg-gradient-to-r from-blue-900 to-cyan-500 px-6 py-4 flex items-center justify-between text-white">
               <h2 className="font-bold text-lg flex items-center gap-2">
                 <Pencil size={20} /> Editar Conta
               </h2>
-              <button onClick={() => setModalEditar({ show: false, conta: null })} className="p-2 hover:bg-white/20 rounded-full transition-colors">
+              <button onClick={() => setModalEditar({ show: false, conta: null })} aria-label="Fechar" className="p-2.5 -mr-1.5 hover:bg-white/20 rounded-full transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -736,7 +737,7 @@ function ContasPagar() {
                     type="date" required
                     value={contaEditando.data_vencimento}
                     onChange={(e) => setContaEditando({...contaEditando, data_vencimento: e.target.value})}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-slate-700 text-sm dark:border-slate-700 dark:text-slate-200"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-slate-700 text-base sm:text-sm dark:border-slate-700 dark:text-slate-200"
                   />
                 </div>
               </div>
@@ -773,7 +774,7 @@ function ContasPagar() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalOverlay>
       )}
 
     </div>
