@@ -3,48 +3,37 @@ import { supabase } from '../supabaseClient';
 
 /**
  * Hook customizado para escutar mudanças no Realtime do Supabase.
+ * O RLS vale para o Realtime: cada usuário só recebe eventos das próprias linhas.
  * @param {string[]} tables - Array com o nome das tabelas para escutar (ex: ['transacoes', 'contas']).
  * @param {function} callback - Função que será chamada quando ocorrer um evento de mudança.
  */
 export function useRealtime(tables, callback) {
   const savedCallback = useRef();
+  const tablesKey = (tables || []).join(',');
 
   useEffect(() => {
     savedCallback.current = callback;
   }, [callback]);
 
   useEffect(() => {
-    if (!tables || tables.length === 0) return;
+    if (!tablesKey) return;
 
-    // Criar um nome único para o canal unindo os nomes das tabelas
-    const channelName = `realtime-${tables.join('-')}`;
-    const channel = supabase.channel(channelName);
+    // Nome único por instância: duas telas escutando as mesmas tabelas
+    // não podem compartilhar o mesmo canal.
+    const channel = supabase.channel(`realtime-${tablesKey}-${crypto.randomUUID()}`);
 
-    // Inscrever-se para cada tabela solicitada
-    tables.forEach((table) => {
+    tablesKey.split(',').forEach((table) => {
       channel.on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: table },
-        (payload) => {
-          console.log(`[Realtime] Mudança detectada em ${table}:`, payload);
-          if (savedCallback.current) {
-            savedCallback.current(payload);
-          }
-        }
+        { event: '*', schema: 'public', table },
+        (payload) => savedCallback.current?.(payload)
       );
     });
 
-    // Iniciar a inscrição
-    channel.subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        console.log(`[Realtime] Inscrito no canal: ${channelName}`);
-      }
-    });
+    channel.subscribe();
 
-    // Função de limpeza ao desmontar o componente
     return () => {
       supabase.removeChannel(channel);
-      console.log(`[Realtime] Inscrição removida: ${channelName}`);
     };
-  }, [JSON.stringify(tables)]);
+  }, [tablesKey]);
 }

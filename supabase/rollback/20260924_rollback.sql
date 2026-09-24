@@ -9,6 +9,9 @@
 --   ON CONFLICT (id) DO NOTHING;   -- recoloca linhas apagadas
 -- =====================================================================
 
+-- ── 20260924141407_movimentar_meta ─────────────────────────────────
+-- DROP FUNCTION IF EXISTS public.movimentar_meta(uuid, text, numeric, date);
+
 -- ── 20260924134647_ajustes_pg_net_e_reset_login ─────────────────────
 -- GRANT EXECUTE ON FUNCTION public.reset_login_attempts(text) TO anon;
 -- (versão anterior da função: supabase/migrations/20260731180621_rate_limit_login.sql)

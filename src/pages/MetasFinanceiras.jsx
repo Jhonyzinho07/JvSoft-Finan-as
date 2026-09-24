@@ -5,7 +5,7 @@ import {
   Edit, Plane, Car, Home, Heart, ShoppingBag, Book, PiggyBank, Smartphone 
 } from 'lucide-react'
 import { supabase } from '../supabaseClient'
-import { formatarMoeda } from '../utils/helpers'
+import { formatarMoeda, hojeISO } from '../utils/helpers'
 import { useToast } from '../components/Toast'
 
 const iconesDisponiveis = [
@@ -52,8 +52,8 @@ export default function MetasFinanceiras() {
       const { data, error } = await supabase.from('metas').select('*').order('created_at', { ascending: false })
       if (error) throw error
       setMetas(data || [])
-    } catch (_error) {
-      console.error("Erro ao carregar metas:", _error)
+    } catch (error) {
+      console.error("Erro ao carregar metas:", error)
     } finally {
       setLoading(false)
     }
@@ -99,7 +99,8 @@ export default function MetasFinanceiras() {
       setNovaMeta({ titulo: '', valor_objetivo: '', data_limite: '', cor: '#3b82f6', icone: 'Target' })
       toast.success('Meta criada com sucesso!')
       carregarMetas()
-    } catch (_error) {
+    } catch (error) {
+      console.error(error)
       toast.error('Erro ao criar meta. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -128,7 +129,8 @@ export default function MetasFinanceiras() {
       setMetaEditando(null)
       toast.success('Meta atualizada com sucesso!')
       carregarMetas()
-    } catch (_error) {
+    } catch (error) {
+      console.error(error)
       toast.error('Erro ao editar meta. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -144,47 +146,27 @@ export default function MetasFinanceiras() {
       if (isNaN(valor) || valor <= 0) { toast.warning('Digite um valor válido.'); setSalvando(false); return }
 
       if (tipoMovimento === 'resgatar' && valor > metaSelecionada.valor_atual) {
+        toast.warning('Valor de resgate maior do que o saldo guardado!')
         setSalvando(false)
-        { toast.warning('Valor de resgate maior do que o saldo guardado!'); setSalvando(false); return }
+        return
       }
 
-      const novoValorAtual = tipoMovimento === 'depositar' 
-        ? Number(metaSelecionada.valor_atual) + valor 
-        : Number(metaSelecionada.valor_atual) - valor
-
-      const { error: erroMeta } = await supabase.from('metas').update({ valor_atual: novoValorAtual }).eq('id', metaSelecionada.id)
-      if (erroMeta) throw erroMeta
-
-      let idCategoriaInvestimento = null
-      try {
-        const tipoStr = tipoMovimento === 'depositar' ? 'despesa' : 'receita'
-        const { data: categorias } = await supabase.from('categorias').select('id').ilike('nome', 'Investimento').eq('tipo', tipoStr)
-        if (categorias && categorias.length > 0) {
-          idCategoriaInvestimento = categorias[0].id
-        } else {
-          const { data: novaCategoria } = await supabase.from('categorias').insert([{ nome: 'Investimento', tipo: tipoStr }]).select()
-          if (novaCategoria && novaCategoria.length > 0) idCategoriaInvestimento = novaCategoria[0].id
-        }
-      } catch (err) {
-        console.error("Não foi possível atribuir a categoria Investimento.", err)
-      }
-
-      const { error: erroTransacao } = await supabase.from('transacoes').insert([{
-        tipo: tipoMovimento === 'depositar' ? 'despesa' : 'receita',
-        descricao: tipoMovimento === 'depositar' ? `Investimento: ${metaSelecionada.titulo}` : `Resgate: ${metaSelecionada.titulo}`,
-        valor: valor,
-        data_transacao: new Date().toISOString().split('T')[0],
-        categoria_id: idCategoriaInvestimento
-      }])
-
-      if (erroTransacao) throw erroTransacao
+      // Atualiza a meta e registra a transação em uma única operação no banco
+      const { error } = await supabase.rpc('movimentar_meta', {
+        p_meta_id: metaSelecionada.id,
+        p_tipo: tipoMovimento,
+        p_valor: valor,
+        p_data: hojeISO(),
+      })
+      if (error) throw error
 
       setShowMovimentoModal(false)
       setValorMovimento('')
       setMetaSelecionada(null)
       toast.success(tipoMovimento === 'depositar' ? 'Depósito realizado!' : 'Resgate realizado!')
       carregarMetas()
-    } catch (_error) {
+    } catch (error) {
+      console.error(error)
       toast.error('Erro ao processar a movimentação. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -197,7 +179,8 @@ export default function MetasFinanceiras() {
     try {
       await supabase.from('metas').delete().eq('id', id)
       carregarMetas()
-    } catch (_error) {
+    } catch (error) {
+      console.error(error)
       toast.error('Erro ao excluir meta. Tente novamente.')
     }
   }

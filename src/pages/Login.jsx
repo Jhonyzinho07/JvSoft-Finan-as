@@ -98,7 +98,8 @@ export default function Login() {
       if (error) throw error;
       toast.success('Se o e-mail existir em nossa base, você receberá um link para redefinir sua senha.');
       setIsForgotPassword(false);
-    } catch (_err) {
+    } catch (err) {
+      console.error(err)
       setError('Ocorreu um erro ao tentar recuperar a senha. Verifique sua conexão.');
     } finally {
       setLoading(false);
@@ -190,12 +191,13 @@ export default function Login() {
         navigate('/dashboard');
 
       }
-    } catch (_err) {
+    } catch (err) {
+      console.error(err)
 
       // TRADUÇÃO DE ERROS DO SUPABASE PARA PORTUGUÊS
-      if (_err.message === 'User already registered') {
+      if (err.message === 'User already registered') {
         setError('Este e-mail já está em uso.');
-      } else if (_err.message === 'Invalid login credentials') {
+      } else if (err.message === 'Invalid login credentials') {
         if (!isSignUp) {
            // Registra falha no backend
            const { data: failData } = await supabase.rpc('register_login_failure', { p_email: sanitizedEmail });
@@ -230,7 +232,8 @@ export default function Login() {
       });
 
       if (error) throw error;
-    } catch (_err) {
+    } catch (err) {
+      console.error(err)
       setError('Erro ao fazer login com o Google.');
       setLoading(false);
     }

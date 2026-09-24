@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../supabaseClient'
 import { useToast } from '../components/Toast'
+import { registrarPushSeAutorizado, desregistrarPush } from '../utils/push'
 import {
   User, LogOut, Shield, Bell, Moon, Sun, Loader2, AlertTriangle, Trash2,
   ChevronRight, KeyRound, Save, X, Check, Camera, BellOff, Monitor
@@ -74,7 +75,10 @@ export default function Configuracoes() {
     setNotificacoes(novoValor)
     localStorage.setItem('pref_notif', novoValor)
 
-    if (!novoValor) return
+    if (!novoValor) {
+      desregistrarPush()
+      return
+    }
     if (!('Notification' in window)) {
       toast.warning('Seu navegador não suporta notificações. Os alertas continuam aparecendo dentro do app.')
       return
@@ -83,10 +87,13 @@ export default function Configuracoes() {
       const permissao = await Notification.requestPermission()
       setPermissaoNotif(permissao)
       if (permissao === 'granted') {
+        registrarPushSeAutorizado()
         toast.success('Notificações ativadas!')
       } else {
         toast.warning('Permissão negada. Você ainda vai ver os alertas dentro do app.')
       }
+    } else if (Notification.permission === 'granted') {
+      registrarPushSeAutorizado()
     } else if (Notification.permission === 'denied') {
       toast.warning('As notificações estão bloqueadas nas permissões do navegador para este site.')
     }

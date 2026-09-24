@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRealtime } from './hooks/useRealtime'
 import { supabase } from './supabaseClient'
-import { formatarMoeda } from './utils/helpers'
+import { formatarMoeda, dataISOLocal, intervaloDoMes } from './utils/helpers'
 import { useTheme } from './contexts/ThemeContext'
 import {
   TrendingUp, TrendingDown, CreditCard, Clock, ChevronRight,
@@ -15,29 +15,28 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 
 async function carregarDados() {
   const hoje = new Date()
-  const primeiroDia6Meses = new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1).toISOString()
-  const ultimoDia   = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59).toISOString()
-  const primeiroDiaMesAnt = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1).toISOString()
-  const ultimoDiaMesAnt   = new Date(hoje.getFullYear(), hoje.getMonth(), 0, 23, 59, 59).toISOString()
+  // Datas no formato 'YYYY-MM-DD' no fuso local (a coluna é DATE)
+  const primeiroDia6Meses = dataISOLocal(new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1))
+  const { fim: ultimoDia } = intervaloDoMes(hoje.getFullYear(), hoje.getMonth())
+  const mesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1)
+  const { inicio: primeiroDiaMesAnt, fim: ultimoDiaMesAnt } = intervaloDoMes(mesAnterior.getFullYear(), mesAnterior.getMonth())
 
   const [
     { data: transacoes },
-    { data: transacoesMesAnt },
-    { data: cartoes },
+    { data: resumoMesAnt },
     { data: todasContas },   // pagas E pendentes — para calcular total real da dívida
-    { data: todasTransacoes },
+    { data: resumoGeral },
   ] = await Promise.all([
     supabase.from('transacoes').select('*, categorias(nome, cor)')
       .gte('data_transacao', primeiroDia6Meses).lte('data_transacao', ultimoDia)
       .order('data_transacao', { ascending: false })
         .order('created_at', { ascending: false }),
-    supabase.from('transacoes').select('tipo, valor')
-      .gte('data_transacao', primeiroDiaMesAnt).lte('data_transacao', ultimoDiaMesAnt),
-    supabase.from('cartoes').select('nome'),
+    // Somas calculadas no banco (sem o limite de 1000 linhas por consulta)
+    supabase.rpc('resumo_financeiro', { p_inicio: primeiroDiaMesAnt, p_fim: ultimoDiaMesAnt }),
     supabase.from('contas')
       .select('*, categorias(nome, icone, cor)')
       .order('data_vencimento', { ascending: true }),
-    supabase.from('transacoes').select('tipo, valor'),
+    supabase.rpc('resumo_financeiro'),
   ])
 
   // ── Totais do mês e Saldo Histórico ─────────────────────────────────────────
@@ -50,20 +49,15 @@ async function carregarDados() {
       else despesasMes += v
     }
   })
-  transacoesMesAnt?.forEach(t => {
-    const v = Number(t.valor)
-    if (t.tipo === 'receita') receitasMesAnt += v
-    else despesasMesAnt += v
-  })
+  if (resumoMesAnt?.[0]) {
+    receitasMesAnt = Number(resumoMesAnt[0].receitas)
+    despesasMesAnt = Number(resumoMesAnt[0].despesas)
+  }
 
-  let saldo = 0
-  todasTransacoes?.forEach(t => {
-    const v = Number(t.valor)
-    if (t.tipo === 'receita') saldo += v
-    else saldo -= v
-  })
+  const saldo = Number(resumoGeral?.[0]?.saldo ?? 0)
 
-  const totalFaturas = todasContas?.filter(c => !c.status_pago && c.descricao?.startsWith('Fatura:')).reduce((acc, c) => acc + Number(c.valor), 0) || 0
+  const ehFatura = (c) => c.cartao_id || c.descricao?.startsWith('Fatura:')
+  const totalFaturas = todasContas?.filter(c => !c.status_pago && ehFatura(c)).reduce((acc, c) => acc + Number(c.valor), 0) || 0
 
   // ── Alertas: separando Vencidas e Vencem em Breve (2 dias) ────────
   const dataAtual = new Date()
@@ -215,7 +209,6 @@ export default function Dashboard() {
     queryKey: ['dashboard'],
     queryFn: carregarDados,
     staleTime: 2 * 60 * 1000,
-    onError: () => toast.error('Erro ao carregar o dashboard.'),
   })
 
   if (isLoading) {
