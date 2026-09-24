@@ -296,7 +296,7 @@ export default function Transacoes() {
                   onChange={e => setEditando({...editando, descricao: e.target.value})}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor (R$)</label>
                   <div className="relative">

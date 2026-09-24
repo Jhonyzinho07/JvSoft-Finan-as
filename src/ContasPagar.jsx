@@ -509,7 +509,7 @@ function ContasPagar() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">
                     {parseInt(novaConta.parcelas) > 1 ? 'Valor Total (R$)' : 'Valor (R$)'}
@@ -717,7 +717,7 @@ function ContasPagar() {
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-200">Valor (R$)</label>
                   <div className="relative">
