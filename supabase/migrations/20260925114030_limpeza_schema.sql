@@ -43,6 +43,8 @@ CREATE SCHEMA IF NOT EXISTS backup_limpeza_20260925;
 
 DROP TABLE IF EXISTS backup_limpeza_20260925.credores;
 CREATE TABLE backup_limpeza_20260925.credores AS TABLE public.credores;
+-- Mesmo fora da API, fica com RLS ligado e sem policies (ninguém de fora lê)
+ALTER TABLE backup_limpeza_20260925.credores ENABLE ROW LEVEL SECURITY;
 -- dividas, receitas, contas_bancarias e metas_financeiras estão com 0
 -- linhas em produção; e as colunas removidas (transacoes.paga,
 -- transacoes.conta_id, contas.transacao_id, contas.credor_id,
