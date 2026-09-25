@@ -12,7 +12,7 @@ export default defineConfig({
         // (Vite 8 usa o rolldown, que só aceita manualChunks como função — não objeto)
         manualChunks(id) {
           if (!id.includes('node_modules')) return
-          if (/node_modules\/(react|react-dom|react-router-dom|scheduler)\//.test(id)) return 'vendor-react'
+          if (/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(id)) return 'vendor-react'
           if (id.includes('node_modules/@supabase/')) return 'vendor-supabase'
           if (id.includes('node_modules/@tanstack/')) return 'vendor-query'
         }

@@ -32,7 +32,7 @@ describe('buscarTodas', () => {
     expect(montarQuery).toHaveBeenCalledTimes(1);
   });
 
-  it('para exatamente quando uma página fecha em um múltiplo do tamanho (sem página extra vazia)', async () => {
+  it('quando o total é múltiplo do tamanho, busca uma página extra vazia para confirmar o fim', async () => {
     const montarQuery = vi.fn(criarQueryFalsa(2000));
 
     const resultado = await buscarTodas(montarQuery);
