@@ -1,6 +1,6 @@
 // Importação bancária diária (Nubank via Meu Pluggy / Open Finance).
 //
-// - O job `sincronizar-banco` (pg_cron, 06:00 de Brasília) chama esta função
+// - O job `sincronizar-banco` (pg_cron, 12:00 de Brasília) chama esta função
 //   com a service role key: sincroniza todas as conexões ativas.
 // - O usuário logado pode chamar para testar a própria conexão
 //   (Configurações → "Testar conexão"), no máximo a cada 5 minutos.

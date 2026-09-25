@@ -494,7 +494,7 @@ export default function Configuracoes() {
           <Landmark size={16} className="text-blue-600" /> Conexão bancária (Nubank via Meu Pluggy)
         </h2>
         <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
-          Importa automaticamente, todo dia às 6h, as transações da conta e do cartão do Nubank para você revisar em Importações. Nada vira lançamento sem sua aprovação.
+          Importa automaticamente, todo dia às 12h, as transações da conta e do cartão do Nubank para você revisar em Importações. Nada vira lançamento sem sua aprovação.
         </p>
 
         {carregandoConexao ? (
@@ -592,7 +592,7 @@ export default function Configuracoes() {
                     Testar conexão agora
                   </button>
                   <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
-                    A atualização automática acontece todo dia às 6h. O banco (via Meu Pluggy) atualiza os dados uma vez por dia.
+                    A atualização automática acontece todo dia às 12h. O banco (via Meu Pluggy) atualiza os dados uma vez por dia.
                   </p>
                 </div>
 

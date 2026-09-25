@@ -36,7 +36,7 @@ export function ehHojeLocal(timestamp, agora = new Date()) {
 }
 
 // A conexão pede atenção (aviso âmbar) quando a última importação falhou
-// ou quando passou mais de um dia sem importar (o job roda todo dia às 6h;
+// ou quando passou mais de um dia sem importar (o job roda todo dia às 12h;
 // a folga de 2h cobre o horário da própria execução). Antes da primeira
 // importação ainda não há o que cobrar.
 const LIMITE_SEM_IMPORTAR_MS = 26 * 60 * 60 * 1000

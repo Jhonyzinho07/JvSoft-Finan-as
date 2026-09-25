@@ -73,7 +73,7 @@ describe('conexaoPrecisaAtencao', () => {
     expect(conexaoPrecisaAtencao(conexao, AGORA)).toBe(true)
   })
 
-  it('false de madrugada, antes do job das 6h (importou ontem às 6h)', () => {
+  it('false antes do job do dia (importou ontem no mesmo horário)', () => {
     const conexao = { ultimo_status: 'ok', ultima_importacao_em: new Date(2026, 8, 24, 6, 0) }
     expect(conexaoPrecisaAtencao(conexao, new Date(2026, 8, 25, 5, 30))).toBe(false)
   })
