@@ -24,6 +24,7 @@ const CartoesCredito  = lazy(() => import('./pages/CartoesCredito'))
 const Orcamentos      = lazy(() => import('./pages/Orcamentos'))
 const Relatorios      = lazy(() => import('./pages/Relatorios'))
 const Configuracoes   = lazy(() => import('./pages/Configuracoes'))
+const Importacoes     = lazy(() => import('./pages/Importacoes'))
 const TermosDeUso     = lazy(() => import('./pages/TermosDeUso'))
 const PoliticaPrivacidade = lazy(() => import('./pages/PoliticaPrivacidade'))
 const RedefinirSenha  = lazy(() => import('./pages/RedefinirSenha'))
@@ -141,6 +142,7 @@ function AppContent() {
               <Route path="/orcamento" element={<Orcamentos />} />
               <Route path="/relatorios" element={<Relatorios />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
+              <Route path="/importacoes" element={<Importacoes />} />
               <Route path="/reset-password" element={<RedefinirSenha />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>

@@ -1,20 +1,32 @@
 import { NavLink, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../supabaseClient'
+import { carregarAvisoBanco } from './AvisoBanco'
 import logoEmpresa from '../assets/logo-256.png' // versão leve (256px) — a original de 1024px pesava 300 KB
-import { 
-  LayoutDashboard, 
-  Receipt, 
-  Target, 
-  ArrowRightLeft, 
-  CreditCard, 
-  PieChart, 
-  BarChart2, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Receipt,
+  Target,
+  ArrowRightLeft,
+  CreditCard,
+  PieChart,
+  BarChart2,
+  Landmark,
+  Settings,
   LogOut
 } from 'lucide-react'
 
 export default function Sidebar({ setUsuario }) {
   const navigate = useNavigate()
+
+  // Mesma queryKey do AvisoBanco (Dashboard): reaproveita o cache do React Query
+  // em vez de disparar outra consulta só para o badge de pendentes.
+  const { data: avisoBanco } = useQuery({
+    queryKey: ['aviso-banco'],
+    queryFn: carregarAvisoBanco,
+    staleTime: 60 * 1000,
+  })
+  const pendentesBanco = avisoBanco?.pendentes || 0
 
   // Função centralizada para fazer logout com segurança
   const handleLogout = async () => {
@@ -33,6 +45,7 @@ export default function Sidebar({ setUsuario }) {
     { path: '/cartoes', icone: CreditCard, label: 'Cartões' },
     { path: '/orcamento', icone: PieChart, label: 'Orçamentos' },
     { path: '/relatorios', icone: BarChart2, label: 'Relatórios' },
+    { path: '/importacoes', icone: Landmark, label: 'Importações', badge: pendentesBanco },
   ]
 
   return (
@@ -65,11 +78,16 @@ export default function Sidebar({ setUsuario }) {
               }`
             }
           >
-            <item.icone 
-              size={20} 
-              className="transition-transform group-hover:scale-110" 
+            <item.icone
+              size={20}
+              className="transition-transform group-hover:scale-110"
             />
-            <span className="font-medium text-sm">{item.label}</span>
+            <span className="font-medium text-sm flex-1">{item.label}</span>
+            {item.badge > 0 && (
+              <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                {item.badge > 99 ? '99+' : item.badge}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

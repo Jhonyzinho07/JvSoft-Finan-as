@@ -16,10 +16,18 @@ Estado em 2026-09-25. As definições que valem estão em `supabase/migrations/`
 ## Funções no banco
 
 - Todas têm `search_path` fixo.
-- As funções de regra de negócio (`lancar_gasto_cartao`, `pagar_conta`, `excluir_transacao`, `movimentar_meta`, `resumo_financeiro`, parcelamentos) são `SECURITY INVOKER` e só podem ser executadas por usuários logados.
+- As funções de regra de negócio (`lancar_gasto_cartao`, `pagar_conta`, `excluir_transacao`, `movimentar_meta`, `resumo_financeiro`, `aprovar_importacao`, parcelamentos) são `SECURITY INVOKER` e só podem ser executadas por usuários logados.
 - Funções de trigger e internas (`set_user_id*`, `criar_categorias_padrao_novo_usuario`, `registrar_aceite_termos_novo_usuario`, `_client_ip`) não podem ser chamadas pela API.
 - Por padrão, funções novas em `public` **não** ficam executáveis por visitantes (`ALTER DEFAULT PRIVILEGES`).
 - `delete_user` é `SECURITY DEFINER`, restrita a usuários logados, e apaga apenas os dados do próprio `auth.uid()`.
+
+## Importação bancária
+
+- O acesso ao banco é **só leitura**: o Open Finance, via Meu Pluggy, não movimenta dinheiro. O consentimento pode ser revogado a qualquer momento no app do Nubank ou no Meu Pluggy.
+- `importacoes_banco` só recebe linhas da Edge Function `sincronizar-banco` (service role). O usuário lê, revisa e apaga as próprias, mas não consegue inserir.
+- A coluna `importacoes_banco.dados` guarda a transação original do Pluggy para conferência, protegida pelo mesmo RLS.
+- A Edge Function é chamada pelo job (service role) ou pelo usuário logado, que só sincroniza as próprias conexões e no máximo a cada 5 minutos. Sem token válido, responde 401.
+- `PLUGGY_CLIENT_ID` e `PLUGGY_CLIENT_SECRET` ficam só nos secrets da Edge Function.
 
 ## Login
 
@@ -41,7 +49,7 @@ Estado em 2026-09-25. As definições que valem estão em `supabase/migrations/`
 |---|---|
 | `.env` / Vercel | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_VAPID_PUBLIC_KEY`: todas **públicas** por natureza |
 | Supabase Vault | URL do projeto e service role key, lidas pelo job pg_cron |
-| Secrets da Edge Function | `VAPID_PRIVATE_KEY` (a service role key é injetada automaticamente) |
+| Secrets da Edge Function | `VAPID_PRIVATE_KEY`, `PLUGGY_CLIENT_ID`, `PLUGGY_CLIENT_SECRET` (a service role key é injetada automaticamente) |
 
 A service role key **nunca** vai para o front-end nem para o repositório.
 
