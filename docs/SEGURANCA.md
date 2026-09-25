@@ -1,11 +1,11 @@
 # Segurança
 
-Estado em 2026-09-24. As definições que valem estão em `supabase/migrations/`.
+Estado em 2026-09-25. As definições que valem estão em `supabase/migrations/`.
 
 ## Isolamento de dados (RLS)
 
 - Todas as tabelas de `public` têm Row Level Security ligado.
-- Cada tabela de dados tem a política `auth.uid() = user_id` (leitura e escrita).
+- Cada tabela de dados tem a política `(select auth.uid()) = user_id` (leitura e escrita). O `select` faz o Postgres calcular o usuário uma vez por consulta, e não uma vez por linha.
 - `login_attempts` e `login_attempts_ip` têm RLS **sem** políticas, de propósito: só as funções de login mexem nelas.
 - O `user_id` é preenchido por trigger (`set_user_id` / `set_user_id_on_insert`):
   - com sessão, é sempre o usuário logado;
@@ -48,5 +48,7 @@ A service role key **nunca** vai para o front-end nem para o repositório.
 ## Backup
 
 - A cópia de segurança feita antes das correções de 2026-09-24 (schema `backup_20260924`) foi conferida contra a produção e removida no mesmo dia, depois da validação do app.
+- A limpeza de schema de 2026-09-25 (remoção de tabelas/colunas sem uso) copiou antes os dados da única tabela removida que tinha linhas (`credores`) para o schema temporário `backup_limpeza_20260925`, com RLS ligado e sem acesso de `anon`/`authenticated`. Esse schema deve ser removido depois de conferir a limpeza contra a produção.
 - Para um backup completo antes de mudanças grandes: `npx supabase db dump -f schema.sql` e `npx supabase db dump --data-only -f dados.sql`. O arquivo de dados contém dados pessoais: guarde **fora** do repositório.
-- `supabase/rollback/20260924_rollback.sql` desfaz a estrutura das migrations daquele dia (funções, permissões, colunas), não os dados.
+- `supabase/rollback/20260924_rollback.sql` desfaz a estrutura das migrations de 2026-09-24 (funções, permissões, colunas), não os dados.
+- `supabase/rollback/20260925_rollback.sql` desfaz a limpeza de schema de 2026-09-25 (tabelas, colunas, policies, índices), com os dados de `credores` restauráveis a partir do backup acima.

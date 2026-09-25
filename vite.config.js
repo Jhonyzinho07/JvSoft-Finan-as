@@ -4,6 +4,21 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        // Vendors estáveis em chunks próprios: eles mudam bem menos que o código do
+        // app, então o navegador reaproveita o cache deles entre deploys.
+        // (Vite 8 usa o rolldown, que só aceita manualChunks como função — não objeto)
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(id)) return 'vendor-react'
+          if (id.includes('node_modules/@supabase/')) return 'vendor-supabase'
+          if (id.includes('node_modules/@tanstack/')) return 'vendor-query'
+        }
+      }
+    }
+  },
   plugins: [
     react(),
     VitePWA({
@@ -26,14 +41,17 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/logo.png',
+            // Ícones dedicados nos tamanhos certos (antes: o PNG de 1024px/300KB direto)
+            src: '/icons/logo-192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
           },
           {
-            src: '/logo.png',
+            src: '/icons/logo-512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
           }
         ]
       }

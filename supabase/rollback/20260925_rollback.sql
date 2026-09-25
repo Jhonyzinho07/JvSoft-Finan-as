@@ -1,0 +1,122 @@
+-- =====================================================================
+-- ROLLBACK da limpeza de schema de 2026-09-25 (NÃO é migration — rodar
+-- à mão no SQL Editor, e só a seção necessária).
+--
+-- A cópia de segurança dos dados removidos (schema
+-- backup_limpeza_20260925, com public.credores — a única tabela
+-- removida que tinha linhas) foi conferida contra a produção antes de
+-- aplicar a limpeza. As demais tabelas/colunas removidas estavam vazias
+-- ou só com valores padrão: não há dado a restaurar para elas.
+--
+-- Recomendado: rodar as seções na ordem inversa da migration (índices/
+-- policies primeiro, tabelas/colunas por último), e SÓ até o ponto que
+-- precisar desfazer.
+-- =====================================================================
+
+-- ── 6) Índices criados ───────────────────────────────────────────────
+-- DROP INDEX IF EXISTS public.idx_contas_user_id;
+-- DROP INDEX IF EXISTS public.idx_contas_categoria_id;
+-- DROP INDEX IF EXISTS public.idx_transacoes_categoria_id;
+-- DROP INDEX IF EXISTS public.idx_transacoes_cartao_id;
+-- DROP INDEX IF EXISTS public.idx_orcamentos_categoria_id;
+-- DROP INDEX IF EXISTS public.idx_push_subscriptions_user_id;
+-- DROP INDEX IF EXISTS public.idx_termos_aceites_user_id;
+
+-- ── 5) Policies otimizadas ───────────────────────────────────────────
+-- Para voltar à versão anterior (auth.uid() em vez de
+-- (select auth.uid())), refaça o DROP POLICY + CREATE POLICY de cada
+-- uma com auth.uid() no lugar de (select auth.uid()). Semântica idêntica
+-- nos dois formatos — normalmente não há motivo para desfazer isto.
+
+-- ── 4) Tabelas removidas ─────────────────────────────────────────────
+-- Restaurar a estrutura (sem dados, exceto credores):
+--
+-- CREATE TABLE public.metas_financeiras (
+--   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--   nome text NOT NULL,
+--   valor_alvo numeric NOT NULL,
+--   valor_atual numeric DEFAULT 0,
+--   prazo date,
+--   prioridade text DEFAULT 'media',
+--   criada_em timestamptz DEFAULT now(),
+--   user_id uuid REFERENCES auth.users(id)
+-- );
+--
+-- CREATE TABLE public.contas_bancarias (
+--   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--   nome text NOT NULL,
+--   saldo_inicial numeric DEFAULT 0,
+--   instituicao text,
+--   tipo text DEFAULT 'corrente',
+--   created_at timestamptz DEFAULT now(),
+--   user_id uuid REFERENCES auth.users(id)
+-- );
+--
+-- CREATE TABLE public.receitas (
+--   id uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+--   descricao text NOT NULL,
+--   valor numeric NOT NULL,
+--   dia_recebimento integer,
+--   created_at timestamptz DEFAULT timezone('utc', now()),
+--   user_id uuid REFERENCES auth.users(id)
+-- );
+--
+-- CREATE TABLE public.credores (
+--   id uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+--   nome text NOT NULL,
+--   emoji text,
+--   cor text DEFAULT '#3b82f6',
+--   created_at timestamptz DEFAULT timezone('utc', now()),
+--   user_id uuid REFERENCES auth.users(id)
+-- );
+-- -- Dados originais (9 linhas):
+-- -- INSERT INTO public.credores SELECT * FROM backup_limpeza_20260925.credores;
+--
+-- CREATE TABLE public.dividas (
+--   id uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+--   credor_id uuid REFERENCES public.credores(id),
+--   descricao text NOT NULL,
+--   valor_parcela numeric NOT NULL,
+--   parcelas_restantes integer NOT NULL,
+--   dia_vencimento integer,
+--   valor_total numeric,
+--   observacao text,
+--   created_at timestamptz DEFAULT timezone('utc', now()),
+--   status text DEFAULT 'pendente',
+--   transacao_id uuid REFERENCES public.transacoes(id),
+--   user_id uuid REFERENCES auth.users(id)
+-- );
+--
+-- -- Recriar RLS (ligar RLS e as policies "Usuários veem apenas ..." /
+-- -- "Usuarios veem apenas ..." de cada tabela, com
+-- -- (select auth.uid()) = user_id) e os índices idx_credores_user_id,
+-- -- idx_dividas_user_id, idx_receitas_user_id — ver
+-- -- supabase/migrations/20260713000000_baseline.sql e
+-- -- 20260731235231_enable_rls_credores_dividas.sql para o texto exato.
+
+-- ── 3) Colunas removidas ─────────────────────────────────────────────
+-- ALTER TABLE public.cartoes    ADD COLUMN IF NOT EXISTS fatura_atual numeric NOT NULL DEFAULT 0;
+-- ALTER TABLE public.transacoes ADD COLUMN IF NOT EXISTS conta_id uuid REFERENCES public.contas_bancarias(id);
+-- ALTER TABLE public.transacoes ADD COLUMN IF NOT EXISTS paga boolean DEFAULT false;
+-- ALTER TABLE public.contas     ADD COLUMN IF NOT EXISTS transacao_id uuid REFERENCES public.transacoes(id);
+-- ALTER TABLE public.contas     ADD COLUMN IF NOT EXISTS credor_id uuid REFERENCES public.credores(id);
+-- -- Todas as colunas estavam com valor nulo/padrão em todas as linhas
+-- -- de produção antes da limpeza; não há dado a restaurar.
+
+-- ── 2) Funções recriadas ─────────────────────────────────────────────
+-- Versões anteriores (antes desta migration) estão em:
+--   supabase/migrations/20260924133521_seguranca_funcoes_e_cadastro.sql
+--   (define search_path/grants de delete_user e criar_parcelamento)
+--   supabase/migrations/20260801000058_fix_delete_user_cascade_cleanup.sql
+--   (versão de delete_user com todas as tabelas)
+--   supabase/migrations/20260807004658_20240807000000_lancar_gasto_cartao.sql
+--   (versão de criar_parcelamento com p_credor_id)
+-- Restaurar rodando de novo o CREATE OR REPLACE FUNCTION de cada uma
+-- com o texto desses arquivos (criar_parcelamento com 6 parâmetros
+-- precisa, antes, de
+-- DROP FUNCTION IF EXISTS public.criar_parcelamento(text, numeric, integer, date, uuid);
+-- já que o número de parâmetros muda).
+
+-- ── 1) Backup ────────────────────────────────────────────────────────
+-- DROP SCHEMA IF EXISTS backup_limpeza_20260925 CASCADE;
+-- (só depois de restaurar os dados de public.credores, se for o caso)

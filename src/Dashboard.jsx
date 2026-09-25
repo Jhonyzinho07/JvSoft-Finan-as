@@ -1,15 +1,20 @@
+import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRealtime } from './hooks/useRealtime'
 import { supabase } from './supabaseClient'
 import { formatarMoeda, dataISOLocal, intervaloDoMes } from './utils/helpers'
+import { buscarTodas } from './utils/buscarTodas'
 import { useTheme } from './contexts/ThemeContext'
 import {
   TrendingUp, TrendingDown, CreditCard, Clock, ChevronRight,
   ArrowUpRight, ArrowDownRight, Wallet, Repeat, Receipt,
   CheckCircle2, Loader2, AlertCircle, LayoutDashboard
 } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+
+// O recharts sozinho pesa ~100 KB gzip — carregado só quando o Dashboard
+// realmente vai desenhar o gráfico, sem atrasar os cards e números.
+const GraficoMensal = lazy(() => import('./components/GraficoMensal'))
 
 // ─── Query principal ──────────────────────────────────────────────────────────
 
@@ -22,20 +27,31 @@ async function carregarDados() {
   const { inicio: primeiroDiaMesAnt, fim: ultimoDiaMesAnt } = intervaloDoMes(mesAnterior.getFullYear(), mesAnterior.getMonth())
 
   const [
-    { data: transacoes },
+    transacoes,
     { data: resumoMesAnt },
-    { data: todasContas },   // pagas E pendentes — para calcular total real da dívida
+    todasContas,   // pagas E pendentes — para calcular total real da dívida
     { data: resumoGeral },
   ] = await Promise.all([
-    supabase.from('transacoes').select('*, categorias(nome, cor)')
-      .gte('data_transacao', primeiroDia6Meses).lte('data_transacao', ultimoDia)
-      .order('data_transacao', { ascending: false })
-        .order('created_at', { ascending: false }),
+    // ~200 transações/mês: em poucos meses passa das 1000 linhas por consulta do PostgREST.
+    // Busca paginada, com .order('id') como desempate para o .range() ficar estável.
+    buscarTodas((inicio, fim) =>
+      supabase.from('transacoes').select('*, categorias(nome, cor)')
+        .gte('data_transacao', primeiroDia6Meses).lte('data_transacao', ultimoDia)
+        .order('data_transacao', { ascending: false })
+        .order('created_at', { ascending: false })
+        .order('id')
+        .range(inicio, fim)
+    ),
     // Somas calculadas no banco (sem o limite de 1000 linhas por consulta)
     supabase.rpc('resumo_financeiro', { p_inicio: primeiroDiaMesAnt, p_fim: ultimoDiaMesAnt }),
-    supabase.from('contas')
-      .select('*, categorias(nome, icone, cor)')
-      .order('data_vencimento', { ascending: true }),
+    // Todas as contas (pagas e pendentes) também podem passar de 1000 linhas com o tempo
+    buscarTodas((inicio, fim) =>
+      supabase.from('contas')
+        .select('*, categorias(nome, icone, cor)')
+        .order('data_vencimento', { ascending: true })
+        .order('id')
+        .range(inicio, fim)
+    ),
     supabase.rpc('resumo_financeiro'),
   ])
 
@@ -535,35 +551,10 @@ export default function Dashboard() {
           <h2 className="font-bold text-slate-800 text-sm mb-0.5 dark:text-slate-100">Fluxo dos Últimos 6 Meses</h2>
           <p className="text-slate-400 text-xs mb-5">Receitas vs. despesas mês a mês</p>
           {temGrafico ? (
-            <>
-              <ResponsiveContainer width="100%" height={190}>
-                <BarChart data={grafico} barSize={9} barGap={2}>
-                  <XAxis dataKey="mes" tick={{ fontSize: 10, fill: isDark ? '#64748b' : '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis hide />
-                  <Tooltip
-                    formatter={(v, name) => [formatarMoeda(v), name === 'receitas' ? 'Receitas' : 'Despesas']}
-                    contentStyle={{
-                      borderRadius: 12,
-                      border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
-                      backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                      color: isDark ? '#f1f5f9' : '#1e293b',
-                      fontSize: 11
-                    }}
-                    cursor={{ fill: isDark ? '#334155' : '#f8fafc' }}
-                  />
-                  <Bar dataKey="receitas" fill="#10b981" radius={[4,4,0,0]} />
-                  <Bar dataKey="despesas" fill="#f87171" radius={[4,4,0,0]} />
-                </BarChart>
-              </ResponsiveContainer>
-              <div className="flex items-center justify-center gap-5 mt-2">
-                <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block" /> Receitas
-                </span>
-                <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-red-400 inline-block" /> Despesas
-                </span>
-              </div>
-            </>
+            // Placeholder com a mesma altura do gráfico (190px + legenda) para não "pular" o layout
+            <Suspense fallback={<div className="h-[190px] mt-2 rounded-2xl bg-slate-50 dark:bg-slate-700/40 animate-pulse" />}>
+              <GraficoMensal grafico={grafico} isDark={isDark} />
+            </Suspense>
           ) : (
             <div className="h-[190px] flex flex-col items-center justify-center gap-2 text-slate-400">
               <Wallet size={28} className="text-slate-300" />
