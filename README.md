@@ -105,7 +105,7 @@ Sem esses passos o app continua funcionando e mostra os alertas de vencimento de
 O fluxo:
 
 1. O [Meu Pluggy](https://meu.pluggy.ai), gratuito para uso pessoal, lê a conta e o cartão do Nubank pelo Open Finance **uma vez por dia**. Itens do Meu Pluggy não aceitam atualização manual.
-2. O job `sincronizar-banco` (pg_cron) roda todo dia às **06:00 de Brasília** e chama a Edge Function `sincronizar-banco`.
+2. O job `sincronizar-banco` (pg_cron) roda todo dia às **12:00 de Brasília**, logo depois da atualização diária do Meu Pluggy (por volta das 10h–11h40), e chama a Edge Function `sincronizar-banco`.
 3. A função grava as transações novas em `importacoes_banco` como **pendentes**. Ela:
    - não duplica nada (usa o id da transação no Pluggy);
    - sugere a categoria pelas regras aprendidas ou por palavras-chave;
