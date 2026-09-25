@@ -3,6 +3,7 @@ import { BarChart2, TrendingUp, TrendingDown, DollarSign, Loader2, Calendar, Fil
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { supabase } from '../supabaseClient'
 import { formatarMoeda } from '../utils/helpers'
+import { buscarTodas } from '../utils/buscarTodas'
 import { useToast } from '../components/Toast'
 import { useTheme } from '../contexts/ThemeContext'
 // jsPDF, autoTable e html2canvas são carregados só quando o usuário clica em "Exportar PDF"
@@ -35,18 +36,13 @@ export default function Relatorios() {
       // Relatório = transações realizadas (fonte única). Contas em aberto ainda não
       // são gasto, e faturas de cartão já estão representadas pelas compras.
       // Busca paginada: o PostgREST devolve no máximo 1000 linhas por consulta.
-      const TAMANHO_PAGINA = 1000
-      const transacoes = []
-      for (let inicio = 0; ; inicio += TAMANHO_PAGINA) {
-        const { data, error } = await supabase.from('transacoes')
+      const transacoes = await buscarTodas((inicio, fim) =>
+        supabase.from('transacoes')
           .select('tipo, descricao, valor, data_transacao, categorias(nome)')
           .order('data_transacao', { ascending: false })
           .order('id')
-          .range(inicio, inicio + TAMANHO_PAGINA - 1)
-        if (error) throw error
-        transacoes.push(...data)
-        if (data.length < TAMANHO_PAGINA) break
-      }
+          .range(inicio, fim)
+      )
 
       const historicoUnificado = transacoes.map(m => ({
         tipo: m.tipo,
