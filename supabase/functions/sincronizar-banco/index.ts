@@ -40,6 +40,19 @@ type Conexao = {
 
 type ContaPluggy = { id: string; type: 'BANK' | 'CREDIT' | string; name?: string }
 
+/**
+ * A chave vem do Vault (job agendado). Ela pode não ser igual, caractere a
+ * caractere, à SUPABASE_SERVICE_ROLE_KEY injetada aqui (chave legada JWT x
+ * chave nova sb_secret_). Por isso a chave é validada no próprio Supabase:
+ * só uma service role consegue listar usuários do Auth.
+ */
+async function ehServiceRole(token: string): Promise<boolean> {
+  if (token === supabaseServiceKey) return true
+  const cliente = createClient(supabaseUrl, token, { auth: { persistSession: false, autoRefreshToken: false } })
+  const { error } = await cliente.auth.admin.listUsers({ page: 1, perPage: 1 })
+  return !error
+}
+
 function json(corpo: unknown, status = 200) {
   return new Response(JSON.stringify(corpo), { status, headers: { ...CORS, 'Content-Type': 'application/json' } })
 }
@@ -221,10 +234,11 @@ serve(async (req) => {
 
   // Job agendado (service role) → todas as conexões; usuário → só as dele
   let userId: string | null = null
-  if (token !== supabaseServiceKey) {
-    const { data, error } = await supabase.auth.getUser(token)
-    if (error || !data?.user) return json({ erro: 'Não autorizado' }, 401)
-    userId = data.user.id
+  const { data: sessao } = await supabase.auth.getUser(token)
+  if (sessao?.user) {
+    userId = sessao.user.id
+  } else if (!(await ehServiceRole(token))) {
+    return json({ erro: 'Não autorizado' }, 401)
   }
 
   let consulta = supabase.from('conexoes_bancarias')

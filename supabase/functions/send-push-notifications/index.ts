@@ -42,6 +42,20 @@ async function buscarTodas<T>(consulta: (inicio: number, fim: number) => Promise
   }
 }
 
+/**
+ * A chave vem do Vault (job agendado). Ela pode não ser igual, caractere a
+ * caractere, à SUPABASE_SERVICE_ROLE_KEY injetada aqui (chave legada JWT x
+ * chave nova sb_secret_). Por isso a chave é validada no próprio Supabase:
+ * só uma service role consegue listar usuários do Auth.
+ */
+async function ehServiceRole(token: string): Promise<boolean> {
+  if (!token) return false
+  if (token === supabaseServiceKey) return true
+  const cliente = createClient(supabaseUrl, token, { auth: { persistSession: false, autoRefreshToken: false } })
+  const { error } = await cliente.auth.admin.listUsers({ page: 1, perPage: 1 })
+  return !error
+}
+
 type Conta = { user_id: string; valor: number; data_vencimento: string }
 type Inscricao = { id: string; user_id: string; endpoint: string; p256dh: string; auth: string }
 
@@ -57,8 +71,8 @@ serve(async (req) => {
   }
 
   // Só o job agendado (pg_cron), que envia a service role key, pode disparar
-  const authHeader = req.headers.get('Authorization')
-  if (!authHeader || authHeader !== `Bearer ${supabaseServiceKey}`) {
+  const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
+  if (!(await ehServiceRole(token))) {
     return new Response('Unauthorized', { status: 401 })
   }
 
