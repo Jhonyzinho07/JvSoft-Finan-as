@@ -48,7 +48,7 @@ A service role key **nunca** vai para o front-end nem para o repositório.
 ## Backup
 
 - A cópia de segurança feita antes das correções de 2026-09-24 (schema `backup_20260924`) foi conferida contra a produção e removida no mesmo dia, depois da validação do app.
-- A limpeza de schema de 2026-09-25 (remoção de tabelas/colunas sem uso) copiou antes os dados da única tabela removida que tinha linhas (`credores`) para o schema temporário `backup_limpeza_20260925`, com RLS ligado e sem acesso de `anon`/`authenticated`. Esse schema deve ser removido depois de conferir a limpeza contra a produção.
+- A limpeza de schema de 2026-09-25 (remoção de tabelas e colunas sem uso) copiou antes os dados da única tabela removida que tinha linhas (`credores`, 9 linhas) para o schema `backup_limpeza_20260925`. Depois da validação do app em produção, esse backup foi removido no mesmo dia.
 - Para um backup completo antes de mudanças grandes: `npx supabase db dump -f schema.sql` e `npx supabase db dump --data-only -f dados.sql`. O arquivo de dados contém dados pessoais: guarde **fora** do repositório.
 - `supabase/rollback/20260924_rollback.sql` desfaz a estrutura das migrations de 2026-09-24 (funções, permissões, colunas), não os dados.
-- `supabase/rollback/20260925_rollback.sql` desfaz a limpeza de schema de 2026-09-25 (tabelas, colunas, policies, índices), com os dados de `credores` restauráveis a partir do backup acima.
+- `supabase/rollback/20260925_rollback.sql` desfaz a limpeza de schema de 2026-09-25 (tabelas, colunas, policies, índices). Os dados de `credores` não são mais restauráveis, porque o backup foi removido.

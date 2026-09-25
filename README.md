@@ -28,11 +28,15 @@ src/
   Dashboard.jsx        # visão geral (React Query + Realtime)
   ContasPagar.jsx      # contas, parcelamentos e faturas
   pages/               # Transações, Cartões, Orçamentos, Metas, Relatórios, Configurações, Login…
-  components/          # Sidebar, BottomNav, ModalTransacao, Toast…
+  components/          # Sidebar, BottomNav, ModalOverlay, CampoMoeda, GraficoMensal, Toast…
   hooks/               # useRealtime, useAlertasVencimento
   utils/helpers.js     # formatação e datas no fuso local
+  utils/moeda.js       # máscara e conversão de valores em R$
+  utils/senha.js       # regra única de senha
+  utils/buscarTodas.js # busca paginada (o Supabase devolve no máximo 1000 linhas por consulta)
   utils/push.js        # inscrição de notificações push
   sw.js                # service worker (cache + push)
+public/icons/          # ícones do PWA (192, 512 e apple-touch)
 supabase/
   migrations/          # FONTE DE VERDADE do banco (ver abaixo)
   rollback/            # comandos para desfazer migrations recentes
@@ -46,6 +50,8 @@ O schema é versionado **somente** em `supabase/migrations/`. Não crie tabelas 
 - `20260713000000_baseline.sql` recria a estrutura original do projeto. Em produção ela está marcada como aplicada.
 - Cada arquivo tem a mesma versão registrada no banco (`supabase_migrations.schema_migrations`). A integração GitHub do Supabase aplica em produção as migrations novas que chegarem na `main`.
 
+Tabelas em uso: `transacoes`, `contas`, `categorias`, `cartoes`, `orcamentos`, `metas`, `push_subscriptions`, `termos_aceites`, `login_attempts` e `login_attempts_ip`. As tabelas antigas sem uso (`receitas`, `dividas`, `credores`, `contas_bancarias`, `metas_financeiras`) foram removidas em 2026-09-25 (`20260925114030_limpeza_schema.sql`).
+
 Nova migration:
 
 ```bash
@@ -58,13 +64,17 @@ Regras de negócio que ficam no banco, em funções transacionais chamadas via `
 | Função | Uso |
 |---|---|
 | `lancar_gasto_cartao` | compra no cartão (à vista/parcelada): cria/atualiza a fatura de cada mês e as transações |
+| `editar_transacao` | edita transação; se for compra no cartão, ajusta a fatura (o tipo não muda; bloqueia valor/data se a fatura já foi paga) |
 | `excluir_transacao` | exclui transação; se for compra no cartão, desconta da fatura (bloqueia se a fatura já foi paga) |
+| `editar_conta` | edita conta a pagar, mantendo o `dia_vencimento` original |
 | `pagar_conta` | marca conta como paga/pendente e cria/estorna a despesa. **Fatura de cartão não gera despesa**, porque as compras já foram lançadas |
 | `criar_parcelamento` | conta parcelada (a última parcela recebe os centavos restantes) |
 | `movimentar_meta` | depósito/resgate em meta + transação correspondente |
 | `resumo_financeiro` | receitas, despesas e saldo do usuário (com período opcional) |
 
 Todas rodam como o usuário logado (`SECURITY INVOKER`), então o RLS vale dentro delas.
+
+Consultas que podem passar de 1000 linhas (Dashboard, Relatórios) usam `buscarTodas`, com uma ordenação estável (`.order('id')` como desempate).
 
 ## Notificações push
 
@@ -89,6 +99,10 @@ Sem esses passos o app continua funcionando e mostra os alertas de vencimento de
 
 ## Deploy
 
-O front é publicado na Vercel (SPA: `vercel.json` redireciona todas as rotas para `index.html`). Configure na Vercel as variáveis de `.env.example`. Em Supabase → Authentication → URL Configuration, inclua `https://SEU_DOMINIO/reset-password` nas Redirect URLs, para a recuperação de senha funcionar.
+O front é publicado na Vercel (SPA: `vercel.json` redireciona todas as rotas para `index.html`). Cada merge na `main` gera um deploy automático.
+
+O app é um PWA com cache: depois de um deploy, a primeira abertura ainda usa a versão antiga e a nova é baixada em seguida (o app recarrega sozinho). Se uma migration remover algo que a versão antiga usa, publique o front **antes** de aplicar a migration.
+
+Configure na Vercel as variáveis de `.env.example`. Em Supabase → Authentication → URL Configuration, inclua `https://SEU_DOMINIO/reset-password` nas Redirect URLs, para a recuperação de senha funcionar.
 
 Segurança: veja [`docs/SEGURANCA.md`](docs/SEGURANCA.md).

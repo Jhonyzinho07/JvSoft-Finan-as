@@ -4,8 +4,9 @@
 --
 -- A cópia de segurança dos dados removidos (schema
 -- backup_limpeza_20260925, com public.credores — a única tabela
--- removida que tinha linhas) foi conferida contra a produção antes de
--- aplicar a limpeza. As demais tabelas/colunas removidas estavam vazias
+-- removida que tinha linhas) foi conferida contra a produção e apagada
+-- em 2026-09-25, depois da validação do app: esses dados não são mais
+-- restauráveis. As demais tabelas/colunas removidas estavam vazias
 -- ou só com valores padrão: não há dado a restaurar para elas.
 --
 -- Recomendado: rodar as seções na ordem inversa da migration (índices/
@@ -69,8 +70,7 @@
 --   created_at timestamptz DEFAULT timezone('utc', now()),
 --   user_id uuid REFERENCES auth.users(id)
 -- );
--- -- Dados originais (9 linhas):
--- -- INSERT INTO public.credores SELECT * FROM backup_limpeza_20260925.credores;
+-- -- Os dados originais (9 linhas) não existem mais: o backup foi apagado.
 --
 -- CREATE TABLE public.dividas (
 --   id uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
@@ -118,5 +118,4 @@
 -- já que o número de parâmetros muda).
 
 -- ── 1) Backup ────────────────────────────────────────────────────────
--- DROP SCHEMA IF EXISTS backup_limpeza_20260925 CASCADE;
--- (só depois de restaurar os dados de public.credores, se for o caso)
+-- Já removido em 2026-09-25 (DROP SCHEMA backup_limpeza_20260925 CASCADE).
