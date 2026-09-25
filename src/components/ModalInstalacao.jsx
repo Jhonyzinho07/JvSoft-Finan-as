@@ -65,7 +65,7 @@ export default function ModalInstalacao() {
         <div className="p-6 text-center">
           {/* Logo da pasta public — não muda com o tema */}
           <div className="w-20 h-20 mx-auto bg-slate-50 dark:bg-slate-700 rounded-2xl flex items-center justify-center p-2 mb-4 shadow-inner border border-slate-100 dark:border-slate-600">
-            <img src="/logo.png" alt="Logo JvSoft" className="w-full h-full object-contain" />
+            <img src="/icons/logo-192.png" alt="Logo JvSoft" className="w-full h-full object-contain" />
           </div>
 
           <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Instale o App JvSoft</h2>

@@ -116,7 +116,8 @@ function AppContent() {
         {/* Header Mobile Otimizado (com a sua Logo oficial) */}
         <header className="lg:hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-30 px-4 py-3 flex items-center justify-between border-b border-blue-100 dark:border-slate-700">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo JvSoft" className="w-8 h-8 object-contain rounded-lg shadow-sm" />
+            {/* 192px é suficiente para os 32px exibidos aqui, mesmo em telas retina */}
+            <img src="/icons/logo-192.png" alt="Logo JvSoft" className="w-8 h-8 object-contain rounded-lg shadow-sm" />
             <span className="font-bold text-gray-800 dark:text-slate-100">JvSoft</span>
           </div>
           <button

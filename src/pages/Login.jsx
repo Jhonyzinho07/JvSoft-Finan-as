@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useToast } from '../components/Toast';
 import { Mail, Lock, Eye, EyeOff, LogIn, User } from 'lucide-react';
-import logoEmpresa from '../assets/logo.png';
+import logoEmpresa from '../assets/logo-256.png'; // versão leve (256px) — a original de 1024px pesava 300 KB
 import ModalDocumento from '../components/ModalDocumento';
 import { ConteudoTermosDeUso, ConteudoPoliticaPrivacidade } from '../components/DocumentosConteudo';
 

@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import logoEmpresa from '../assets/logo.png'
+import logoEmpresa from '../assets/logo-256.png' // versão leve (256px) — a original de 1024px pesava 300 KB
 import { 
   LayoutDashboard, 
   Receipt, 
