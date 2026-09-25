@@ -61,7 +61,7 @@ function ContasPagar() {
 
       const { data: contasConsumo, error: errorContas } = await supabase
         .from('contas')
-        .select(`*, credores:credor_id (nome, emoji, cor), categorias (nome)`)
+        .select(`*, categorias (nome)`)
         .gte('data_vencimento', primeiroDia)
         .lte('data_vencimento', ultimoDia)
         .order('data_vencimento', { ascending: true })
@@ -72,9 +72,9 @@ function ContasPagar() {
         const vencimentoFormatado = c.data_vencimento ? `Dia ${String(new Date(c.data_vencimento + 'T12:00:00').getDate()).padStart(2, '0')}` : 'Sem data'
         return {
           id: c.id,
-          credor: c.categorias?.nome || c.credores?.nome || 'Outros',
-          emoji: c.credores?.emoji || '💰',
-          cor: c.credores?.cor || '#6b7280',
+          credor: c.categorias?.nome || 'Outros',
+          emoji: '💰',
+          cor: '#6b7280',
           descricao: c.descricao,
           valor: c.valor,
           vencimento: vencimentoFormatado,
