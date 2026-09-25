@@ -4,9 +4,11 @@ import ModalOverlay from '../components/ModalOverlay'
 import { supabase } from '../supabaseClient'
 import { useToast } from '../components/Toast'
 import { registrarPushSeAutorizado, desregistrarPush } from '../utils/push'
+import { formatarDataHoraRelativa } from '../utils/importacoes'
 import {
   User, LogOut, Shield, Bell, Moon, Sun, Loader2, AlertTriangle, Trash2,
-  ChevronRight, KeyRound, Save, X, Check, Camera, BellOff, Monitor
+  ChevronRight, KeyRound, Save, X, Check, Camera, BellOff, Monitor,
+  Landmark, RefreshCw
 } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
 import ModalDocumento from '../components/ModalDocumento'
@@ -61,6 +63,19 @@ export default function Configuracoes() {
   const [modalPrivacidadeOpen, setModalPrivacidadeOpen] = useState(false)
   const [avatarPreview, setAvatarPreview]   = useState(null)
 
+  // Conexão bancária (Nubank via Meu Pluggy)
+  const [conexao, setConexao]                     = useState(null)
+  const [cartoes, setCartoes]                     = useState([])
+  const [carregandoConexao, setCarregandoConexao] = useState(true)
+  const [salvandoConexao, setSalvandoConexao]     = useState(false)
+  const [removendoConexao, setRemovendoConexao]   = useState(false)
+  const [testandoConexao, setTestandoConexao]     = useState(false)
+  const [resultadoTeste, setResultadoTeste]       = useState(null)
+  const [modalRemoverConexao, setModalRemoverConexao] = useState(false)
+  const [conexaoForm, setConexaoForm] = useState({
+    item_id: '', cartao_id: '', importar_desde: '2026-10-01', ativo: true,
+  })
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUsuario(user)
@@ -69,6 +84,103 @@ export default function Configuracoes() {
     })
   }, [])
 
+  // Só é esperada uma conexão bancária por usuário nesta tela (Nubank).
+  const carregarConexaoBancaria = async () => {
+    setCarregandoConexao(true)
+    try {
+      const [{ data: conexaoData }, { data: cartoesData }] = await Promise.all([
+        supabase.from('conexoes_bancarias').select('*').limit(1).maybeSingle(),
+        supabase.from('cartoes').select('id, nome'),
+      ])
+      setConexao(conexaoData || null)
+      setCartoes(cartoesData || [])
+      if (conexaoData) {
+        setConexaoForm({
+          item_id: conexaoData.item_id || '',
+          cartao_id: conexaoData.cartao_id || '',
+          importar_desde: conexaoData.importar_desde || '2026-10-01',
+          ativo: conexaoData.ativo,
+        })
+      }
+    } catch (err) {
+      console.error('Erro ao carregar conexão bancária:', err)
+    } finally {
+      setCarregandoConexao(false)
+    }
+  }
+
+  useEffect(() => { carregarConexaoBancaria() }, [])
+
+  const handleSalvarConexao = async () => {
+    if (!conexaoForm.item_id.trim()) {
+      toast.warning('Informe o ID da conexão no Pluggy.')
+      return
+    }
+    setSalvandoConexao(true)
+    try {
+      const payload = {
+        nome: 'Nubank',
+        item_id: conexaoForm.item_id.trim(),
+        cartao_id: conexaoForm.cartao_id || null,
+        importar_desde: conexaoForm.importar_desde,
+        ativo: conexaoForm.ativo,
+      }
+      // user_id é preenchido por trigger no banco — nunca enviamos daqui.
+      const { error } = conexao?.id
+        ? await supabase.from('conexoes_bancarias').update(payload).eq('id', conexao.id)
+        : await supabase.from('conexoes_bancarias').insert([payload])
+      if (error) throw error
+      toast.success('Conexão bancária salva!')
+      carregarConexaoBancaria()
+    } catch (err) {
+      console.error('Erro ao salvar conexão bancária:', err)
+      toast.error(err.message || 'Não foi possível salvar a conexão.')
+    } finally {
+      setSalvandoConexao(false)
+    }
+  }
+
+  const handleRemoverConexao = async () => {
+    if (!conexao?.id) return
+    setRemovendoConexao(true)
+    try {
+      const { error } = await supabase.from('conexoes_bancarias').delete().eq('id', conexao.id)
+      if (error) throw error
+      toast.success('Conexão removida.')
+      setConexao(null)
+      setConexaoForm({ item_id: '', cartao_id: '', importar_desde: '2026-10-01', ativo: true })
+      setResultadoTeste(null)
+    } catch (err) {
+      console.error('Erro ao remover conexão bancária:', err)
+      toast.error('Não foi possível remover a conexão.')
+    } finally {
+      setRemovendoConexao(false)
+      setModalRemoverConexao(false)
+    }
+  }
+
+  const handleTestarConexao = async () => {
+    setTestandoConexao(true)
+    setResultadoTeste(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('sincronizar-banco', { body: {} })
+      if (error) {
+        // Em erro HTTP a função devolve { erro: '...' }; a mensagem padrão do supabase-js é genérica
+        const corpo = await error.context?.json?.().catch(() => null)
+        throw new Error(corpo?.erro || error.message)
+      }
+      if (data?.erro) throw new Error(data.erro)
+      setResultadoTeste({ ok: true, dados: data })
+      toast.success('Sincronização executada.')
+    } catch (err) {
+      console.error('Erro ao testar conexão bancária:', err)
+      setResultadoTeste({ ok: false, mensagem: err.message || 'Erro ao sincronizar.' })
+      toast.error(err.message || 'Não foi possível testar a conexão agora.')
+    } finally {
+      carregarConexaoBancaria()
+      setTestandoConexao(false)
+    }
+  }
 
   useEffect(() => { localStorage.setItem('pref_alerta', alertaVencimento) }, [alertaVencimento])
 
@@ -376,6 +488,143 @@ export default function Configuracoes() {
         </div>
       </div>
 
+      {/* Conexão bancária (Nubank via Meu Pluggy) */}
+      <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 transition-colors">
+        <h2 className="font-bold text-slate-700 dark:text-slate-200 text-sm mb-1 flex items-center gap-2">
+          <Landmark size={16} className="text-blue-600" /> Conexão bancária (Nubank via Meu Pluggy)
+        </h2>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
+          Importa automaticamente, todo dia às 6h, as transações da conta e do cartão do Nubank para você revisar em Importações. Nada vira lançamento sem sua aprovação.
+        </p>
+
+        {carregandoConexao ? (
+          <div className="py-8 flex justify-center"><Loader2 className="animate-spin text-blue-500 w-6 h-6" /></div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">ID da conexão no Pluggy (item_id)</label>
+              <input
+                type="text"
+                value={conexaoForm.item_id}
+                onChange={(e) => setConexaoForm({ ...conexaoForm, item_id: e.target.value })}
+                placeholder="ex.: 5a2c3b1e-8f0a-4c2d-9e1a-..."
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 text-base sm:text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Cartão do app para as compras do cartão Nubank</label>
+              {cartoes.length === 0 ? (
+                <p className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-xl px-3 py-2.5">
+                  Cadastre seu cartão Nubank em Cartões antes de escolher aqui.
+                </p>
+              ) : (
+                <select
+                  value={conexaoForm.cartao_id}
+                  onChange={(e) => setConexaoForm({ ...conexaoForm, cartao_id: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-blue-500 bg-white appearance-none text-base sm:text-sm"
+                >
+                  <option value="">Selecione o cartão...</option>
+                  {cartoes.map((c) => (
+                    <option key={c.id} value={c.id}>{c.nome}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Importar a partir de</label>
+                <input
+                  type="date"
+                  value={conexaoForm.importar_desde}
+                  onChange={(e) => setConexaoForm({ ...conexaoForm, importar_desde: e.target.value })}
+                  className="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 text-base sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Ativa</label>
+                <div className="flex items-center h-[46px] px-4 rounded-xl border border-slate-200 dark:border-slate-600 justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">{conexaoForm.ativo ? 'Sim' : 'Não'}</span>
+                  <Toggle ativo={conexaoForm.ativo} onChange={(v) => setConexaoForm({ ...conexaoForm, ativo: v })} />
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleSalvarConexao}
+              disabled={salvandoConexao}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-900 to-cyan-500 text-white rounded-xl font-semibold disabled:opacity-60"
+            >
+              {salvandoConexao ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              Salvar conexão
+            </button>
+
+            {conexao && (
+              <>
+                <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 space-y-1.5 text-xs">
+                  <div className="flex justify-between gap-3">
+                    <span className="text-slate-500 dark:text-slate-400">Última importação</span>
+                    <span className="font-semibold text-slate-700 dark:text-slate-200 text-right">{formatarDataHoraRelativa(conexao.ultima_importacao_em)}</span>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <span className="text-slate-500 dark:text-slate-400">Dados do banco</span>
+                    <span className="font-semibold text-slate-700 dark:text-slate-200 text-right">{formatarDataHoraRelativa(conexao.dados_atualizados_em)}</span>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <span className="text-slate-500 dark:text-slate-400">Próxima atualização do banco</span>
+                    <span className="font-semibold text-slate-700 dark:text-slate-200 text-right">{formatarDataHoraRelativa(conexao.proxima_atualizacao_em)}</span>
+                  </div>
+                  {conexao.ultimo_status === 'erro' && conexao.ultimo_erro && (
+                    <p className="text-red-600 dark:text-red-400 pt-1 border-t border-slate-200 dark:border-slate-700 mt-1.5">
+                      Último erro: {conexao.ultimo_erro}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <button
+                    onClick={handleTestarConexao}
+                    disabled={testandoConexao}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold disabled:opacity-60"
+                  >
+                    {testandoConexao ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                    Testar conexão agora
+                  </button>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
+                    A atualização automática acontece todo dia às 6h. O banco (via Meu Pluggy) atualiza os dados uma vez por dia.
+                  </p>
+                </div>
+
+                {resultadoTeste && (
+                  <div className={`rounded-xl px-3 py-2.5 text-xs font-mono whitespace-pre-wrap break-words ${
+                    resultadoTeste.ok
+                      ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
+                      : 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300'
+                  }`}>
+                    {resultadoTeste.ok ? JSON.stringify(resultadoTeste.dados, null, 2) : resultadoTeste.mensagem}
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setModalRemoverConexao(true)}
+                  className="w-full flex items-center justify-center gap-2 py-3 text-red-600 dark:text-red-400 rounded-xl font-semibold border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                >
+                  <Trash2 size={16} /> Remover conexão
+                </button>
+              </>
+            )}
+
+            <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1.5 pt-3 border-t border-slate-100 dark:border-slate-700">
+              <p className="font-semibold text-slate-600 dark:text-slate-300">Como conectar:</p>
+              <p>1. Crie uma conta em <a href="https://meu.pluggy.ai" target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 underline">meu.pluggy.ai</a> e conecte seu Nubank.</p>
+              <p>2. No <a href="https://dashboard.pluggy.ai" target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 underline">dashboard.pluggy.ai</a>, crie a aplicação e autorize o Meu Pluggy.</p>
+              <p>3. Copie o ID do item (item_id) gerado e cole no campo acima.</p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Informações do app */}
       <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 transition-colors">
         <h2 className="font-bold text-slate-700 dark:text-slate-200 text-sm mb-4">Sobre o App</h2>
@@ -452,6 +701,41 @@ export default function Configuracoes() {
         </ModalOverlay>
       )}
 
+
+      {/* Modal Remover Conexão Bancária */}
+      {modalRemoverConexao && (
+        <ModalOverlay>
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden p-6 border border-red-100 dark:border-red-900/30">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
+                <AlertTriangle size={32} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Remover conexão?</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  As importações pendentes desta conexão somem junto. Os lançamentos que você já aprovou continuam normalmente no app.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setModalRemoverConexao(false)}
+                disabled={removendoConexao}
+                className="flex-1 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleRemoverConexao}
+                disabled={removendoConexao}
+                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold flex justify-center items-center gap-2 hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {removendoConexao ? <Loader2 size={18} className="animate-spin" /> : 'Remover'}
+              </button>
+            </div>
+          </div>
+        </ModalOverlay>
+      )}
 
       {/* Modal troca de senha */}
       {modalSenha && (

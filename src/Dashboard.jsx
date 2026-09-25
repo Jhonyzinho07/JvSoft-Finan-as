@@ -6,6 +6,7 @@ import { supabase } from './supabaseClient'
 import { formatarMoeda, dataISOLocal, intervaloDoMes } from './utils/helpers'
 import { buscarTodas } from './utils/buscarTodas'
 import { useTheme } from './contexts/ThemeContext'
+import AvisoBanco from './components/AvisoBanco'
 import {
   TrendingUp, TrendingDown, CreditCard, Clock, ChevronRight,
   ArrowUpRight, ArrowDownRight, Wallet, Repeat, Receipt,
@@ -261,6 +262,9 @@ export default function Dashboard() {
           </p>
         </div>
       </div>
+
+      {/* ── Aviso da importação automática do banco (Nubank) ─────────────────── */}
+      <AvisoBanco />
 
       {/* ── Banners de alerta com listagem visual ───────────────────────────── */}
       <div className="flex flex-col gap-4">

@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { NavLink, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../supabaseClient'
+import { carregarAvisoBanco } from './AvisoBanco'
 import {
   LayoutDashboard,
   Receipt,
@@ -12,12 +14,22 @@ import {
   PieChart,
   BarChart2,
   Settings,
+  Landmark,
   LogOut
 } from 'lucide-react'
 
 export default function BottomNav({ setUsuario }) {
   const [showMais, setShowMais] = useState(false)
   const navigate = useNavigate()
+
+  // Mesma queryKey do AvisoBanco (Dashboard): reaproveita o cache do React Query
+  // em vez de disparar outra consulta para o badge de pendentes.
+  const { data: avisoBanco } = useQuery({
+    queryKey: ['aviso-banco'],
+    queryFn: carregarAvisoBanco,
+    staleTime: 60 * 1000,
+  })
+  const pendentesBanco = avisoBanco?.pendentes || 0
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -38,6 +50,7 @@ export default function BottomNav({ setUsuario }) {
     { path: '/transacoes', icone: ArrowRightLeft, label: 'Transações' },
     { path: '/orcamento', icone: PieChart, label: 'Orçamentos' },
     { path: '/relatorios', icone: BarChart2, label: 'Relatórios' },
+    { path: '/importacoes', icone: Landmark, label: 'Importações', badge: pendentesBanco },
     { path: '/configuracoes', icone: Settings, label: 'Configurações' },
   ]
 
@@ -92,7 +105,14 @@ export default function BottomNav({ setUsuario }) {
                     }`
                   }
                 >
-                  <item.icone size={22} />
+                  <span className="relative">
+                    <item.icone size={22} />
+                    {item.badge > 0 && (
+                      <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                        {item.badge > 9 ? '9+' : item.badge}
+                      </span>
+                    )}
+                  </span>
                   <span className="text-xs font-medium text-center leading-tight">{item.label}</span>
                 </NavLink>
               ))}

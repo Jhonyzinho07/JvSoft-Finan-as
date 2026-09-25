@@ -1,0 +1,19 @@
+-- =====================================================================
+-- ROLLBACK da importação bancária (20260925132051_importacao_bancaria).
+-- NÃO é migration: rodar à mão no SQL Editor, só se for desfazer.
+-- Apaga as importações e regras aprendidas; as transações já aprovadas
+-- continuam em `transacoes` (são lançamentos normais).
+-- =====================================================================
+
+-- SELECT cron.unschedule('sincronizar-banco');
+-- ALTER PUBLICATION supabase_realtime DROP TABLE public.importacoes_banco, public.conexoes_bancarias;
+-- DROP FUNCTION IF EXISTS public.aprovar_importacao(uuid, text, numeric, date, uuid, text, integer);
+-- DROP TABLE IF EXISTS public.importacoes_banco;
+-- DROP TABLE IF EXISTS public.regras_categoria;
+-- DROP TABLE IF EXISTS public.conexoes_bancarias;
+--
+-- E recriar delete_user() sem as três tabelas acima (ver
+-- 20260925114030_limpeza_schema.sql para o texto anterior).
+--
+-- A Edge Function `sincronizar-banco` pode ser apagada em
+-- Supabase → Edge Functions.
