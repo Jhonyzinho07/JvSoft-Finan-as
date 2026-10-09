@@ -18,7 +18,7 @@ import {
 } from '../utils/importacoes'
 import {
   Landmark, Loader2, CheckCircle2, Check, X, EyeOff, Eye, RotateCcw, Link2,
-  AlertTriangle, CreditCard, Wallet, ListChecks, Tag,
+  AlertTriangle, CreditCard, Wallet, ListChecks, Tag, Trash2,
 } from 'lucide-react'
 
 // ─── Carregamento ─────────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ function formatarDataLabel(iso) {
 
 // ─── Cartão de um item pendente ────────────────────────────────────────────────
 
-function CardPendente({ imp, form, categorias, duplicada, salvando, onChange, onAprovar, onIgnorar, onVincular }) {
+function CardPendente({ imp, form, categorias, duplicada, salvando, onChange, onAprovar, onIgnorar, onVincular, onDeletar }) {
   const ehCartao = imp.origem === 'cartao'
   const badgeParcela = formatarBadgeParcela(imp)
   const ofereceParcelamento = deveOferecerParcelamentoCompleto(imp)
@@ -114,9 +114,20 @@ function CardPendente({ imp, form, categorias, duplicada, salvando, onChange, on
             </span>
           )}
         </div>
-        <p className="font-extrabold text-slate-800 dark:text-slate-100 text-sm shrink-0">
-          {formatarMoeda(Number(imp.valor))}
-        </p>
+        <div className="flex items-center gap-2 shrink-0">
+          <p className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
+            {formatarMoeda(Number(imp.valor))}
+          </p>
+          <button
+            type="button"
+            disabled={salvando}
+            onClick={onDeletar}
+            className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50 p-1"
+            title="Apagar permanentemente"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
       </div>
 
       {/* Possível duplicada */}
@@ -265,7 +276,7 @@ function CardPendente({ imp, form, categorias, duplicada, salvando, onChange, on
 
 // ─── Cartão de um item ignorado ─────────────────────────────────────────────────
 
-function CardIgnorada({ imp, salvando, onRestaurar }) {
+function CardIgnorada({ imp, salvando, onRestaurar, onDeletar }) {
   const ehCartao = imp.origem === 'cartao'
   const badgeParcela = formatarBadgeParcela(imp)
   return (
@@ -280,14 +291,25 @@ function CardIgnorada({ imp, salvando, onRestaurar }) {
           {formatarMoeda(Number(imp.valor))}{badgeParcela ? ` · ${badgeParcela}` : ''}
         </p>
       </div>
-      <button
-        type="button"
-        disabled={salvando}
-        onClick={onRestaurar}
-        className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-3 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-950/70 transition-colors disabled:opacity-50"
-      >
-        <RotateCcw size={13} /> Restaurar
-      </button>
+      <div className="shrink-0 flex items-center gap-2">
+        <button
+          type="button"
+          disabled={salvando}
+          onClick={onRestaurar}
+          className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-3 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-950/70 transition-colors disabled:opacity-50"
+        >
+          <RotateCcw size={13} /> Restaurar
+        </button>
+        <button
+          type="button"
+          disabled={salvando}
+          onClick={onDeletar}
+          className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-50"
+          title="Apagar permanentemente"
+        >
+          <Trash2 size={15} />
+        </button>
+      </div>
     </div>
   )
 }
@@ -420,6 +442,28 @@ export default function Importacoes() {
     } catch (err) {
       console.error('Erro ao restaurar importação:', err)
       toast.error('Não foi possível restaurar. Tente novamente.')
+    } finally {
+      setSalvandoId(null)
+    }
+  }
+
+
+  const deletar = async (imp) => {
+    if (!window.confirm('Tem certeza que deseja apagar permanentemente esta importação? Ela não aparecerá mais.')) {
+      return
+    }
+    setSalvandoId(imp.id)
+    try {
+      const { error } = await supabase
+        .from('importacoes_banco')
+        .delete()
+        .eq('id', imp.id)
+      if (error) throw error
+      toast.success('Importação apagada.')
+      invalidarTudo()
+    } catch (err) {
+      console.error('Erro ao deletar importação:', err)
+      toast.error('Não foi possível apagar. Tente novamente.')
     } finally {
       setSalvandoId(null)
     }
@@ -567,6 +611,7 @@ export default function Importacoes() {
                       imp={imp}
                       salvando={salvandoId === imp.id}
                       onRestaurar={() => restaurar(imp)}
+                      onDeletar={() => deletar(imp)}
                     />
                   ) : (
                     formPorId[imp.id] && (
@@ -581,6 +626,7 @@ export default function Importacoes() {
                         onAprovar={() => aprovar(imp)}
                         onIgnorar={() => ignorar(imp)}
                         onVincular={() => vincular(imp)}
+                        onDeletar={() => deletar(imp)}
                       />
                     )
                   )
